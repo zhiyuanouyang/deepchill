@@ -3,9 +3,9 @@ import { SITE_CONFIG, buildCanonicalUrl } from '@/app/lib/seo';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Free Developer Tools — JSON Formatter, Text Diff, Base64, URL Encoder | Deepchill',
-    description: 'Fast, free, ad-free developer tools that run entirely in your browser. JSON formatter, text diff checker, URL encoder/decoder, Base64 converter, and Unix timestamp tool.',
-    keywords: 'developer tools, json formatter, text diff, url encoder, base64 decoder, unix timestamp converter, free online tools',
+    title: 'Free Developer Tools — JSON, Cron, JWT, Regex, Base64 & More | Deepchill',
+    description: 'Fast, free, ad-free developer tools that run entirely in your browser. JSON formatter, cron parser, JWT decoder, regex tester, text diff, URL encoder, Base64, and Unix timestamp tools.',
+    keywords: 'developer tools, json formatter, cron parser, jwt decoder, regex tester, text diff, url encoder, base64 decoder, unix timestamp converter, free online tools',
     alternates: { canonical: buildCanonicalUrl('/tools') },
     openGraph: {
         title: 'Free Developer Tools | Deepchill',
@@ -32,6 +32,36 @@ const TOOLS = [
         border: 'border-amber-500/25',
         iconColor: 'text-amber-400',
         tags: ['Format', 'Validate', 'Minify'],
+    },
+    {
+        name: 'Cron Parser',
+        slug: 'cron-parser',
+        description: 'Decode any cron expression into plain English. See the next 5 run times, use the visual builder, and switch timezones.',
+        icon: '⏰',
+        color: 'from-violet-500/20 to-purple-500/10',
+        border: 'border-violet-500/25',
+        iconColor: 'text-violet-400',
+        tags: ['Schedule', 'Next runs', 'Builder'],
+    },
+    {
+        name: 'JWT Decoder & Encoder',
+        slug: 'jwt',
+        description: 'Decode JWT tokens instantly — view header, payload, signature. Encode new tokens with HMAC signing.',
+        icon: '🔑',
+        color: 'from-emerald-500/20 to-teal-500/10',
+        border: 'border-emerald-500/25',
+        iconColor: 'text-emerald-400',
+        tags: ['Decode', 'Encode', 'Verify'],
+    },
+    {
+        name: 'Regex Tester',
+        slug: 'regex',
+        description: 'Test regular expressions with live match highlighting, capture group visualization, and replace mode.',
+        icon: '.*',
+        color: 'from-rose-500/20 to-pink-500/10',
+        border: 'border-rose-500/25',
+        iconColor: 'text-rose-400',
+        tags: ['Match', 'Groups', 'Replace'],
     },
     {
         name: 'Text Diff',

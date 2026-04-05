@@ -15,6 +15,9 @@ const ALL_TOOLS: Tool[] = [
     { name: 'URL Encoder', href: '/tools/url-encoder', description: 'Encode & decode URLs', icon: '%' },
     { name: 'Base64 Tool', href: '/tools/base64', description: 'Encode & decode Base64', icon: '64' },
     { name: 'Timestamp', href: '/tools/timestamp', description: 'Convert Unix timestamps', icon: '⏱' },
+    { name: 'Cron Parser', href: '/tools/cron-parser', description: 'Parse & explain cron expressions', icon: '⏰' },
+    { name: 'JWT Tool', href: '/tools/jwt', description: 'Decode & encode JWTs', icon: '🔑' },
+    { name: 'Regex Tester', href: '/tools/regex', description: 'Test & debug regex patterns', icon: '.*' },
 ];
 
 export default function RelatedTools({ currentSlug }: RelatedToolsProps) {
