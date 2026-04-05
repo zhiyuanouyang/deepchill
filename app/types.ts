@@ -1,22 +1,29 @@
 
 export interface WebApp {
     id: string;
+    slug: string;
     name: string;
+    tagline: string;
     description: string;
+    longDescription: string;
     subdomain: string;
+    launchUrl: string;
     category: AppCategory;
     tags: string[];
+    keywords: string[];
+    features: string[];
     imageUrl: string;
     icon: string;
     isNew?: boolean;
+    comingSoon?: boolean;
+    publishedAt: string;
 }
 
 export enum AppCategory {
-    // PRODUCTIVITY = 'Productivity',
-    // CREATIVE = 'Creative',
-    // ANALYTICS = 'Analytics',
     AI = 'Artificial Intelligence',
-    // DEVELOPER = 'Developer Tools'
+    PRODUCTIVITY = 'Productivity',
+    DEVELOPER = 'Developer Tools',
+    ANALYTICS = 'Analytics',
 }
 
 export interface ChatMessage {
