@@ -8,8 +8,8 @@ import { usePathname } from 'next/navigation';
 const NAV_LINKS = [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
+    { href: '/tools', label: 'Tools' },
     { href: '/blog', label: 'Blog' },
-    { href: '/categories/ai-tools', label: 'Categories' },
 ];
 
 const Navbar: React.FC = () => {

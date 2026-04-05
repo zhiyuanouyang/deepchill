@@ -6,11 +6,12 @@ const FOOTER_LINKS = {
         { label: 'All Products', href: '/products' },
         { label: 'InterviewGPT', href: '/products/interviewgpt' },
     ],
-    Categories: [
-        { label: 'AI & Automation', href: '/categories/ai-tools' },
-        { label: 'Games & Entertainment', href: '/categories/games' },
-        { label: 'Finance & Fintech', href: '/categories/finance' },
-        { label: 'Productivity & Utilities', href: '/categories/productivity' },
+    Tools: [
+        { label: 'JSON Formatter', href: '/tools/json-formatter' },
+        { label: 'Text Diff', href: '/tools/text-diff' },
+        { label: 'URL Encoder', href: '/tools/url-encoder' },
+        { label: 'Base64 Tool', href: '/tools/base64' },
+        { label: 'Timestamp', href: '/tools/timestamp' },
     ],
     Company: [
         { label: 'About', href: '/about' },
@@ -27,7 +28,7 @@ const Footer: React.FC = () => {
         <footer className="border-t border-white/5 bg-slate-950/80 backdrop-blur-sm" aria-label="Site footer">
             <div className="container-xl py-16">
                 {/* Top row */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                     {/* Brand column */}
                     <div className="md:col-span-1">
                         <Link href="/" className="flex items-center gap-2.5 mb-4 group w-fit" aria-label="Deepchill home">

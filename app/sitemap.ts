@@ -47,6 +47,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'yearly',
             priority: 0.4,
         },
+        // Developer tools hub
+        {
+            url: `${BASE_URL}/tools`,
+            lastModified: now,
+            changeFrequency: 'monthly',
+            priority: 0.88,
+        },
+        // Individual developer tools
+        ...['json-formatter', 'text-diff', 'url-encoder', 'base64', 'timestamp'].map((slug) => ({
+            url: `${BASE_URL}/tools/${slug}`,
+            lastModified: now,
+            changeFrequency: 'monthly' as const,
+            priority: 0.85,
+        })),
     ];
 
 
