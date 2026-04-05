@@ -17,6 +17,9 @@ export const metadata: Metadata = {
         default: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
         template: `%s | ${SITE_CONFIG.name}`,
     },
+    verification: {
+        google: "0mofi5a7aVyB1bOoCwm-kD8c7DG2D4cCX6Yc6roXY40",
+    },
     description: SITE_CONFIG.description,
     keywords: [
         'AI tools for software engineers',
