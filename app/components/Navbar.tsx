@@ -53,14 +53,13 @@ const Navbar: React.FC = () => {
                 {/* Desktop CTA */}
                 <div className="hidden md:flex items-center gap-3">
                     <a
-                        href="https://interviewgpt.deepchill.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="/products"
                         className="btn-primary text-sm py-2.5 px-5"
+                        id="nav-cta-products"
                     >
-                        Try InterviewGPT
+                        Explore Products
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                     </a>
                 </div>
@@ -108,12 +107,11 @@ const Navbar: React.FC = () => {
                     })}
                     <div className="divider my-2" />
                     <a
-                        href="https://interviewgpt.deepchill.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="/products"
                         className="btn-primary text-sm py-2.5 text-center"
+                        id="nav-mobile-cta-products"
                     >
-                        Try InterviewGPT →
+                        Explore Products →
                     </a>
                 </div>
             )}

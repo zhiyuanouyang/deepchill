@@ -7,9 +7,9 @@ import { Category } from '@/app/data/categories';
 export const SITE_CONFIG = {
     name: 'Deepchill',
     domain: 'https://deepchill.app',
-    tagline: 'AI-Powered SaaS Tools for Modern Developers',
+    tagline: 'A Studio for Ambitious Products',
     description:
-        'Deepchill is a suite of AI-powered SaaS tools for software engineers — from technical interview prep to resume building. Discover tools that accelerate your career.',
+        'Deepchill is an indie studio that builds products across AI, games, finance, and more — crafted by one person, shipped for everyone. Discover what we\'ve made.',
     twitterHandle: '@deepchillapp',
     locale: 'en_US',
     defaultOgImage: 'https://deepchill.app/og-default.png',

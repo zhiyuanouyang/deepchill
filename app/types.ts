@@ -24,6 +24,10 @@ export enum AppCategory {
     PRODUCTIVITY = 'Productivity',
     DEVELOPER = 'Developer Tools',
     ANALYTICS = 'Analytics',
+    GAMES = 'Games & Entertainment',
+    FINANCE = 'Finance & Fintech',
+    CONSUMER = 'Consumer',
+    UTILITIES = 'Utilities',
 }
 
 export interface ChatMessage {

@@ -8,9 +8,10 @@ const FOOTER_LINKS = {
         { label: 'ResumeGPT (Coming Soon)', href: '/products/resumegpt' },
     ],
     Categories: [
-        { label: 'AI Tools', href: '/categories/ai-tools' },
-        { label: 'Interview Prep', href: '/categories/interview-prep' },
-        { label: 'Career Growth', href: '/categories/career-growth' },
+        { label: 'AI & Automation', href: '/categories/ai-tools' },
+        { label: 'Games & Entertainment', href: '/categories/games' },
+        { label: 'Finance & Fintech', href: '/categories/finance' },
+        { label: 'Productivity & Utilities', href: '/categories/productivity' },
     ],
     'Resources': [
         { label: 'Blog', href: '/blog' },
@@ -37,15 +38,14 @@ const Footer: React.FC = () => {
                             <span className="text-lg font-bold tracking-tight text-white">DEEPCHILL</span>
                         </Link>
                         <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                            AI-powered SaaS tools for software engineers. Built to accelerate careers and simplify complex workflows.
+                            A studio for ambitious products — crafted by one person, shipped for everyone.
                         </p>
                         <a
-                            href="https://interviewgpt.deepchill.app"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-primary text-sm py-2.5 px-4 w-fit"
+                            href="/products"
+                            className="btn-secondary text-sm py-2.5 px-4 w-fit"
+                            id="footer-browse-products"
                         >
-                            Try InterviewGPT →
+                            Browse Products →
                         </a>
                     </div>
 

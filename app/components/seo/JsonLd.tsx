@@ -28,7 +28,7 @@ export function buildWebSiteSchema() {
         name: 'Deepchill',
         url: 'https://deepchill.app',
         description:
-            'Deepchill is a suite of AI-powered SaaS tools for software engineers — interview prep, resume building, and more.',
+            'Deepchill is an indie studio that builds products across AI, games, finance, and more — crafted by one person, shipped for everyone.',
         potentialAction: {
             '@type': 'SearchAction',
             target: {
@@ -49,7 +49,7 @@ export function buildOrganizationSchema() {
         logo: 'https://deepchill.app/logo.png',
         sameAs: ['https://twitter.com/deepchillapp'],
         description:
-            'Deepchill builds AI-powered SaaS tools for software engineers and tech professionals.',
+            'Deepchill is an indie studio building products across AI, games, finance, and everyday utilities — crafted by one person, shipped for everyone.',
     };
 }
 
