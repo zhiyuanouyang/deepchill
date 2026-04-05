@@ -5,7 +5,6 @@ const FOOTER_LINKS = {
     Products: [
         { label: 'All Products', href: '/products' },
         { label: 'InterviewGPT', href: '/products/interviewgpt' },
-        { label: 'ResumeGPT (Coming Soon)', href: '/products/resumegpt' },
     ],
     Categories: [
         { label: 'AI & Automation', href: '/categories/ai-tools' },

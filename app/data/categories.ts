@@ -26,7 +26,7 @@ export const CATEGORIES: Category[] = [
             'machine learning products',
             'AI automation',
         ],
-        productSlugs: ['interviewgpt', 'resumegpt'],
+        productSlugs: ['interviewgpt'],
         blogSlugs: ['top-ai-tools-for-software-engineer-interview-prep'],
     },
     {
@@ -77,7 +77,7 @@ export const CATEGORIES: Category[] = [
             'time-saving apps',
             'focus tools',
         ],
-        productSlugs: ['resumegpt'],
+        productSlugs: [],
         blogSlugs: [
             'how-to-ace-system-design-interview-2025',
             'behavioral-interview-questions-for-software-engineers',
