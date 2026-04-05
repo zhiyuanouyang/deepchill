@@ -12,11 +12,11 @@ const FOOTER_LINKS = {
         { label: 'Finance & Fintech', href: '/categories/finance' },
         { label: 'Productivity & Utilities', href: '/categories/productivity' },
     ],
-    'Resources': [
+    Company: [
+        { label: 'About', href: '/about' },
         { label: 'Blog', href: '/blog' },
-        { label: 'System Design Guide', href: '/blog/how-to-ace-system-design-interview-2025' },
-        { label: 'AI Interview Tools', href: '/blog/top-ai-tools-for-software-engineer-interview-prep' },
-        { label: 'Behavioral Questions', href: '/blog/behavioral-interview-questions-for-software-engineers' },
+        { label: 'Privacy Policy', href: '/privacy' },
+        { label: 'Terms of Service', href: '/terms' },
     ],
 };
 
@@ -36,9 +36,20 @@ const Footer: React.FC = () => {
                             </div>
                             <span className="text-lg font-bold tracking-tight text-white">DEEPCHILL</span>
                         </Link>
-                        <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                        <p className="text-slate-500 text-sm leading-relaxed mb-3">
                             A studio for ambitious products — crafted by one person, shipped for everyone.
                         </p>
+                        <a
+                            href="https://zhiyuanouyang.vercel.app"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-500 hover:text-indigo-400 text-xs transition-colors inline-flex items-center gap-1 mb-6"
+                            id="footer-developer-link"
+                            aria-label="Visit developer personal website"
+                        >
+                            <span>Made by Zhiyuan Ouyang</span>
+                            <span aria-hidden>↗</span>
+                        </a>
                         <a
                             href="/products"
                             className="btn-secondary text-sm py-2.5 px-4 w-fit"
@@ -78,6 +89,8 @@ const Footer: React.FC = () => {
                         © {currentYear} Deepchill. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6 text-xs text-slate-600">
+                        <Link href="/privacy" className="hover:text-slate-400 transition-colors" id="footer-privacy-link">Privacy</Link>
+                        <Link href="/terms" className="hover:text-slate-400 transition-colors" id="footer-terms-link">Terms</Link>
                         <span>Built with Next.js · Deployed on Vercel</span>
                     </div>
                 </div>

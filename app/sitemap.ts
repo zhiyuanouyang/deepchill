@@ -29,7 +29,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'daily',
             priority: 0.8,
         },
+        {
+            url: `${BASE_URL}/about`,
+            lastModified: now,
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${BASE_URL}/privacy`,
+            lastModified: now,
+            changeFrequency: 'yearly',
+            priority: 0.4,
+        },
+        {
+            url: `${BASE_URL}/terms`,
+            lastModified: now,
+            changeFrequency: 'yearly',
+            priority: 0.4,
+        },
     ];
+
 
     // Dynamic product pages
     const productPages: MetadataRoute.Sitemap = APPS_CATALOG
