@@ -6,7 +6,7 @@ import { SITE_CONFIG, buildCanonicalUrl } from '@/app/lib/seo';
 export const metadata: Metadata = {
     title: `Privacy Policy | ${SITE_CONFIG.name}`,
     description:
-        'Learn how Deepchill collects, uses, and protects your personal information when you use our products and services.',
+        'Deepchill.app is a static portfolio and app gallery. We do not collect any personal data on this website.',
     alternates: { canonical: buildCanonicalUrl('/privacy') },
     openGraph: {
         title: `Privacy Policy | ${SITE_CONFIG.name}`,
@@ -72,148 +72,80 @@ export default function PrivacyPage() {
                 <article className="prose-dark max-w-none">
                     <p>
                         Welcome to <strong>Deepchill</strong> (&quot;we&quot;, &quot;us&quot;, or
-                        &quot;our&quot;). This Privacy Policy explains how we collect, use,
-                        disclose, and safeguard your information when you visit{' '}
-                        <strong>deepchill.app</strong> and use any of our products or services
-                        (collectively, the &quot;Service&quot;). Please read this policy carefully.
-                        If you disagree with its terms, please discontinue use of the Service.
+                        &quot;our&quot;). This Privacy Policy describes our practices for{' '}
+                        <strong>deepchill.app</strong> — a static portfolio website and app gallery
+                        — and clarifies how it differs from the individual applications we host.
                     </p>
 
-                    <h2>1. Information We Collect</h2>
-                    <h3>Information You Provide</h3>
+                    <h2>1. This Website Does Not Collect Personal Data</h2>
                     <p>
-                        We may collect personal information that you voluntarily provide, such as
-                        your email address when creating an account, subscribing to our newsletter,
-                        or contacting us for support.
-                    </p>
-
-                    <h3>Automatically Collected Information</h3>
-                    <p>
-                        When you visit our site, we may automatically collect certain information
-                        about your device and usage, including:
+                        <strong>deepchill.app</strong> is a read-only gallery and introduction
+                        website. We do <strong>not</strong>:
                     </p>
                     <ul>
-                        <li>IP address and general location data (country/region level)</li>
-                        <li>Browser type and operating system</li>
-                        <li>Pages visited and time spent on each page</li>
-                        <li>Referring URLs</li>
-                        <li>Device identifiers</li>
+                        <li>Collect your name, email address, or any account information</li>
+                        <li>Use cookies or tracking pixels</li>
+                        <li>Run analytics or advertising scripts on this domain</li>
+                        <li>Store any data about your visit</li>
                     </ul>
-
-                    <h3>Cookies and Tracking Technologies</h3>
                     <p>
-                        We use cookies and similar tracking technologies to enhance your experience,
-                        analyze usage patterns, and serve relevant content. You can instruct your
-                        browser to refuse all cookies; however, some features of the Service may
-                        not function properly.
+                        Simply browsing <strong>deepchill.app</strong> leaves no personal data with
+                        us.
                     </p>
 
-                    <h2>2. How We Use Your Information</h2>
-                    <p>We use the information we collect to:</p>
-                    <ul>
-                        <li>Provide, operate, and maintain the Service</li>
-                        <li>Improve and personalize your experience</li>
-                        <li>Respond to comments, questions, and support requests</li>
-                        <li>Send you technical notices, updates, and promotional communications</li>
-                        <li>Monitor and analyze usage and trends</li>
-                        <li>Detect, prevent, and address technical issues or fraud</li>
-                        <li>Comply with legal obligations</li>
-                    </ul>
-
-                    <h2>3. Third-Party Services</h2>
+                    <h2>2. Hosted Applications on Subdomains</h2>
                     <p>
-                        We may use third-party services that collect, monitor, and analyze data.
-                        These include:
+                        Some apps linked from this gallery are hosted on subdomains (e.g.,{' '}
+                        <em>*.deepchill.app</em>) or separate domains. These are independent
+                        products that may:
                     </p>
                     <ul>
-                        <li>
-                            <strong>Google Analytics</strong> — for website usage analytics
-                        </li>
-                        <li>
-                            <strong>Google AdSense</strong> — for advertising; Google may use
-                            cookies to serve ads based on your prior visits
-                        </li>
-                        <li>
-                            <strong>Vercel</strong> — for hosting and edge networking
-                        </li>
-                        <li>
-                            <strong>Supabase</strong> — for database and authentication services
-                        </li>
+                        <li>Require account creation and collect personal information</li>
+                        <li>Use cookies, local storage, or third-party analytics</li>
+                        <li>Have their own Terms of Service and Privacy Policies</li>
                     </ul>
                     <p>
-                        These third parties have their own privacy policies governing how they
-                        handle your data. We are not responsible for their practices.
+                        Please review the privacy policy of each individual application before
+                        using it. We are not responsible for the data practices of those apps,
+                        even when they share the <em>deepchill.app</em> domain.
                     </p>
 
-                    <h2>4. Data Sharing and Disclosure</h2>
+                    <h2>3. Infrastructure</h2>
                     <p>
-                        We do not sell your personal information. We may share information only in
-                        the following circumstances:
-                    </p>
-                    <ul>
-                        <li>
-                            <strong>Service Providers:</strong> With third parties that help us
-                            operate the Service (e.g., hosting, analytics)
-                        </li>
-                        <li>
-                            <strong>Legal Requirements:</strong> When required by law or to protect
-                            the rights and safety of our users or the public
-                        </li>
-                        <li>
-                            <strong>Business Transfers:</strong> In connection with a merger,
-                            acquisition, or sale of assets
-                        </li>
-                    </ul>
-
-                    <h2>5. Data Retention</h2>
-                    <p>
-                        We retain personal information for as long as necessary to provide the
-                        Service and fulfill the purposes described in this policy, unless a longer
-                        retention period is required or permitted by law.
-                    </p>
-
-                    <h2>6. Security</h2>
-                    <p>
-                        We implement commercially reasonable security measures to protect your
-                        information. However, no method of transmission over the internet or
-                        electronic storage is 100% secure. We cannot guarantee absolute security.
-                    </p>
-
-                    <h2>7. Your Rights</h2>
-                    <p>
-                        Depending on your jurisdiction, you may have the right to access, correct,
-                        or delete your personal information. To exercise these rights, please
-                        contact us via our{' '}
+                        This website is hosted on <strong>Vercel</strong>. Vercel may log
+                        standard server-level information (such as IP addresses and request
+                        timestamps) as part of normal infrastructure operations. This data is
+                        handled according to{' '}
                         <a
-                            href="https://zhiyuanouyang.vercel.app"
+                            href="https://vercel.com/legal/privacy-policy"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: '#818cf8' }}
                         >
-                            personal website
+                            Vercel&apos;s Privacy Policy
                         </a>
-                        .
+                        . We do not have access to or control over this infrastructure-level data.
                     </p>
 
-                    <h2>8. Children&apos;s Privacy</h2>
+                    <h2>4. Children&apos;s Privacy</h2>
                     <p>
-                        Our Service is not directed to children under 13. We do not knowingly
-                        collect personal information from children. If we discover that a child
-                        under 13 has provided us personal information, we will promptly delete it.
+                        This website is not directed to children under 13. Because we collect no
+                        personal data, there is no risk of inadvertently collecting information
+                        from minors on <strong>deepchill.app</strong>.
                     </p>
 
-                    <h2>9. Changes to This Policy</h2>
+                    <h2>5. Changes to This Policy</h2>
                     <p>
-                        We may update this Privacy Policy from time to time. We will notify you of
-                        significant changes by updating the &quot;Last updated&quot; date at the
-                        top of this page. Your continued use of the Service after any changes
-                        constitutes acceptance of the updated policy.
+                        We may update this Privacy Policy from time to time. Changes will be
+                        reflected by updating the &quot;Last updated&quot; date above. As this
+                        site collects no data, updates are unlikely to affect you directly.
                     </p>
 
-                    <h2>10. Contact Us</h2>
+                    <h2>6. Contact</h2>
                     <p>
-                        If you have questions or concerns about this Privacy Policy, please reach
-                        out through the developer&apos;s personal website:{' '}
+                        If you have questions about this Privacy Policy or the applications listed
+                        on this site, please reach out through the developer&apos;s personal
+                        website:{' '}
                         <a
                             href="https://zhiyuanouyang.vercel.app"
                             target="_blank"
