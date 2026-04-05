@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY = 'dc_json_input';
 
@@ -294,17 +293,6 @@ export default function JSONFormatterClient() {
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
 
             {/* Divider */}
-            <div className="divider my-12" />
-
-            {/* SubdomainCTA */}
-            <SubdomainCTA
-                headline="Need AI-powered JSON analysis?"
-                description="InterviewGPT can explain complex JSON schemas, generate mock data, and help you understand API responses in seconds."
-                ctaLabel="Try InterviewGPT"
-                ctaHref="https://interviewgpt.deepchill.app"
-                features={['Schema explanation', 'Mock data generation', 'API response analysis']}
-            />
-
             <div className="divider my-12" />
 
             {/* SEO Content */}

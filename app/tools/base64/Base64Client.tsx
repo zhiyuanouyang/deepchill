@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY = 'dc_b64_input';
 type Mode = 'encode' | 'decode';
@@ -256,16 +255,6 @@ export default function Base64Client() {
             </div>
 
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Working with tokens or secrets?"
-                description="InterviewGPT can help you understand JWT tokens, API authentication patterns, and when to use Base64 vs encryption in your architecture."
-                ctaLabel="Try InterviewGPT"
-                ctaHref="https://interviewgpt.deepchill.app"
-                features={['JWT token analysis', 'Auth pattern guidance', 'Security best practices']}
-            />
-
             <div className="divider my-12" />
 
             <SEOSection

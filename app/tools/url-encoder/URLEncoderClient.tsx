@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY = 'dc_url_input';
 type Mode = 'encode' | 'decode';
@@ -202,16 +201,6 @@ export default function URLEncoderClient() {
                     ))}
                 </div>
             </div>
-
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Building an API or web app?"
-                description="InterviewGPT helps you understand URL structures, query parameters, and API design patterns with AI explanations."
-                ctaLabel="Try InterviewGPT"
-                ctaHref="https://interviewgpt.deepchill.app"
-                features={['API pattern analysis', 'URL structure explained', 'Query param help']}
-            />
 
             <div className="divider my-12" />
 

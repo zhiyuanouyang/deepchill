@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 type InputMode = 'timestamp' | 'date';
 
@@ -228,16 +227,6 @@ export default function TimestampClient() {
             )}
 
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Working with time-sensitive data in interviews?"
-                description="InterviewGPT helps you ace system design questions around distributed timestamps, event ordering, and time-series data."
-                ctaLabel="Try InterviewGPT"
-                ctaHref="https://interviewgpt.deepchill.app"
-                features={['System design prep', 'Distributed systems', 'Interview practice']}
-            />
-
             <div className="divider my-12" />
 
             <SEOSection

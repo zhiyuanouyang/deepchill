@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_LEFT = 'dc_diff_left';
 const STORAGE_RIGHT = 'dc_diff_right';
@@ -193,16 +192,6 @@ export default function TextDiffClient() {
             )}
 
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Need AI-powered code review?"
-                description="InterviewGPT can analyze code diffs, explain what changed, and suggest improvements using AI."
-                ctaLabel="Try InterviewGPT"
-                ctaHref="https://interviewgpt.deepchill.app"
-                features={['AI diff explanation', 'Code quality feedback', 'Suggest improvements']}
-            />
-
             <div className="divider my-12" />
 
             <SEOSection
