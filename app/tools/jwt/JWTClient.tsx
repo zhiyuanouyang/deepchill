@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY = 'dc_jwt_input';
 
@@ -192,7 +191,7 @@ export default function JWTClient() {
             else url.searchParams.delete('t');
             window.history.replaceState(null, '', url.toString());
         } catch { /* noop */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     // Update expiry countdown every second
@@ -461,16 +460,6 @@ export default function JWTClient() {
             )}
 
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Need advanced JWT management?"
-                description="Manage signing keys, rotate secrets, and audit token usage with our developer identity platform."
-                ctaLabel="Explore Auth Platform"
-                ctaHref="https://auth.deepchill.app"
-                features={['Key rotation', 'Token audit log', 'RS256/ES256 support', 'Webhook alerts']}
-            />
 
             <div className="divider my-12" />
 

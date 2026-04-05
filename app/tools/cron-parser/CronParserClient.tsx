@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY = 'dc_cron_input';
 
@@ -445,16 +444,6 @@ export default function CronParserClient() {
 
             {/* Keyboard hints */}
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Need production cron monitoring?"
-                description="Track scheduled job execution, receive failure alerts, and view run history with our advanced cron monitoring service."
-                ctaLabel="Explore Cron Monitor"
-                ctaHref="https://cron.deepchill.app"
-                features={['Execution alerts', 'Run history', 'Slack & email notifications', 'Multi-region']}
-            />
 
             <div className="divider my-12" />
 

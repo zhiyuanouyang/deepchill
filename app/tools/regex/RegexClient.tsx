@@ -8,7 +8,6 @@ import KeyboardShortcutsHint from '@/app/components/tools/KeyboardShortcutsHint'
 import SEOSection from '@/app/components/tools/SEOSection';
 import FAQSection from '@/app/components/tools/FAQSection';
 import RelatedTools from '@/app/components/tools/RelatedTools';
-import SubdomainCTA from '@/app/components/tools/SubdomainCTA';
 
 const STORAGE_KEY_PATTERN = 'dc_regex_pattern';
 const STORAGE_KEY_FLAGS = 'dc_regex_flags';
@@ -436,16 +435,6 @@ export default function RegexClient() {
             )}
 
             <KeyboardShortcutsHint shortcuts={SHORTCUTS} />
-
-            <div className="divider my-12" />
-
-            <SubdomainCTA
-                headline="Need server-side regex validation?"
-                description="Run regex patterns at scale across logs, API payloads, and data pipelines with our search infrastructure."
-                ctaLabel="Explore Search Platform"
-                ctaHref="https://search.deepchill.app"
-                features={['Stream processing', 'Named captures', 'PCRE2 support', 'Performance benchmarks']}
-            />
 
             <div className="divider my-12" />
 
