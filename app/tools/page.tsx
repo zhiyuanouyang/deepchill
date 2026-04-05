@@ -103,6 +103,16 @@ const TOOLS = [
         iconColor: 'text-rose-400',
         tags: ['Unix', 'UTC', 'Relative'],
     },
+    {
+        name: 'UUID Generator',
+        slug: 'uuid-generator',
+        description: 'Generate cryptographically secure UUIDs instantly. UUID v4, v1, v7 — bulk export, custom formats, keyboard shortcuts.',
+        icon: '⬡',
+        color: 'from-indigo-500/20 to-purple-500/10',
+        border: 'border-indigo-500/25',
+        iconColor: 'text-indigo-400',
+        tags: ['v4', 'v7', 'Bulk'],
+    },
 ];
 
 export default function ToolsHubPage() {

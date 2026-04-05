@@ -18,6 +18,7 @@ const ALL_TOOLS: Tool[] = [
     { name: 'Cron Parser', href: '/tools/cron-parser', description: 'Parse & explain cron expressions', icon: '⏰' },
     { name: 'JWT Tool', href: '/tools/jwt', description: 'Decode & encode JWTs', icon: '🔑' },
     { name: 'Regex Tester', href: '/tools/regex', description: 'Test & debug regex patterns', icon: '.*' },
+    { name: 'UUID Generator', href: '/tools/uuid-generator', description: 'Generate v4 / v1 / v7 UUIDs', icon: '⬡' },
 ];
 
 export default function RelatedTools({ currentSlug }: RelatedToolsProps) {
