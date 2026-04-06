@@ -55,7 +55,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.88,
         },
         // Individual developer tools
-        ...['json-formatter', 'text-diff', 'url-encoder', 'base64', 'timestamp', 'cron-parser', 'jwt', 'regex'].map((slug) => ({
+        ...['json-formatter', 'text-diff', 'url-encoder', 'base64', 'timestamp', 'cron-parser', 'jwt', 'regex', 'text-curator', 'uuid-generator'].map((slug) => ({
             url: `${BASE_URL}/tools/${slug}`,
             lastModified: now,
             changeFrequency: 'monthly' as const,
