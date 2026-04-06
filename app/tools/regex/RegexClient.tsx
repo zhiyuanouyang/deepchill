@@ -139,21 +139,12 @@ export default function RegexClient() {
 
     // Load from URL / localStorage
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlPattern = params.get('p');
-        const urlFlags = params.get('f');
-        const urlText = params.get('t');
-        if (urlPattern) { try { setPattern(decodeURIComponent(urlPattern)); } catch { /* noop */ } }
-        if (urlFlags) { try { setFlags(new Set(decodeURIComponent(urlFlags).split('') as Flag[])); } catch { /* noop */ } }
-        if (urlText) { try { setTestText(decodeURIComponent(urlText)); } catch { /* noop */ } }
-        else {
-            const p = localStorage.getItem(STORAGE_KEY_PATTERN);
-            const f = localStorage.getItem(STORAGE_KEY_FLAGS);
-            const t = localStorage.getItem(STORAGE_KEY_TEXT);
-            if (p) setPattern(p);
-            if (f) setFlags(new Set(f.split('') as Flag[]));
-            if (t) setTestText(t);
-        }
+        const p = localStorage.getItem(STORAGE_KEY_PATTERN);
+        const f = localStorage.getItem(STORAGE_KEY_FLAGS);
+        const t = localStorage.getItem(STORAGE_KEY_TEXT);
+        if (p) setPattern(p);
+        if (f) setFlags(new Set(f.split('') as Flag[]));
+        if (t) setTestText(t);
         patternRef.current?.focus();
     }, []);
 
@@ -201,15 +192,7 @@ export default function RegexClient() {
             localStorage.setItem(STORAGE_KEY_FLAGS, Array.from(flags).join(''));
             localStorage.setItem(STORAGE_KEY_TEXT, testText);
 
-            // Shareable URL
-            try {
-                const url = new URL(window.location.href);
-                url.searchParams.set('p', encodeURIComponent(pattern));
-                url.searchParams.set('f', encodeURIComponent(Array.from(flags).join('')));
-                if (testText) url.searchParams.set('t', encodeURIComponent(testText));
-                else url.searchParams.delete('t');
-                window.history.replaceState(null, '', url.toString());
-            } catch { /* noop */ }
+
         }, 80);
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [pattern, flags, testText, replaceStr, replaceMode]);

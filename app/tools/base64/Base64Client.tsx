@@ -55,10 +55,7 @@ export default function Base64Client() {
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const v = params.get('input');
-        if (v) { try { setInput(decodeURIComponent(v)); } catch { /**/ } }
-        else { const s = localStorage.getItem(STORAGE_KEY); if (s) setInput(s); }
+        const s = localStorage.getItem(STORAGE_KEY); if (s) setInput(s);
         inputRef.current?.focus();
     }, []);
 
@@ -69,11 +66,7 @@ export default function Base64Client() {
             const { output: o, error: e } = mode === 'encode' ? encodeBase64(input) : decodeBase64(input);
             setOutput(o); setError(e);
             if (input) localStorage.setItem(STORAGE_KEY, input); else localStorage.removeItem(STORAGE_KEY);
-            try {
-                const url = new URL(window.location.href);
-                if (input) url.searchParams.set('input', encodeURIComponent(input)); else url.searchParams.delete('input');
-                window.history.replaceState(null, '', url.toString());
-            } catch { /**/ }
+
         }, 60);
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [input, mode, inputType]);

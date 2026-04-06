@@ -233,14 +233,8 @@ export default function CronParserClient() {
 
     // Load from URL / localStorage
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlExpr = params.get('e');
-        if (urlExpr) {
-            try { setExpr(decodeURIComponent(urlExpr)); } catch { /* noop */ }
-        } else {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) setExpr(saved);
-        }
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) setExpr(saved);
         inputRef.current?.focus();
     }, []);
 
@@ -264,12 +258,7 @@ export default function CronParserClient() {
             }
             if (expr) localStorage.setItem(STORAGE_KEY, expr);
             else localStorage.removeItem(STORAGE_KEY);
-            try {
-                const url = new URL(window.location.href);
-                if (expr) url.searchParams.set('e', encodeURIComponent(expr));
-                else url.searchParams.delete('e');
-                window.history.replaceState(null, '', url.toString());
-            } catch { /* noop */ }
+
         }, 80);
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [expr, timezone]);

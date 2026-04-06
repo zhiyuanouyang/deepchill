@@ -72,14 +72,8 @@ export default function JSONFormatterClient() {
 
     // Initialize from localStorage / URL
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlInput = params.get('input');
-        if (urlInput) {
-            try { setInput(decodeURIComponent(urlInput)); } catch { /* noop */ }
-        } else {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) setInput(saved);
-        }
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) setInput(saved);
         textareaRef.current?.focus();
     }, []);
 
@@ -93,13 +87,7 @@ export default function JSONFormatterClient() {
             // Persist
             if (input) localStorage.setItem(STORAGE_KEY, input);
             else localStorage.removeItem(STORAGE_KEY);
-            // Shareable URL
-            try {
-                const url = new URL(window.location.href);
-                if (input) url.searchParams.set('input', encodeURIComponent(input));
-                else url.searchParams.delete('input');
-                window.history.replaceState(null, '', url.toString());
-            } catch { /* noop */ }
+
         }, 60);
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [input, mode]);

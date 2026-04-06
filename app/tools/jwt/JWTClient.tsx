@@ -155,14 +155,8 @@ export default function JWTClient() {
 
     // Load from URL / localStorage
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlToken = params.get('t');
-        if (urlToken) {
-            try { setToken(decodeURIComponent(urlToken)); } catch { /* noop */ }
-        } else {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) setToken(saved);
-        }
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) setToken(saved);
         textareaRef.current?.focus();
     }, []);
 
@@ -185,12 +179,7 @@ export default function JWTClient() {
         }
         if (token) localStorage.setItem(STORAGE_KEY, token);
         else localStorage.removeItem(STORAGE_KEY);
-        try {
-            const url = new URL(window.location.href);
-            if (token) url.searchParams.set('t', encodeURIComponent(token.trim()));
-            else url.searchParams.delete('t');
-            window.history.replaceState(null, '', url.toString());
-        } catch { /* noop */ }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 

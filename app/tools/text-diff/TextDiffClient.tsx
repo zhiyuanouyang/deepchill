@@ -66,12 +66,8 @@ export default function TextDiffClient() {
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const l = params.get('left'), r = params.get('right');
-        if (l) { try { setLeft(decodeURIComponent(l)); } catch { /**/ } }
-        else { const s = localStorage.getItem(STORAGE_LEFT); if (s) setLeft(s); }
-        if (r) { try { setRight(decodeURIComponent(r)); } catch { /**/ } }
-        else { const s = localStorage.getItem(STORAGE_RIGHT); if (s) setRight(s); }
+        const sLeft = localStorage.getItem(STORAGE_LEFT); if (sLeft) setLeft(sLeft);
+        const sRight = localStorage.getItem(STORAGE_RIGHT); if (sRight) setRight(sRight);
     }, []);
 
     useEffect(() => {
@@ -81,12 +77,7 @@ export default function TextDiffClient() {
             setDiff(d);
             if (left) localStorage.setItem(STORAGE_LEFT, left); else localStorage.removeItem(STORAGE_LEFT);
             if (right) localStorage.setItem(STORAGE_RIGHT, right); else localStorage.removeItem(STORAGE_RIGHT);
-            try {
-                const url = new URL(window.location.href);
-                if (left) url.searchParams.set('left', encodeURIComponent(left)); else url.searchParams.delete('left');
-                if (right) url.searchParams.set('right', encodeURIComponent(right)); else url.searchParams.delete('right');
-                window.history.replaceState(null, '', url.toString());
-            } catch { /**/ }
+
         }, 80);
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [left, right]);

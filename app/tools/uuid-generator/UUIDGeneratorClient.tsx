@@ -155,11 +155,7 @@ const DownloadIcon = () => (
     </svg>
 );
 
-const ShareIcon = () => (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-    </svg>
-);
+
 
 // ─── UUID Row ──────────────────────────────────────────────────────────────────
 
@@ -473,12 +469,7 @@ export default function UUIDGeneratorClient() {
         showToast(`Downloaded uuids.${ext}`);
     }, [displayedUuids, showToast]);
 
-    const shareUrl = useCallback(() => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('v', settings.version);
-        url.searchParams.set('n', String(settings.count));
-        navigator.clipboard.writeText(url.toString()).then(() => showToast('Link copied!'));
-    }, [settings.version, settings.count, showToast]);
+
 
     // Keyboard shortcuts
     useEffect(() => {
@@ -499,15 +490,7 @@ export default function UUIDGeneratorClient() {
         return () => window.removeEventListener('keydown', handler);
     }, [regenerate, displayedUuids, settings.count, showToast]);
 
-    // URL param sync on mount
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const params = new URLSearchParams(window.location.search);
-        const v = params.get('v') as UUIDVersion | null;
-        const n = parseInt(params.get('n') || '', 10);
-        if (v && ['v1', 'v4', 'v7'].includes(v)) updateSettings('version', v);
-        if (!isNaN(n) && n > 0 && n <= 1000) updateSettings('count', n);
-    }, [updateSettings]);
+
 
     return (
         <div className="container-lg">
@@ -682,15 +665,7 @@ export default function UUIDGeneratorClient() {
                         ))}
                     </div>
 
-                    {/* Share */}
-                    <button
-                        onClick={shareUrl}
-                        aria-label="Share settings URL"
-                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-white/8 bg-white/3 text-slate-500 hover:text-slate-200 hover:border-white/15 transition-all duration-150"
-                    >
-                        <ShareIcon />
-                        Share
-                    </button>
+
 
                     {/* UUID count stat */}
                     <span className="ml-auto text-xs text-slate-700 font-mono">
