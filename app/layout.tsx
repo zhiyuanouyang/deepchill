@@ -1,6 +1,7 @@
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { SITE_CONFIG } from '@/app/lib/seo';
 import JsonLd, { buildWebSiteSchema, buildOrganizationSchema } from '@/app/components/seo/JsonLd';
@@ -83,6 +84,7 @@ export default function RootLayout({
                 <JsonLd schema={buildWebSiteSchema()} />
                 <JsonLd schema={buildOrganizationSchema()} />
                 {children}
+                <Analytics />
             </body>
         </html>
     );
