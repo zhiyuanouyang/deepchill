@@ -27,7 +27,7 @@ const FAQS = [
 export default function RngClient() {
     // State
     const [distType, setDistType] = useState<'uniform' | 'normal' | 'exponential' | 'poisson' | 'binomial'>('uniform');
-    const [count, setCount] = useState<number>(100);
+    const [count, setCount] = useState<number>(10);
     const [isInteger, setIsInteger] = useState<boolean>(false);
 
     // Distribution specific params
@@ -40,6 +40,11 @@ export default function RngClient() {
     const [results, setResults] = useState<number[]>([]);
 
     const regenerate = useCallback(() => {
+        if (distType === 'uniform' && uniformParams.min > uniformParams.max) {
+            setResults([]);
+            return;
+        }
+
         let params = {};
         switch (distType) {
             case 'uniform': params = uniformParams; break;
@@ -91,10 +96,10 @@ export default function RngClient() {
                             <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Generate Count</label>
                             <input
                                 type="number"
-                                min="1" max="10000"
+                                min="1" max="1000"
                                 className="w-full bg-white/5 border border-white/10 rounded-lg text-sm text-slate-300 p-2 focus:border-green-500/40 outline-none transition-colors"
                                 value={count}
-                                onChange={(e) => setCount(Math.min(10000, Math.max(1, parseInt(e.target.value) || 1)))}
+                                onChange={(e) => setCount(Math.min(1000, Math.max(1, parseInt(e.target.value) || 1)))}
                             />
                         </div>
                         <div className="flex flex-col justify-end">
@@ -114,15 +119,20 @@ export default function RngClient() {
                     <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Parameters</div>
 
                     {distType === 'uniform' && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[10px] uppercase text-slate-500 mb-1">Min</label>
-                                <input type="number" className="w-full bg-white/5 border border-white/10 rounded-lg text-sm text-slate-300 p-2 focus:border-green-500/40 outline-none" value={uniformParams.min} onChange={e => setUniformParams({ ...uniformParams, min: parseFloat(e.target.value) || 0 })} />
+                        <div className="flex flex-col gap-2">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] uppercase text-slate-500 mb-1">Min</label>
+                                    <input type="number" className={`w-full bg-white/5 border ${uniformParams.min > uniformParams.max ? 'border-red-500/50' : 'border-white/10'} rounded-lg text-sm text-slate-300 p-2 focus:border-green-500/40 outline-none`} value={uniformParams.min} onChange={e => setUniformParams({ ...uniformParams, min: parseFloat(e.target.value) || 0 })} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] uppercase text-slate-500 mb-1">Max</label>
+                                    <input type="number" className={`w-full bg-white/5 border ${uniformParams.min > uniformParams.max ? 'border-red-500/50' : 'border-white/10'} rounded-lg text-sm text-slate-300 p-2 focus:border-green-500/40 outline-none`} value={uniformParams.max} onChange={e => setUniformParams({ ...uniformParams, max: parseFloat(e.target.value) || 0 })} />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-[10px] uppercase text-slate-500 mb-1">Max</label>
-                                <input type="number" className="w-full bg-white/5 border border-white/10 rounded-lg text-sm text-slate-300 p-2 focus:border-green-500/40 outline-none" value={uniformParams.max} onChange={e => setUniformParams({ ...uniformParams, max: parseFloat(e.target.value) || 0 })} />
-                            </div>
+                            {uniformParams.min > uniformParams.max && (
+                                <div className="text-[10px] text-red-500">Min cannot be greater than Max.</div>
+                            )}
                         </div>
                     )}
 
@@ -182,8 +192,8 @@ export default function RngClient() {
                         <div className="flex justify-between items-center p-4 border-b border-white/8 bg-white/4 rounded-t-xl">
                             <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Generated Sequence</h3>
                             <div className="flex gap-2">
-                                <CopyButton getValue={() => results.join('\n')} label="CSV" />
-                                <CopyButton getValue={() => JSON.stringify(results, null, 2)} label="JSON" />
+                                <CopyButton getValue={() => results.join(', ')} label="Comma Separated" />
+                                <CopyButton getValue={() => results.join(' ')} label="Whitespace Separated" />
                             </div>
                         </div>
                         <div className="p-4 grid grid-cols-5 md:grid-cols-10 gap-2 overflow-auto max-h-[300px]">
