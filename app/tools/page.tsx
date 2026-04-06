@@ -123,6 +123,36 @@ const TOOLS = [
         iconColor: 'text-blue-400',
         tags: ['Format', 'Cleanup', 'Chain'],
     },
+    {
+        name: 'CSV Viewer',
+        slug: 'csv-viewer',
+        description: 'Read and analyze massive CSV files securely online. Auto-detect delimiter, paginate, and sort without sending data to our servers.',
+        icon: '📊',
+        color: 'from-emerald-500/20 to-green-500/10',
+        border: 'border-emerald-500/25',
+        iconColor: 'text-emerald-400',
+        tags: ['Table', 'Sort', 'Virtual'],
+    },
+    {
+        name: 'Random Number',
+        slug: 'random-number-generator',
+        description: 'Generate lists of random numbers across multiple statistical distributions with instant visual histograms.',
+        icon: '🎲',
+        color: 'from-fuchsia-500/20 to-pink-500/10',
+        border: 'border-fuchsia-500/25',
+        iconColor: 'text-fuchsia-400',
+        tags: ['Math', 'Distributions', 'Batch'],
+    },
+    {
+        name: 'Timezone Converter',
+        slug: 'timezone-converter',
+        description: 'Easily visualize overlapping working hours across the globe and convert international meeting times interactively.',
+        icon: '🌍',
+        color: 'from-cyan-500/20 to-blue-500/10',
+        border: 'border-cyan-500/25',
+        iconColor: 'text-cyan-400',
+        tags: ['World Clock', 'Sync', 'Planner'],
+    },
 ];
 
 export default function ToolsHubPage() {
