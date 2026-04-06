@@ -143,16 +143,6 @@ const TOOLS = [
         iconColor: 'text-fuchsia-400',
         tags: ['Math', 'Distributions', 'Batch'],
     },
-    {
-        name: 'Timezone Converter',
-        slug: 'timezone-converter',
-        description: 'Easily visualize overlapping working hours across the globe and convert international meeting times interactively.',
-        icon: '🌍',
-        color: 'from-cyan-500/20 to-blue-500/10',
-        border: 'border-cyan-500/25',
-        iconColor: 'text-cyan-400',
-        tags: ['World Clock', 'Sync', 'Planner'],
-    },
 ];
 
 export default function ToolsHubPage() {
