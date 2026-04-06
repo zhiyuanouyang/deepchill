@@ -20,6 +20,7 @@ const FOOTER_LINKS = [
             { label: 'JSON Formatter', href: '/tools/json-formatter' },
             { label: 'JWT Decoder', href: '/tools/jwt' },
             { label: 'Regex Tester', href: '/tools/regex' },
+            { label: 'Text Curator', href: '/tools/text-curator' },
             { label: 'Text Diff Tool', href: '/tools/text-diff' },
             { label: 'Timestamp Converter', href: '/tools/timestamp' },
             { label: 'URL Encoder / Decoder', href: '/tools/url-encoder' },

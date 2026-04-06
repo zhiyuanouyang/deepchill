@@ -113,6 +113,16 @@ const TOOLS = [
         iconColor: 'text-indigo-400',
         tags: ['v4', 'v7', 'Bulk'],
     },
+    {
+        name: 'Text Curator',
+        slug: 'text-curator',
+        description: 'Format, clean, and process text instantly. Convert case, remove duplicates, extract URLs, and chain transformations.',
+        icon: 'Aa',
+        color: 'from-blue-500/20 to-indigo-500/10',
+        border: 'border-blue-500/25',
+        iconColor: 'text-blue-400',
+        tags: ['Format', 'Cleanup', 'Chain'],
+    },
 ];
 
 export default function ToolsHubPage() {
