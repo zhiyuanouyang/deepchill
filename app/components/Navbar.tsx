@@ -9,7 +9,7 @@ const NAV_LINKS = [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
     { href: '/tools', label: 'Tools' },
-    { href: '/blog', label: 'Blog' },
+    // { href: '/blog', label: 'Blog' },
 ];
 
 const Navbar: React.FC = () => {
@@ -38,11 +38,10 @@ const Navbar: React.FC = () => {
                                 key={link.href}
                                 href={link.href}
                                 role="menuitem"
-                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                                    isActive
-                                        ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
+                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive
+                                    ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
                             >
                                 {link.label}
                             </Link>
@@ -95,11 +94,10 @@ const Navbar: React.FC = () => {
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setMobileOpen(false)}
-                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                    isActive
-                                        ? 'bg-indigo-600/20 text-indigo-300'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
+                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                    ? 'bg-indigo-600/20 text-indigo-300'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
                             >
                                 {link.label}
                             </Link>

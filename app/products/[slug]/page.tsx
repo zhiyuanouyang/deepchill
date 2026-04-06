@@ -7,7 +7,7 @@ import Footer from '@/app/components/Footer';
 import Breadcrumb from '@/app/components/Breadcrumb';
 import JsonLd, { buildSoftwareApplicationSchema, buildBreadcrumbSchema } from '@/app/components/seo/JsonLd';
 import { APPS_CATALOG } from '@/app/data/apps';
-import { BLOG_POSTS } from '@/app/data/blog';
+// import { BLOG_POSTS } from '@/app/data/blog';
 import { generateProductMetadata, SITE_CONFIG, buildCanonicalUrl } from '@/app/lib/seo';
 
 interface Props {
@@ -30,7 +30,7 @@ export default async function ProductPage({ params }: Props) {
     const app = APPS_CATALOG.find((a) => a.slug === slug);
     if (!app) notFound();
 
-    const relatedPosts = BLOG_POSTS.filter((p) => p.relatedProductSlug === app.slug).slice(0, 3);
+    // const relatedPosts = BLOG_POSTS.filter((p) => p.relatedProductSlug === app.slug).slice(0, 3);
 
     const breadcrumbItems = [
         { label: 'Products', href: '/products' },
@@ -212,7 +212,7 @@ export default async function ProductPage({ params }: Props) {
                 </section>
 
                 {/* ── Related Articles ─────────────────────────────────── */}
-                {relatedPosts.length > 0 && (
+                {/* {relatedPosts.length > 0 && (
                     <section className="section-padding" aria-labelledby="related-articles-heading">
                         <div className="container-lg">
                             <h2 id="related-articles-heading" className="text-3xl font-bold text-white mb-10">
@@ -235,7 +235,7 @@ export default async function ProductPage({ params }: Props) {
                             </div>
                         </div>
                     </section>
-                )}
+                )} */}
 
                 {/* ── Bottom CTA ───────────────────────────────────────── */}
                 {!app.comingSoon && (

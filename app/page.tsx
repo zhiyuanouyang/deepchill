@@ -6,7 +6,7 @@ import Footer from '@/app/components/Footer';
 import AppCard from '@/app/components/AppCard';
 import JsonLd, { buildWebSiteSchema, buildOrganizationSchema } from '@/app/components/seo/JsonLd';
 import { APPS_CATALOG } from '@/app/data/apps';
-import { BLOG_POSTS } from '@/app/data/blog';
+// import { BLOG_POSTS } from '@/app/data/blog';
 import { CATEGORIES } from '@/app/data/categories';
 import { SITE_CONFIG } from '@/app/lib/seo';
 
@@ -42,7 +42,7 @@ const PILLARS = [
 
 export default function HomePage() {
     const featuredApps = APPS_CATALOG.filter((a) => !a.comingSoon).slice(0, 3);
-    const recentPosts = BLOG_POSTS.slice(0, 3);
+    // const recentPosts = BLOG_POSTS.slice(0, 3);
 
     return (
         <div className="min-h-screen bg-slate-950">
@@ -186,7 +186,7 @@ export default function HomePage() {
                 </section>
 
                 {/* ── Blog Teaser ─────────────────────────────────────────── */}
-                <section className="section-padding" aria-labelledby="blog-heading">
+                {/* <section className="section-padding" aria-labelledby="blog-heading">
                     <div className="container-xl">
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
                             <div>
@@ -227,7 +227,7 @@ export default function HomePage() {
                             ))}
                         </div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* ── Bottom CTA ──────────────────────────────────────────── */}
                 <section className="section-padding" aria-labelledby="bottom-cta-heading">
@@ -254,9 +254,9 @@ export default function HomePage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </Link>
-                                    <Link href="/blog" className="btn-secondary text-base py-4 px-8" id="bottom-cta-blog-link">
+                                    {/* <Link href="/blog" className="btn-secondary text-base py-4 px-8" id="bottom-cta-blog-link">
                                         Read the blog
-                                    </Link>
+                                    </Link> */}
                                 </div>
                             </div>
                         </div>

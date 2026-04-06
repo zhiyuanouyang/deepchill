@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: '*',
                 allow: '/',
-                disallow: ['/api/', '/_next/'],
+                disallow: ['/api/', '/_next/', '/blog/'],
             },
             {
                 // Prevent AI scrapers from bypassing robots

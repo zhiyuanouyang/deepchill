@@ -1,7 +1,7 @@
 
 import type { MetadataRoute } from 'next';
 import { APPS_CATALOG } from '@/app/data/apps';
-import { BLOG_POSTS } from '@/app/data/blog';
+// import { BLOG_POSTS } from '@/app/data/blog';
 import { CATEGORIES } from '@/app/data/categories';
 
 const BASE_URL = 'https://deepchill.app';
@@ -23,12 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.9,
         },
-        {
-            url: `${BASE_URL}/blog`,
-            lastModified: now,
-            changeFrequency: 'daily',
-            priority: 0.8,
-        },
+        // {
+        //     url: `${BASE_URL}/blog`,
+        //     lastModified: now,
+        //     changeFrequency: 'daily',
+        //     priority: 0.8,
+        // },
         {
             url: `${BASE_URL}/about`,
             lastModified: now,
@@ -75,12 +75,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         }));
 
     // Dynamic blog pages
-    const blogPages: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
-        url: `${BASE_URL}/blog/${post.slug}`,
-        lastModified: post.updatedAt ?? post.publishedAt,
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    }));
+    // const blogPages: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
+    //     url: `${BASE_URL}/blog/${post.slug}`,
+    //     lastModified: post.updatedAt ?? post.publishedAt,
+    //     changeFrequency: 'monthly' as const,
+    //     priority: 0.7,
+    // }));
 
     // Dynamic category pages
     const categoryPages: MetadataRoute.Sitemap = CATEGORIES.map((cat) => ({
@@ -90,5 +90,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.75,
     }));
 
-    return [...staticPages, ...productPages, ...blogPages, ...categoryPages];
+    return [...staticPages, ...productPages, ...categoryPages];
+    // return [...staticPages, ...productPages, ...blogPages, ...categoryPages];
 }

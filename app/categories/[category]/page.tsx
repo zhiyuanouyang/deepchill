@@ -9,7 +9,7 @@ import AppCard from '@/app/components/AppCard';
 import JsonLd, { buildBreadcrumbSchema } from '@/app/components/seo/JsonLd';
 import { CATEGORIES } from '@/app/data/categories';
 import { APPS_CATALOG } from '@/app/data/apps';
-import { BLOG_POSTS } from '@/app/data/blog';
+// import { BLOG_POSTS } from '@/app/data/blog';
 import { generateCategoryMetadata, SITE_CONFIG, buildCanonicalUrl } from '@/app/lib/seo';
 
 interface Props {
@@ -33,7 +33,7 @@ export default async function CategoryPage({ params }: Props) {
     if (!cat) notFound();
 
     const categoryProducts = APPS_CATALOG.filter((a) => cat.productSlugs.includes(a.slug));
-    const categoryPosts = BLOG_POSTS.filter((p) => cat.blogSlugs.includes(p.slug));
+    // const categoryPosts = BLOG_POSTS.filter((p) => cat.blogSlugs.includes(p.slug));
     const otherCategories = CATEGORIES.filter((c) => c.slug !== cat.slug);
 
     const breadcrumbItems = [
@@ -107,7 +107,7 @@ export default async function CategoryPage({ params }: Props) {
                     )}
 
                     {/* Related Articles */}
-                    {categoryPosts.length > 0 && (
+                    {/* {categoryPosts.length > 0 && (
                         <section className="mb-20" aria-labelledby="category-articles-heading">
                             <div className="flex items-center justify-between mb-8">
                                 <h2 id="category-articles-heading" className="text-2xl font-bold text-white">
@@ -144,7 +144,7 @@ export default async function CategoryPage({ params }: Props) {
                                 ))}
                             </div>
                         </section>
-                    )}
+                    )} */}
 
                     {/* Other categories */}
                     <section aria-labelledby="other-categories-heading">

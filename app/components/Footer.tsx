@@ -32,7 +32,7 @@ const FOOTER_LINKS = [
         span: 'md:col-span-2',
         links: [
             { label: 'About', href: '/about' },
-            { label: 'Blog', href: '/blog' },
+            // { label: 'Blog', href: '/blog' },
             { label: 'Privacy Policy', href: '/privacy' },
             { label: 'Terms of Service', href: '/terms' },
         ],
