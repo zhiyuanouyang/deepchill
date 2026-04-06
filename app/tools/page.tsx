@@ -124,16 +124,6 @@ const TOOLS = [
         tags: ['Format', 'Cleanup', 'Chain'],
     },
     {
-        name: 'CSV Viewer',
-        slug: 'csv-viewer',
-        description: 'Read and analyze massive CSV files securely online. Auto-detect delimiter, paginate, and sort without sending data to our servers.',
-        icon: '📊',
-        color: 'from-emerald-500/20 to-green-500/10',
-        border: 'border-emerald-500/25',
-        iconColor: 'text-emerald-400',
-        tags: ['Table', 'Sort', 'Virtual'],
-    },
-    {
         name: 'Random Number',
         slug: 'random-number-generator',
         description: 'Generate lists of random numbers across multiple statistical distributions with instant visual histograms.',
