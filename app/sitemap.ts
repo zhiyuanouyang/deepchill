@@ -82,25 +82,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified: now,
             changeFrequency: 'weekly',
             priority: 0.9,
-        },
-        {
-            url: 'https://interviewgpt.deepchill.app/questions',
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.85,
-        },
-        {
-            url: 'https://interviewgpt.deepchill.app/mock-interview',
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.85,
-        },
-        {
-            url: 'https://interviewgpt.deepchill.app/online-judgement',
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.85,
-        },
+        }
     ];
 
     return [...staticPages, ...blogPages, ...categoryPages, ...subdomainPages];
