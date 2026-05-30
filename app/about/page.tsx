@@ -32,7 +32,7 @@ const PRODUCTS_BUILT = [
     {
         name: 'InterviewGPT',
         desc: 'AI-powered technical interview preparation — coding, system design, SQL, and behavioral.',
-        href: '/products/interviewgpt',
+        href: 'https://interviewgpt.deepchill.app',
         tag: 'AI Tools',
         accent: 'from-indigo-500 to-violet-600',
     },
@@ -182,9 +182,11 @@ export default function AboutPage() {
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {PRODUCTS_BUILT.map((p) => (
-                            <Link
+                            <a
                                 key={p.name}
                                 href={p.href}
+                                target={p.href.startsWith('http') ? '_blank' : undefined}
+                                rel={p.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                                 className="glass rounded-xl p-5 flex items-start gap-4 hover:border-indigo-500/40 transition-all group"
                                 style={{ textDecoration: 'none' }}
                             >
@@ -216,7 +218,7 @@ export default function AboutPage() {
                                 <span className="text-slate-600 group-hover:text-indigo-400 transition-colors ml-auto text-lg">
                                     →
                                 </span>
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </section>

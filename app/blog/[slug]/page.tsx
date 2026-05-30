@@ -211,8 +211,8 @@ export default async function BlogPostPage({ params }: Props) {
                                     >
                                         Try {relatedProduct.name} Free →
                                     </a>
-                                    <Link href={`/products/${relatedProduct.slug}`} className="block text-center text-slate-500 hover:text-indigo-400 text-xs mt-3 transition-colors">
-                                        Learn more about {relatedProduct.name}
+                                    <Link href="/#products" className="block text-center text-slate-500 hover:text-indigo-400 text-xs mt-3 transition-colors">
+                                        View other tools on Deepchill
                                     </Link>
                                 </div>
                             )}

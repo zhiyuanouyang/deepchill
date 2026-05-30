@@ -33,7 +33,7 @@ export function buildWebSiteSchema() {
             '@type': 'SearchAction',
             target: {
                 '@type': 'EntryPoint',
-                urlTemplate: 'https://deepchill.app/products?q={search_term_string}',
+                urlTemplate: 'https://deepchill.app/?q={search_term_string}',
             },
             'query-input': 'required name=search_term_string',
         },
@@ -47,7 +47,10 @@ export function buildOrganizationSchema() {
         name: 'Deepchill',
         url: 'https://deepchill.app',
         logo: 'https://deepchill.app/logo.png',
-        sameAs: ['https://twitter.com/deepchillapp'],
+        sameAs: [
+            'https://twitter.com/deepchillapp',
+            'https://interviewgpt.deepchill.app'
+        ],
         description:
             'Deepchill is an indie studio building products across AI, games, finance, and everyday utilities — crafted by one person, shipped for everyone.',
     };
@@ -59,6 +62,7 @@ export function buildSoftwareApplicationSchema(app: {
     url: string;
     category: string;
     features: string[];
+    launchUrl?: string;
 }) {
     return {
         '@context': 'https://schema.org',
@@ -75,6 +79,7 @@ export function buildSoftwareApplicationSchema(app: {
         },
         featureList: app.features.join(', '),
         operatingSystem: 'Web',
+        installUrl: app.launchUrl,
         provider: {
             '@type': 'Organization',
             name: 'Deepchill',

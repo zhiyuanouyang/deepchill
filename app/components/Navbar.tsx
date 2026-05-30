@@ -5,11 +5,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const NAV_LINKS = [
+const NAV_LINKS: { href: string; label: string; isExternal?: boolean }[] = [
     { href: '/', label: 'Home' },
-    { href: '/products', label: 'Products' },
     { href: '/tools', label: 'Tools' },
-    // { href: '/blog', label: 'Blog' },
+    { href: '/blog', label: 'Blog' },
 ];
 
 const Navbar: React.FC = () => {
@@ -30,6 +29,20 @@ const Navbar: React.FC = () => {
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-1" role="menubar">
                     {NAV_LINKS.map((link) => {
+                        if (link.isExternal) {
+                            return (
+                                <a
+                                    key={link.href}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener"
+                                    role="menuitem"
+                                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-indigo-300 hover:bg-white/5"
+                                >
+                                    {link.label}
+                                </a>
+                            );
+                        }
                         const isActive = link.href === '/'
                             ? pathname === '/'
                             : pathname.startsWith(link.href);
@@ -47,20 +60,6 @@ const Navbar: React.FC = () => {
                             </Link>
                         );
                     })}
-                </div>
-
-                {/* Desktop CTA */}
-                <div className="hidden md:flex items-center gap-3">
-                    <a
-                        href="/products"
-                        className="btn-primary text-sm py-2.5 px-5"
-                        id="nav-cta-products"
-                    >
-                        Explore Products
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -86,6 +85,20 @@ const Navbar: React.FC = () => {
             {mobileOpen && (
                 <div className="md:hidden mt-2 mx-0 glass rounded-2xl p-4 flex flex-col gap-1">
                     {NAV_LINKS.map((link) => {
+                        if (link.isExternal) {
+                            return (
+                                <a
+                                    key={link.href}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-indigo-300 hover:bg-white/5"
+                                >
+                                    {link.label}
+                                </a>
+                            );
+                        }
                         const isActive = link.href === '/'
                             ? pathname === '/'
                             : pathname.startsWith(link.href);
@@ -103,14 +116,6 @@ const Navbar: React.FC = () => {
                             </Link>
                         );
                     })}
-                    <div className="divider my-2" />
-                    <a
-                        href="/products"
-                        className="btn-primary text-sm py-2.5 text-center"
-                        id="nav-mobile-cta-products"
-                    >
-                        Explore Products →
-                    </a>
                 </div>
             )}
         </nav>

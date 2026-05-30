@@ -6,8 +6,7 @@ const FOOTER_LINKS = [
         title: 'Products',
         span: 'md:col-span-2',
         links: [
-            { label: 'All Products', href: '/products' },
-            { label: 'InterviewGPT', href: '/products/interviewgpt' },
+            { label: 'InterviewGPT', href: 'https://interviewgpt.deepchill.app', isExternal: true },
         ],
     },
     {
@@ -32,7 +31,7 @@ const FOOTER_LINKS = [
         span: 'md:col-span-2',
         links: [
             { label: 'About', href: '/about' },
-            // { label: 'Blog', href: '/blog' },
+            { label: 'Blog', href: '/blog' },
             { label: 'Privacy Policy', href: '/privacy' },
             { label: 'Terms of Service', href: '/terms' },
         ],
@@ -70,11 +69,13 @@ const Footer: React.FC = () => {
                             <span aria-hidden>↗</span>
                         </a>
                         <a
-                            href="/products"
+                            href="https://interviewgpt.deepchill.app"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="btn-secondary text-sm py-2.5 px-4 w-fit"
                             id="footer-browse-products"
                         >
-                            Browse Products →
+                            Launch InterviewGPT →
                         </a>
                     </div>
 
@@ -85,16 +86,33 @@ const Footer: React.FC = () => {
                                 {section.title}
                             </h3>
                             <ul className={`space-y-3 ${section.columns === 2 ? 'grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 space-y-0' : ''}`}>
-                                {section.links.map((link) => (
-                                    <li key={link.href}>
-                                        <Link
-                                            href={link.href}
-                                            className="text-slate-500 hover:text-indigo-400 text-sm transition-colors"
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    </li>
-                                ))}
+                                {section.links.map((link) => {
+                                    const isExternal = (link as any).isExternal;
+                                    if (isExternal) {
+                                        return (
+                                            <li key={link.href}>
+                                                <a
+                                                    href={link.href}
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    className="text-slate-500 hover:text-indigo-400 text-sm transition-colors"
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            </li>
+                                        );
+                                    }
+                                    return (
+                                        <li key={link.href}>
+                                            <Link
+                                                href={link.href}
+                                                className="text-slate-500 hover:text-indigo-400 text-sm transition-colors"
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ))}

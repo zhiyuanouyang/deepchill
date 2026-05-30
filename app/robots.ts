@@ -19,7 +19,10 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: '/',
             },
         ],
-        sitemap: 'https://deepchill.app/sitemap.xml',
+        sitemap: [
+            'https://deepchill.app/sitemap.xml',
+            'https://interviewgpt.deepchill.app/sitemap.xml',
+        ],
         host: 'https://deepchill.app',
     };
 }

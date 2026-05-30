@@ -6,7 +6,7 @@ import Footer from '@/app/components/Footer';
 import AppCard from '@/app/components/AppCard';
 import JsonLd, { buildWebSiteSchema, buildOrganizationSchema } from '@/app/components/seo/JsonLd';
 import { APPS_CATALOG } from '@/app/data/apps';
-// import { BLOG_POSTS } from '@/app/data/blog';
+import { BLOG_POSTS } from '@/app/data/blog';
 import { CATEGORIES } from '@/app/data/categories';
 import { SITE_CONFIG } from '@/app/lib/seo';
 
@@ -41,8 +41,22 @@ const PILLARS = [
 ];
 
 export default function HomePage() {
-    const featuredApps = APPS_CATALOG.filter((a) => !a.comingSoon).slice(0, 3);
-    // const recentPosts = BLOG_POSTS.slice(0, 3);
+    const activeApps = APPS_CATALOG.filter((a) => !a.comingSoon);
+    const comingSoonApps = APPS_CATALOG.filter((a) => a.comingSoon);
+    const recentPosts = BLOG_POSTS.slice(0, 3);
+
+    const categoriesWithApps = CATEGORIES.filter((cat) =>
+        cat.productSlugs.some((slug) => APPS_CATALOG.some((app) => app.slug === slug))
+    );
+
+    const gridColsClass =
+        categoriesWithApps.length === 1
+            ? 'max-w-md mx-auto grid-cols-1'
+            : categoriesWithApps.length === 2
+            ? 'max-w-2xl mx-auto grid-cols-1 md:grid-cols-2'
+            : categoriesWithApps.length === 3
+            ? 'max-w-5xl mx-auto grid-cols-1 md:grid-cols-3'
+            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
 
     return (
         <div className="min-h-screen bg-slate-950">
@@ -100,13 +114,13 @@ export default function HomePage() {
                             {/* CTAs */}
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Link
-                                    href="/products"
+                                    href="#products"
                                     className="btn-primary text-base py-4 px-8"
                                     id="hero-cta-primary"
                                 >
-                                    Explore all products
+                                    Explore our products
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 13l-7 7-7-7m14-6l-7 7-7-7" />
                                     </svg>
                                 </Link>
                                 <Link
@@ -121,26 +135,36 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* ── Featured Products ───────────────────────────────────── */}
-                <section className="section-padding" aria-labelledby="products-heading">
+                {/* ── Products Showcase ───────────────────────────────────── */}
+                <section className="section-padding animate-fade-in" aria-labelledby="products-heading" id="products">
                     <div className="container-xl">
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
-                            <div>
-                                <p className="text-indigo-400 text-sm font-semibold uppercase tracking-widest mb-2">Our Products</p>
-                                <h2 id="products-heading" className="text-3xl md:text-4xl font-bold text-white">
-                                    What we've built
-                                </h2>
-                            </div>
-                            <Link href="/products" className="btn-secondary text-sm py-2.5 px-5 whitespace-nowrap" id="view-all-products-link">
-                                View all products →
-                            </Link>
+                        <div className="mb-12">
+                            <p className="text-indigo-400 text-sm font-semibold uppercase tracking-widest mb-2">Our Products</p>
+                            <h2 id="products-heading" className="text-3xl md:text-4xl font-bold text-white">
+                                What we've built
+                            </h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {featuredApps.map((app) => (
+                            {activeApps.map((app) => (
                                 <AppCard key={app.id} app={app} />
                             ))}
                         </div>
+
+                        {comingSoonApps.length > 0 && (
+                            <>
+                                <div className="divider my-16" />
+                                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                                    Coming Soon
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {comingSoonApps.map((app) => (
+                                        <AppCard key={app.id} app={app} />
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </section>
 
@@ -158,8 +182,8 @@ export default function HomePage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {CATEGORIES.map((cat) => (
+                        <div className={`grid gap-6 ${gridColsClass}`}>
+                            {categoriesWithApps.map((cat) => (
                                 <Link
                                     key={cat.slug}
                                     href={`/categories/${cat.slug}`}
@@ -186,7 +210,7 @@ export default function HomePage() {
                 </section>
 
                 {/* ── Blog Teaser ─────────────────────────────────────────── */}
-                {/* <section className="section-padding" aria-labelledby="blog-heading">
+                <section className="section-padding" aria-labelledby="blog-heading">
                     <div className="container-xl">
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
                             <div>
@@ -227,7 +251,7 @@ export default function HomePage() {
                             ))}
                         </div>
                     </div>
-                </section> */}
+                </section>
 
                 {/* ── Bottom CTA ──────────────────────────────────────────── */}
                 <section className="section-padding" aria-labelledby="bottom-cta-heading">
@@ -245,18 +269,18 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <Link
-                                        href="/products"
+                                        href="#products"
                                         className="btn-primary text-base py-4 px-8"
                                         id="bottom-cta-button"
                                     >
-                                        Browse all products
+                                        Browse our products
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 13l-7 7-7-7m14-6l-7 7-7-7" />
                                         </svg>
                                     </Link>
-                                    {/* <Link href="/blog" className="btn-secondary text-base py-4 px-8" id="bottom-cta-blog-link">
+                                    <Link href="/blog" className="btn-secondary text-base py-4 px-8" id="bottom-cta-blog-link">
                                         Read the blog
-                                    </Link> */}
+                                    </Link>
                                 </div>
                             </div>
                         </div>

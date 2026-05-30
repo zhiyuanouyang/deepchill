@@ -17,33 +17,39 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-    return CATEGORIES.map((cat) => ({ category: cat.slug }));
+    return CATEGORIES.filter((cat) =>
+        cat.productSlugs.some((slug) => APPS_CATALOG.some((app) => app.slug === slug))
+    ).map((cat) => ({ category: cat.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { category } = await params;
     const cat = CATEGORIES.find((c) => c.slug === category);
-    if (!cat) return { title: 'Category Not Found' };
+    if (!cat || !cat.productSlugs.some((slug) => APPS_CATALOG.some((app) => app.slug === slug))) return { title: 'Category Not Found' };
     return generateCategoryMetadata(cat);
 }
 
 export default async function CategoryPage({ params }: Props) {
     const { category: categorySlug } = await params;
     const cat = CATEGORIES.find((c) => c.slug === categorySlug);
-    if (!cat) notFound();
+    
+    // Check if the category exists and actually has apps in the catalog
+    const hasApps = cat?.productSlugs.some((slug) => APPS_CATALOG.some((app) => app.slug === slug));
+    if (!cat || !hasApps) notFound();
 
     const categoryProducts = APPS_CATALOG.filter((a) => cat.productSlugs.includes(a.slug));
     // const categoryPosts = BLOG_POSTS.filter((p) => cat.blogSlugs.includes(p.slug));
-    const otherCategories = CATEGORIES.filter((c) => c.slug !== cat.slug);
+    const otherCategories = CATEGORIES.filter(
+        (c) => c.slug !== cat.slug && c.productSlugs.some((slug) => APPS_CATALOG.some((app) => app.slug === slug))
+    );
 
     const breadcrumbItems = [
-        { label: 'Categories', href: '/products' },
+        { label: 'Home', href: '/' },
         { label: cat.name },
     ];
 
     const breadcrumbSchema = buildBreadcrumbSchema([
         { name: 'Home', url: SITE_CONFIG.domain },
-        { name: 'Products', url: buildCanonicalUrl('/products') },
         { name: cat.name, url: buildCanonicalUrl(`/categories/${cat.slug}`) },
     ]);
 
@@ -94,7 +100,7 @@ export default async function CategoryPage({ params }: Props) {
                                 <h2 id="category-products-heading" className="text-2xl font-bold text-white">
                                     {cat.name} Tools
                                 </h2>
-                                <Link href="/products" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
+                                <Link href="/#products" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
                                     View all products →
                                 </Link>
                             </div>
