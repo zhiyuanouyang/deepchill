@@ -1,91 +1,53 @@
-
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
-import { SITE_CONFIG } from '@/app/lib/seo';
-import JsonLd, { buildWebSiteSchema, buildOrganizationSchema } from '@/app/components/seo/JsonLd';
 
-const inter = Inter({
-    subsets: ['latin'],
-    variable: '--font-inter',
-    display: 'swap',
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta-sans',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-    metadataBase: new URL(SITE_CONFIG.domain),
-    title: {
-        default: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
-        template: `%s | ${SITE_CONFIG.name}`,
-    },
-    verification: {
-        google: "0mofi5a7aVyB1bOoCwm-kD8c7DG2D4cCX6Yc6roXY40",
-    },
-    description: SITE_CONFIG.description,
-    keywords: [
-        'AI tools for software engineers',
-        'technical interview preparation',
-        'AI SaaS tools',
-        'software engineer career tools',
-        'interview prep platform',
-        'AI-powered developer tools',
-    ],
-    authors: [{ name: 'Deepchill', url: SITE_CONFIG.domain }],
-    creator: 'Deepchill',
-    publisher: 'Deepchill',
-    alternates: { canonical: SITE_CONFIG.domain },
-    openGraph: {
-        type: 'website',
-        locale: SITE_CONFIG.locale,
-        url: SITE_CONFIG.domain,
-        siteName: SITE_CONFIG.name,
-        title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
-        description: SITE_CONFIG.description,
-        images: [
-            {
-                url: `${SITE_CONFIG.domain}/og-default.png`,
-                width: 1200,
-                height: 630,
-                alt: 'Deepchill — AI-Powered SaaS Tools',
-            },
-        ],
-    },
-    twitter: {
-        card: 'summary_large_image',
-        title: `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
-        description: SITE_CONFIG.description,
-        site: SITE_CONFIG.twitterHandle,
-        images: [`${SITE_CONFIG.domain}/og-default.png`],
-    },
-    robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-            index: true,
-            follow: true,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
-        },
-    },
-    other: {
-        'google-adsense-account': 'ca-pub-3805318800428171',
-    },
+  title: 'Indie & Open Source Product Directory',
+  description:
+    'A curated directory and launchpad for indie makers and open-source developers to showcase projects, boost visibility, and earn SEO backlinks.',
+  keywords: [
+    'indie makers',
+    'open source',
+    'developer tools',
+    'backlinks',
+    'SEO',
+    'indie hackers',
+    'directory',
+    'SaaS',
+  ],
+  authors: [{ name: 'Deepchill Directory' }],
+  openGraph: {
+    title: 'Indie & Open Source Product Directory',
+    description:
+      'A curated directory and launchpad for indie makers and open-source developers to showcase projects, boost visibility, and earn SEO backlinks.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Indie & Open Source Product Directory',
+    description:
+      'A curated directory and launchpad for indie makers and open-source developers to showcase projects, boost visibility, and earn SEO backlinks.',
+  },
 };
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <html lang="en" className={inter.variable}>
-            <body className="antialiased">
-                <JsonLd schema={buildWebSiteSchema()} />
-                <JsonLd schema={buildOrganizationSchema()} />
-                {children}
-                <Analytics />
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en" className={plusJakartaSans.variable}>
+      <body className="min-h-screen antialiased bg-[#f8fafc] text-slate-900 selection:bg-indigo-500 selection:text-white">
+        {children}
+      </body>
+    </html>
+  );
 }

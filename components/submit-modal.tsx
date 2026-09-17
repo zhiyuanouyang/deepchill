@@ -1,0 +1,440 @@
+'use client';
+
+import React, { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X, Sparkles, Plus, Loader2, ShieldCheck, Info } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { Product, ProductCategory, PricingModel } from '@/lib/types';
+
+interface SubmitModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmitProduct: (product: Product) => void;
+}
+
+const CATEGORIES: ProductCategory[] = [
+  'DevTools',
+  'AI & Machine Learning',
+  'Productivity',
+  'Design & Creative',
+  'Open Source Infrastructure',
+  'SaaS & Analytics',
+  'Security & Privacy',
+  'Developer Utilities',
+];
+
+const PRICING_OPTIONS: PricingModel[] = ['Free', 'Open Source', 'Freemium', 'Paid'];
+
+export const SubmitModal: React.FC<SubmitModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmitProduct,
+}) => {
+  const [name, setName] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [repoUrl, setRepoUrl] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<ProductCategory>('DevTools');
+  const [pricing, setPricing] = useState<PricingModel>('Open Source');
+  const [tagsInput, setTagsInput] = useState('');
+  const [makerName, setMakerName] = useState('');
+  const [makerHandle, setMakerHandle] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiTip, setAiTip] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleAiEnhance = async () => {
+    if (!name.trim()) {
+      setErrors((prev) => ({ ...prev, name: 'Please enter a project name first' }));
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai/enhance-submission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.polishedTagline && !tagline) {
+          setTagline(data.polishedTagline);
+        }
+        if (data.suggestedTags && Array.isArray(data.suggestedTags)) {
+          const currentTags = tagsInput
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean);
+          const merged = Array.from(new Set([...currentTags, ...data.suggestedTags]));
+          setTagsInput(merged.join(', '));
+        }
+        if (data.seoAdvice) {
+          setAiTip(data.seoAdvice);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to enhance submission:', err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!name.trim()) newErrors.name = 'Product name is required';
+    if (!websiteUrl.trim()) {
+      newErrors.websiteUrl = 'Direct website URL is required for SEO backlink';
+    } else if (!/^https?:\/\//i.test(websiteUrl)) {
+      newErrors.websiteUrl = 'URL must begin with http:// or https://';
+    }
+    if (!tagline.trim()) newErrors.tagline = 'A concise tagline is required';
+    if (!description.trim()) newErrors.description = 'Please provide a project description';
+    if (!makerName.trim()) newErrors.makerName = 'Maker name or handle is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const parsedTags = tagsInput
+      .split(',')
+      .map((t) => t.trim().replace(/^#/, ''))
+      .filter((t) => t.length > 0);
+
+    const newProduct: Product = {
+      id:
+        name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '') || `proj-${Date.now()}`,
+      name: name.trim(),
+      tagline: tagline.trim(),
+      description: description.trim(),
+      websiteUrl: websiteUrl.trim(),
+      repoUrl: repoUrl.trim() || undefined,
+      category,
+      pricing,
+      tags: parsedTags.length > 0 ? parsedTags : ['Indie', 'DevTools'],
+      makerName: makerName.trim(),
+      makerHandle: makerHandle.trim() || undefined,
+      logoUrl: logoUrl.trim() || undefined,
+      upvotes: 1,
+      featured: false,
+      launchDate: new Date().toISOString().split('T')[0],
+      dofollowApproved: true,
+      starsCount: repoUrl ? 1 : undefined,
+    };
+
+    onSubmitProduct(newProduct);
+
+    // Confetti celebration!
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b'],
+      });
+    } catch {
+      // Ignore
+    }
+
+    // Reset form
+    setName('');
+    setWebsiteUrl('');
+    setRepoUrl('');
+    setTagline('');
+    setDescription('');
+    setTagsInput('');
+    setMakerName('');
+    setMakerHandle('');
+    setLogoUrl('');
+    setAiTip(null);
+    setErrors({});
+    onClose();
+  };
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 animate-in fade-in duration-200" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass border border-white/80 shadow-2xl animate-in zoom-in-95 duration-200">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <Dialog.Title className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Submit Your Project
+                </Dialog.Title>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <ShieldCheck className="w-3.5 h-3.5" /> High-Value Backlink
+                </span>
+              </div>
+              <Dialog.Description className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                Gain organic traffic, maker discovery, and verified direct DoFollow backlink indexing.
+              </Dialog.Description>
+            </div>
+            <Dialog.Close asChild>
+              <button
+                id="submit-modal-close-btn"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </Dialog.Close>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
+            {/* Name & Website */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Product Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  id="input-product-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g., Supabase, Cal.com"
+                  className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
+                    errors.name ? 'border-rose-400' : ''
+                  }`}
+                />
+                {errors.name && <p className="text-[11px] text-rose-600 mt-1">{errors.name}</p>}
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Website URL <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  id="input-website-url"
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://yourproduct.com"
+                  className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
+                    errors.websiteUrl ? 'border-rose-400' : ''
+                  }`}
+                />
+                {errors.websiteUrl && (
+                  <p className="text-[11px] text-rose-600 mt-1">{errors.websiteUrl}</p>
+                )}
+              </div>
+            </div>
+
+            {/* GitHub Repo & Category */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  GitHub Repository <span className="text-slate-400 text-xs">(optional)</span>
+                </label>
+                <input
+                  id="input-repo-url"
+                  type="url"
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  placeholder="https://github.com/org/repo"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Category</label>
+                <select
+                  id="select-category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ProductCategory)}
+                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white text-slate-800"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Pricing Model & Logo URL */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Pricing Model</label>
+                <select
+                  id="select-pricing"
+                  value={pricing}
+                  onChange={(e) => setPricing(e.target.value as PricingModel)}
+                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white text-slate-800"
+                >
+                  {PRICING_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Logo / Icon Image URL <span className="text-slate-400 text-xs">(optional)</span>
+                </label>
+                <input
+                  id="input-logo-url"
+                  type="url"
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://example.com/logo.png"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Tagline + AI Optimize Button */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-slate-700">
+                  Tagline (1-sentence summary) <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  id="btn-ai-enhance-tagline"
+                  onClick={handleAiEnhance}
+                  disabled={aiLoading}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3 h-3 text-indigo-500" />
+                  )}
+                  <span>AI Polish &amp; Tag Suggester</span>
+                </button>
+              </div>
+              <input
+                id="input-tagline"
+                type="text"
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+                placeholder="e.g., Open source scheduling infrastructure for everyone"
+                className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
+                  errors.tagline ? 'border-rose-400' : ''
+                }`}
+              />
+              {errors.tagline && <p className="text-[11px] text-rose-600 mt-1">{errors.tagline}</p>}
+            </div>
+
+            {/* Detailed Description */}
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">
+                Detailed Description <span className="text-rose-500">*</span>
+              </label>
+              <textarea
+                id="textarea-description"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Explain what your product solves, key features, and why indie/open-source users love it..."
+                className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
+                  errors.description ? 'border-rose-400' : ''
+                }`}
+              />
+              {errors.description && (
+                <p className="text-[11px] text-rose-600 mt-1">{errors.description}</p>
+              )}
+            </div>
+
+            {/* Tags & Tech Stack */}
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">
+                Tech Stack / Keywords <span className="text-slate-400 text-xs">(comma separated)</span>
+              </label>
+              <input
+                id="input-tags"
+                type="text"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="e.g., Next.js, PostgreSQL, Docker, TypeScript, Self-Hosted"
+                className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+              />
+            </div>
+
+            {/* Maker Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Maker Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  id="input-maker-name"
+                  type="text"
+                  value={makerName}
+                  onChange={(e) => setMakerName(e.target.value)}
+                  placeholder="e.g., Sarah Chen"
+                  className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
+                    errors.makerName ? 'border-rose-400' : ''
+                  }`}
+                />
+                {errors.makerName && (
+                  <p className="text-[11px] text-rose-600 mt-1">{errors.makerName}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Maker Twitter / GitHub handle
+                </label>
+                <input
+                  id="input-maker-handle"
+                  type="text"
+                  value={makerHandle}
+                  onChange={(e) => setMakerHandle(e.target.value)}
+                  placeholder="@sarahbuilds"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* AI SEO Tip */}
+            {aiTip && (
+              <div className="p-3 rounded-xl bg-indigo-50/90 border border-indigo-100 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-indigo-900 leading-snug">
+                  <span className="font-bold">Gemini SEO Tip:</span> {aiTip}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Actions */}
+            <div className="pt-4 border-t border-slate-200/80 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                id="btn-cancel-submission"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="btn-submit-project-final"
+                className="liquid-btn-primary px-6 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/10"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Launch &amp; Claim Backlink</span>
+              </button>
+            </div>
+          </form>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
