@@ -98,6 +98,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       <ShieldCheck className="w-3.5 h-3.5" /> Direct DoFollow
                     </span>
                   )}
+                  {product.totalPaid !== undefined && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                      🔥 ${product.totalPaid} Bid
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm sm:text-base text-slate-600 font-medium mt-1 leading-snug">
                   {product.tagline}

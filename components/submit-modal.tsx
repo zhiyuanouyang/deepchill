@@ -41,6 +41,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [makerName, setMakerName] = useState('');
   const [makerHandle, setMakerHandle] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [biddingAmount, setBiddingAmount] = useState<number>(50);
 
   const [aiLoading, setAiLoading] = useState(false);
   const [aiTip, setAiTip] = useState<string | null>(null);
@@ -131,6 +132,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       launchDate: new Date().toISOString().split('T')[0],
       dofollowApproved: true,
       starsCount: repoUrl ? 1 : undefined,
+      totalPaid: biddingAmount,
+      paidAt: new Date().toISOString(),
     };
 
     onSubmitProduct(newProduct);
@@ -400,6 +403,54 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   placeholder="@sarahbuilds"
                   className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
                 />
+              </div>
+            </div>
+
+            {/* Bidding Amount / Sponsor Trending Rank */}
+            <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="font-bold text-amber-900 text-sm flex items-center gap-1.5">
+                  <span>🔥 Bidding &amp; Sponsor Boost</span>
+                  <span className="text-[11px] font-normal text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                    Determines Trending List Ranking
+                  </span>
+                </label>
+                <span className="text-sm font-extrabold text-amber-900">${biddingAmount}</span>
+              </div>
+              <p className="text-xs text-amber-800/80 mb-3">
+                Higher total paid bidding secures top visibility in the Trending directory list. Latest payments appear instantly on the Newest list.
+              </p>
+
+              <div className="flex items-center gap-2 flex-wrap mb-3">
+                {[0, 25, 50, 100, 250, 500].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setBiddingAmount(amt)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      biddingAmount === amt
+                        ? 'bg-amber-600 text-white shadow-xs'
+                        : 'bg-white text-slate-700 hover:bg-amber-100/70 border border-amber-200'
+                    }`}
+                  >
+                    {amt === 0 ? 'Free ($0)' : `$${amt}`}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-amber-900">Custom amount:</span>
+                <div className="relative w-32">
+                  <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={biddingAmount}
+                    onChange={(e) => setBiddingAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full liquid-glass-input rounded-xl pl-7 pr-3 py-1.5 text-xs font-bold text-slate-800 outline-none bg-white"
+                  />
+                </div>
               </div>
             </div>
 

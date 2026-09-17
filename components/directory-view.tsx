@@ -12,11 +12,13 @@ import {
   Tag,
   X,
   Layers,
+  Sparkles,
 } from 'lucide-react';
 import { Product, ProductCategory, PricingModel } from '@/lib/types';
 import { INITIAL_PRODUCTS } from '@/data/initial-products';
 import { Navbar } from '@/components/navbar';
-import { ProductCard } from '@/components/product-card';
+import { PrimaryProductListItem, SideProductListItem } from '@/components/product-list-item';
+import { PaginationControls } from '@/components/pagination-controls';
 import { AiSearchPanel } from '@/components/ai-search-panel';
 import { SubmitModal } from '@/components/submit-modal';
 import { ProjectDetailModal } from '@/components/project-detail-modal';
@@ -36,6 +38,9 @@ const CATEGORIES: ('All' | ProductCategory)[] = [
 
 const PRICING_FILTERS: ('All' | PricingModel)[] = ['All', 'Open Source', 'Free', 'Freemium', 'Paid'];
 
+const PRIMARY_PAGE_SIZE = 6;
+const SIDE_PAGE_SIZE = 6;
+
 export function DirectoryView() {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [upvotedIds, setUpvotedIds] = useState<Set<string>>(new Set());
@@ -45,8 +50,11 @@ export function DirectoryView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'All' | ProductCategory>('All');
   const [selectedPricing, setSelectedPricing] = useState<'All' | PricingModel>('All');
-  const [activeSort, setActiveSort] = useState<'trending' | 'newest' | 'featured'>('trending');
   const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // Pagination states
+  const [primaryPage, setPrimaryPage] = useState(1);
+  const [sidePage, setSidePage] = useState(1);
 
   // Discovery Mode: 'keyword' | 'ai'
   const [activeMode, setActiveMode] = useState<'keyword' | 'ai'>('keyword');
@@ -55,6 +63,12 @@ export function DirectoryView() {
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [isSeoGuideOpen, setIsSeoGuideOpen] = useState(false);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPrimaryPage(1);
+    setSidePage(1);
+  }, [searchQuery, selectedCategory, selectedPricing, activeTag]);
 
   // Hydrate from localStorage once client mounts
   useEffect(() => {
@@ -66,7 +80,18 @@ export function DirectoryView() {
           if (Array.isArray(parsed) && parsed.length > 0) {
             const existingIds = new Set(parsed.map((p: Product) => p.id));
             const missing = INITIAL_PRODUCTS.filter((p) => !existingIds.has(p.id));
-            setProducts([...parsed, ...missing]);
+            
+            // Ensure any saved product gets proper defaults if missing totalPaid or paidAt
+            const hydrated = parsed.map((p: Product) => {
+              const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
+              return {
+                ...p,
+                totalPaid: p.totalPaid ?? fallback?.totalPaid ?? 0,
+                paidAt: p.paidAt ?? fallback?.paidAt ?? p.launchDate ?? new Date().toISOString(),
+              };
+            });
+
+            setProducts([...hydrated, ...missing]);
           }
         }
 
@@ -148,51 +173,75 @@ export function DirectoryView() {
   // Add new submitted project
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prev) => [newProduct, ...prev]);
-    // Automatically open its detail view to show badge code
+    // Automatically open its detail view
     setDetailProduct(newProduct);
   };
 
-  // Filtered & Sorted products calculation
-  const filteredProducts = useMemo(() => {
-    return products
-      .filter((product) => {
-        if (selectedCategory !== 'All' && product.category !== selectedCategory) {
+  // Base filtered products (common filter for category, pricing, tags, search)
+  const baseFilteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (selectedCategory !== 'All' && product.category !== selectedCategory) {
+        return false;
+      }
+      if (selectedPricing !== 'All' && product.pricing !== selectedPricing) {
+        return false;
+      }
+      if (activeTag && !product.tags.some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = product.name.toLowerCase().includes(q);
+        const matchTagline = product.tagline.toLowerCase().includes(q);
+        const matchDesc = product.description.toLowerCase().includes(q);
+        const matchTags = product.tags.some((t) => t.toLowerCase().includes(q));
+        const matchMaker = product.makerName.toLowerCase().includes(q);
+        if (!matchName && !matchTagline && !matchDesc && !matchTags && !matchMaker) {
           return false;
         }
-        if (selectedPricing !== 'All' && product.pricing !== selectedPricing) {
-          return false;
-        }
-        if (activeTag && !product.tags.some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
-          return false;
-        }
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const matchName = product.name.toLowerCase().includes(q);
-          const matchTagline = product.tagline.toLowerCase().includes(q);
-          const matchDesc = product.description.toLowerCase().includes(q);
-          const matchTags = product.tags.some((t) => t.toLowerCase().includes(q));
-          const matchMaker = product.makerName.toLowerCase().includes(q);
-          if (!matchName && !matchTagline && !matchDesc && !matchTags && !matchMaker) {
-            return false;
-          }
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        if (activeSort === 'trending') {
-          return b.upvotes - a.upvotes;
-        }
-        if (activeSort === 'newest') {
-          return new Date(b.launchDate).getTime() - new Date(a.launchDate).getTime();
-        }
-        if (activeSort === 'featured') {
-          if (a.featured && !b.featured) return -1;
-          if (!a.featured && b.featured) return 1;
-          return b.upvotes - a.upvotes;
-        }
-        return 0;
-      });
-  }, [products, selectedCategory, selectedPricing, activeTag, searchQuery, activeSort]);
+      }
+      return true;
+    });
+  }, [products, selectedCategory, selectedPricing, activeTag, searchQuery]);
+
+  // 1. Trending List: Ranked by total paid bidding (higher = higher rank)
+  const trendingProducts = useMemo(() => {
+    return [...baseFilteredProducts].sort((a, b) => {
+      const aPaid = a.totalPaid ?? 0;
+      const bPaid = b.totalPaid ?? 0;
+      if (bPaid !== aPaid) {
+        return bPaid - aPaid;
+      }
+      if (b.upvotes !== a.upvotes) {
+        return b.upvotes - a.upvotes;
+      }
+      const aTime = new Date(a.paidAt || a.launchDate).getTime();
+      const bTime = new Date(b.paidAt || b.launchDate).getTime();
+      return bTime - aTime;
+    });
+  }, [baseFilteredProducts]);
+
+  // 2. Newest List: Ranked by payment timestamp (latest paid shows first)
+  const newestProducts = useMemo(() => {
+    return [...baseFilteredProducts].sort((a, b) => {
+      const aTime = new Date(a.paidAt || a.launchDate).getTime();
+      const bTime = new Date(b.paidAt || b.launchDate).getTime();
+      return bTime - aTime;
+    });
+  }, [baseFilteredProducts]);
+
+  // Paginated slices
+  const totalTrendingPages = Math.max(1, Math.ceil(trendingProducts.length / PRIMARY_PAGE_SIZE));
+  const paginatedTrending = useMemo(() => {
+    const start = (primaryPage - 1) * PRIMARY_PAGE_SIZE;
+    return trendingProducts.slice(start, start + PRIMARY_PAGE_SIZE);
+  }, [trendingProducts, primaryPage]);
+
+  const totalNewestPages = Math.max(1, Math.ceil(newestProducts.length / SIDE_PAGE_SIZE));
+  const paginatedNewest = useMemo(() => {
+    const start = (sidePage - 1) * SIDE_PAGE_SIZE;
+    return newestProducts.slice(start, start + SIDE_PAGE_SIZE);
+  }, [newestProducts, sidePage]);
 
   const openSourceCount = useMemo(() => {
     return products.filter((p) => p.pricing === 'Open Source').length;
@@ -216,7 +265,7 @@ export function DirectoryView() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-2 pb-10 sm:pb-12 text-center max-w-3xl mx-auto">
+        <section className="pt-2 pb-8 sm:pb-10 text-center max-w-3xl mx-auto">
           {/* Subtle badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-700 bg-white/80 border border-indigo-100/80 shadow-xs mb-5">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
@@ -332,7 +381,7 @@ export function DirectoryView() {
             })}
           </div>
 
-          {/* Secondary Filters: Pricing Model, Active Tag, Sorting */}
+          {/* Secondary Filters: Pricing Model, Active Tag, Clear filters (Sorting buttons removed) */}
           <div className="liquid-glass rounded-2xl p-3 sm:px-4 sm:py-2.5 flex items-center justify-between gap-3 flex-wrap text-xs font-medium">
             {/* Pricing pills */}
             <div className="flex items-center gap-1 flex-wrap">
@@ -367,84 +416,121 @@ export function DirectoryView() {
               </div>
             )}
 
-            {/* Sorting controls */}
-            <div className="flex items-center gap-1 ml-auto">
-              <span className="text-slate-400 mr-1 hidden md:inline">Sort:</span>
-              <button
-                id="sort-trending-btn"
-                onClick={() => setActiveSort('trending')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  activeSort === 'trending'
-                    ? 'bg-white font-bold text-slate-900 shadow-2xs border border-slate-200/80'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5 text-amber-500" />
-                <span>Trending</span>
-              </button>
-              <button
-                id="sort-newest-btn"
-                onClick={() => setActiveSort('newest')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  activeSort === 'newest'
-                    ? 'bg-white font-bold text-slate-900 shadow-2xs border border-slate-200/80'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Newest</span>
-              </button>
-              <button
-                id="sort-featured-btn"
-                onClick={() => setActiveSort('featured')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  activeSort === 'featured'
-                    ? 'bg-white font-bold text-slate-900 shadow-2xs border border-slate-200/80'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Star className="w-3.5 h-3.5 text-violet-500" />
-                <span>Featured</span>
-              </button>
+            {/* Directory Results Counter / Reset */}
+            <div className="flex items-center gap-3 ml-auto text-slate-500 font-medium">
+              <span>
+                Matching <strong>{baseFilteredProducts.length}</strong> of{' '}
+                <strong>{products.length}</strong> products
+              </span>
+              {(searchQuery || selectedCategory !== 'All' || selectedPricing !== 'All' || activeTag) && (
+                <button
+                  id="clear-all-filters-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('All');
+                    setSelectedPricing('All');
+                    setActiveTag(null);
+                  }}
+                  className="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline underline-offset-2"
+                >
+                  Reset
+                </button>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Directory Results Counter */}
-        <div className="flex items-center justify-between text-xs text-slate-500 font-medium mb-4 px-1">
-          <span>
-            Showing <strong>{filteredProducts.length}</strong> of{' '}
-            <strong>{products.length}</strong> indie projects
-          </span>
-          {(searchQuery || selectedCategory !== 'All' || selectedPricing !== 'All' || activeTag) && (
-            <button
-              id="clear-all-filters-btn"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('All');
-                setSelectedPricing('All');
-                setActiveTag(null);
-              }}
-              className="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          )}
-        </div>
+        {/* Dual List View Layout (Primary: Trending on left, Secondary: Newest on right) */}
+        {baseFilteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-14 items-start">
+            {/* Primary List: Trending (Takes ~67% / 8 cols) */}
+            <section className="lg:col-span-8 flex flex-col space-y-4">
+              {/* Primary Header */}
+              <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200/70">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                    <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                      <span>Trending Projects</span>
+                      <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded-md border border-amber-200">
+                        Ranked by Total Paid Bids
+                      </span>
+                    </h2>
+                  </div>
+                </div>
 
-        {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onSelectTag={(tag) => setActiveTag(tag)}
-                onOpenDetails={(p) => setDetailProduct(p)}
-                onUpvote={handleUpvote}
-                isUpvoted={upvotedIds.has(product.id)}
+                <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                  Page {primaryPage} of {totalTrendingPages}
+                </span>
+              </div>
+
+              {/* List View Items */}
+              <div className="flex flex-col space-y-3">
+                {paginatedTrending.map((product, idx) => (
+                  <PrimaryProductListItem
+                    key={product.id}
+                    product={product}
+                    rank={(primaryPage - 1) * PRIMARY_PAGE_SIZE + idx + 1}
+                    onSelectTag={(tag) => setActiveTag(tag)}
+                    onOpenDetails={(p) => setDetailProduct(p)}
+                    onUpvote={handleUpvote}
+                    isUpvoted={upvotedIds.has(product.id)}
+                  />
+                ))}
+              </div>
+
+              {/* Primary Pagination */}
+              <PaginationControls
+                currentPage={primaryPage}
+                totalPages={totalTrendingPages}
+                totalItems={trendingProducts.length}
+                pageSize={PRIMARY_PAGE_SIZE}
+                onPageChange={setPrimaryPage}
               />
-            ))}
+            </section>
+
+            {/* Secondary Side List: Newest Releases (Takes ~33% / 4 cols) */}
+            <aside className="lg:col-span-4 flex flex-col space-y-4">
+              {/* Side Header */}
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200/70">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                    Newest Releases
+                  </h3>
+                </div>
+                <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                  Latest Paid
+                </span>
+              </div>
+
+              {/* Side List Items */}
+              <div className="flex flex-col space-y-2.5">
+                {paginatedNewest.map((product) => (
+                  <SideProductListItem
+                    key={product.id}
+                    product={product}
+                    onOpenDetails={(p) => setDetailProduct(p)}
+                    onUpvote={handleUpvote}
+                    isUpvoted={upvotedIds.has(product.id)}
+                  />
+                ))}
+              </div>
+
+              {/* Side Pagination (Compact) */}
+              <PaginationControls
+                currentPage={sidePage}
+                totalPages={totalNewestPages}
+                totalItems={newestProducts.length}
+                pageSize={SIDE_PAGE_SIZE}
+                onPageChange={setSidePage}
+                compact
+              />
+            </aside>
           </div>
         ) : (
           <div className="liquid-glass rounded-3xl p-12 text-center max-w-lg mx-auto my-12">

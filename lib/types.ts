@@ -30,6 +30,8 @@ export interface Product {
   badgeCode?: string;
   starsCount?: number;
   dofollowApproved?: boolean;
+  totalPaid?: number;
+  paidAt?: string;
 }
 
 export interface AiAskResponse {
