@@ -1,11 +1,28 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  html {
+    color-scheme: light;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
     font-family: var(--font-plus-jakarta-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .dark body {
+    color: #f1f5f9;
+    background-color: #0b0f19;
   }
 }
 
@@ -20,6 +37,16 @@
     0 20px 25px -5px rgba(15, 23, 42, 0.02),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 -1px 1px 0 rgba(226, 232, 240, 0.4);
+}
+
+.dark .liquid-glass {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 0, 0, 0.5),
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4);
 }
 
 .liquid-glass-card {
@@ -43,6 +70,23 @@
   transform: translateY(-2px);
 }
 
+.dark .liquid-glass-card {
+  background: rgba(17, 24, 39, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 20px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .liquid-glass-card:hover {
+  background: rgba(30, 41, 59, 0.72);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 
+    0 16px 36px -8px rgba(0, 0, 0, 0.65),
+    0 4px 20px -2px rgba(99, 102, 241, 0.18),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.15);
+}
+
 .liquid-glass-pill {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
@@ -53,12 +97,29 @@
     inset 0 1px 0.5px rgba(255, 255, 255, 0.9);
 }
 
+.dark .liquid-glass-pill {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
 .liquid-glass-active {
   background: linear-gradient(135deg, rgba(241, 245, 249, 0.9), rgba(255, 255, 255, 0.95));
   border-color: rgba(148, 163, 184, 0.5);
   box-shadow: 
     0 4px 12px -2px rgba(15, 23, 42, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+
+.dark .liquid-glass-active {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 
+    0 4px 12px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .liquid-glass-input {
@@ -79,6 +140,23 @@
     inset 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
+.dark .liquid-glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  color: #f1f5f9;
+}
+
+.dark .liquid-glass-input:focus {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(129, 140, 248, 0.6);
+  box-shadow: 
+    0 0 0 3px rgba(99, 102, 241, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
 .liquid-btn-primary {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -96,6 +174,21 @@
   transform: translateY(-1px);
 }
 
+.dark .liquid-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 16px 0 rgba(79, 70, 229, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.dark .liquid-btn-primary:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  box-shadow: 
+    0 6px 24px 0 rgba(79, 70, 229, 0.5),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
+}
+
 /* Fluid background glowing orbs */
 .liquid-blob-1 {
   background: radial-gradient(circle, rgba(165, 180, 252, 0.45) 0%, rgba(224, 231, 255, 0.1) 70%, transparent 100%);
@@ -107,4 +200,16 @@
 
 .liquid-blob-3 {
   background: radial-gradient(circle, rgba(186, 230, 253, 0.35) 0%, rgba(240, 253, 250, 0.1) 70%, transparent 100%);
+}
+
+.dark .liquid-blob-1 {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(79, 70, 229, 0.05) 65%, transparent 100%);
+}
+
+.dark .liquid-blob-2 {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, rgba(124, 58, 237, 0.04) 65%, transparent 100%);
+}
+
+.dark .liquid-blob-3 {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.03) 65%, transparent 100%);
 }

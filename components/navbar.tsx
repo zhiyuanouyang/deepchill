@@ -1,6 +1,8 @@
 'use client';
 
+import React from 'react';
 import { Plus, ShieldCheck, Layers } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 interface NavbarProps {
   onOpenSubmit: () => void;
@@ -18,20 +20,20 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="liquid-glass rounded-2xl px-4 py-3 sm:px-6 flex items-center justify-between gap-4 transition-all">
         {/* Brand / Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-900 text-white shadow-md shadow-indigo-900/10">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 via-indigo-950 to-indigo-900 dark:from-indigo-600 dark:to-violet-600 text-white shadow-md shadow-indigo-900/10 dark:shadow-indigo-500/20">
             <Layers className="w-5 h-5 text-indigo-200" />
             <div className="absolute inset-0 rounded-xl bg-white/10 pointer-events-none" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">
+              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white">
                 Deepchill
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50/90 text-indigo-700 border border-indigo-200/60">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50/90 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
                 Directory ({totalProducts})
               </span>
             </div>
-            <p className="hidden sm:block text-xs text-slate-500 font-medium">
+            <p className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 font-medium">
               High-authority launchpad &amp; SEO backlinks for makers
             </p>
           </div>
@@ -43,18 +45,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="nav-seo-guide-btn"
             onClick={onOpenSeoInfo}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:text-indigo-600 bg-white/70 hover:bg-white border border-slate-200/80 transition-all cursor-pointer"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
             title="Learn how our DoFollow backlinks boost your website's domain authority"
           >
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>SEO &amp; Backlinks</span>
           </button>
+
+          {/* Color Mode Switcher */}
+          <ThemeToggle />
 
           {/* Submit Project Button */}
           <button
             id="nav-submit-project-btn"
             onClick={onOpenSubmit}
-            className="liquid-btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white cursor-pointer"
+            className="liquid-btn-primary flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white cursor-pointer shadow-md"
           >
             <Plus className="w-4 h-4" />
             <span>Submit Project</span>

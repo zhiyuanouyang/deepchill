@@ -40,17 +40,17 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-200/60 text-xs">
+      <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-800 text-xs">
         <span className="text-slate-500 font-medium">
-          Page <strong className="text-slate-800">{currentPage}</strong> of{' '}
-          <strong className="text-slate-800">{totalPages}</strong>
+          Page <strong className="text-slate-800 dark:text-slate-200">{currentPage}</strong> of{' '}
+          <strong className="text-slate-800 dark:text-slate-200">{totalPages}</strong>
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             aria-label="Previous Page"
-            className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
@@ -58,7 +58,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             aria-label="Next Page"
-            className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -74,12 +74,12 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
       : null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200/60 mt-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200/60 dark:border-slate-800 mt-4">
       {startItem && endItem && totalItems ? (
         <span className="text-xs text-slate-500 font-medium">
-          Showing <strong className="text-slate-800">{startItem}</strong> -{' '}
-          <strong className="text-slate-800">{endItem}</strong> of{' '}
-          <strong className="text-slate-800">{totalItems}</strong> results
+          Showing <strong className="text-slate-800 dark:text-slate-200">{startItem}</strong> -{' '}
+          <strong className="text-slate-800 dark:text-slate-200">{endItem}</strong> of{' '}
+          <strong className="text-slate-800 dark:text-slate-200">{totalItems}</strong> results
         </span>
       ) : (
         <span className="text-xs text-slate-500 font-medium">
@@ -94,7 +94,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={currentPage === 1}
           aria-label="First page"
           title="First page"
-          className="p-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          className="p-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
         >
           <ChevronsLeft className="w-4 h-4" />
         </button>
@@ -105,7 +105,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={currentPage === 1}
           aria-label="Previous page"
           title="Previous page"
-          className="p-1.5 px-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          className="p-1.5 px-2 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Prev</span>
@@ -129,7 +129,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
                 className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   isCurrent
                     ? 'liquid-btn-primary text-white shadow-xs'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80'
+                    : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700'
                 }`}
               >
                 {page}
@@ -144,7 +144,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={currentPage === totalPages}
           aria-label="Next page"
           title="Next page"
-          className="p-1.5 px-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          className="p-1.5 px-2 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
@@ -156,7 +156,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={currentPage === totalPages}
           aria-label="Last page"
           title="Last page"
-          className="p-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          className="p-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
         >
           <ChevronsRight className="w-4 h-4" />
         </button>

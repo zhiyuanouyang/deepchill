@@ -168,27 +168,27 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 animate-in fade-in duration-200" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass border border-white/80 shadow-2xl animate-in zoom-in-95 duration-200">
+        <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/75 backdrop-blur-md z-50 animate-in fade-in duration-200" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass dark:bg-slate-900/95 border border-white/80 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <Dialog.Title className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                <Dialog.Title className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   Submit Your Project
                 </Dialog.Title>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
                   <ShieldCheck className="w-3.5 h-3.5" /> High-Value Backlink
                 </span>
               </div>
-              <Dialog.Description className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              <Dialog.Description className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
                 Gain organic traffic, maker discovery, and verified direct DoFollow backlink indexing.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 id="submit-modal-close-btn"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -199,7 +199,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Name & Website */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Product Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -216,7 +216,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Website URL <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -238,7 +238,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* GitHub Repo & Category */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   GitHub Repository <span className="text-slate-400 text-xs">(optional)</span>
                 </label>
                 <input
@@ -252,12 +252,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Category</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
                 <select
                   id="select-category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white text-slate-800"
+                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -271,12 +271,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Pricing Model & Logo URL */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Pricing Model</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Pricing Model</label>
                 <select
                   id="select-pricing"
                   value={pricing}
                   onChange={(e) => setPricing(e.target.value as PricingModel)}
-                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white text-slate-800"
+                  className="w-full liquid-glass-input rounded-xl px-3 py-2.5 outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100"
                 >
                   {PRICING_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>
@@ -287,7 +287,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Logo / Icon Image URL <span className="text-slate-400 text-xs">(optional)</span>
                 </label>
                 <input
@@ -304,7 +304,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Tagline + AI Optimize Button */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="font-bold text-slate-700">
+                <label className="font-bold text-slate-700 dark:text-slate-300">
                   Tagline (1-sentence summary) <span className="text-rose-500">*</span>
                 </label>
                 <button
@@ -312,12 +312,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   id="btn-ai-enhance-tagline"
                   onClick={handleAiEnhance}
                   disabled={aiLoading}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
                 >
                   {aiLoading ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
                   ) : (
-                    <Sparkles className="w-3 h-3 text-indigo-500" />
+                    <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
                   )}
                   <span>AI Polish &amp; Tag Suggester</span>
                 </button>
@@ -337,7 +337,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
             {/* Detailed Description */}
             <div>
-              <label className="block font-bold text-slate-700 mb-1">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Detailed Description <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -357,7 +357,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
             {/* Tags & Tech Stack */}
             <div>
-              <label className="block font-bold text-slate-700 mb-1">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Tech Stack / Keywords <span className="text-slate-400 text-xs">(comma separated)</span>
               </label>
               <input
@@ -373,7 +373,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Maker Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Maker Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -392,7 +392,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Maker Twitter / GitHub handle
                 </label>
                 <input
@@ -407,17 +407,17 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             </div>
 
             {/* Bidding Amount / Sponsor Trending Rank */}
-            <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+            <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="font-bold text-amber-900 text-sm flex items-center gap-1.5">
+                <label className="font-bold text-amber-900 dark:text-amber-300 text-sm flex items-center gap-1.5">
                   <span>🔥 Bidding &amp; Sponsor Boost</span>
-                  <span className="text-[11px] font-normal text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-normal text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">
                     Determines Trending List Ranking
                   </span>
                 </label>
-                <span className="text-sm font-extrabold text-amber-900">${biddingAmount}</span>
+                <span className="text-sm font-extrabold text-amber-900 dark:text-amber-300">${biddingAmount}</span>
               </div>
-              <p className="text-xs text-amber-800/80 mb-3">
+              <p className="text-xs text-amber-800/80 dark:text-amber-300/70 mb-3">
                 Higher total paid bidding secures top visibility in the Trending directory list. Latest payments appear instantly on the Newest list.
               </p>
 
@@ -429,8 +429,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                     onClick={() => setBiddingAmount(amt)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       biddingAmount === amt
-                        ? 'bg-amber-600 text-white shadow-xs'
-                        : 'bg-white text-slate-700 hover:bg-amber-100/70 border border-amber-200'
+                        ? 'bg-amber-600 dark:bg-amber-500 text-white shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-amber-100/70 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-800/40'
                     }`}
                   >
                     {amt === 0 ? 'Free ($0)' : `$${amt}`}
@@ -439,7 +439,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-amber-900">Custom amount:</span>
+                <span className="text-xs font-medium text-amber-900 dark:text-amber-300">Custom amount:</span>
                 <div className="relative w-32">
                   <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">$</span>
                   <input
@@ -448,7 +448,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                     step="5"
                     value={biddingAmount}
                     onChange={(e) => setBiddingAmount(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-full liquid-glass-input rounded-xl pl-7 pr-3 py-1.5 text-xs font-bold text-slate-800 outline-none bg-white"
+                    className="w-full liquid-glass-input rounded-xl pl-7 pr-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-100 outline-none bg-white dark:bg-slate-800"
                   />
                 </div>
               </div>
@@ -456,21 +456,21 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
             {/* AI SEO Tip */}
             {aiTip && (
-              <div className="p-3 rounded-xl bg-indigo-50/90 border border-indigo-100 flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-indigo-900 leading-snug">
+              <div className="p-3 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-indigo-900 dark:text-indigo-200 leading-snug">
                   <span className="font-bold">Gemini SEO Tip:</span> {aiTip}
                 </p>
               </div>
             )}
 
             {/* Submit Actions */}
-            <div className="pt-4 border-t border-slate-200/80 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-end gap-3">
               <button
                 type="button"
                 id="btn-cancel-submission"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold transition-colors cursor-pointer"
               >
                 Cancel
               </button>
