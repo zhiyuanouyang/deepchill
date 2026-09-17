@@ -1,20 +1,15 @@
 'use client';
 
-import React from 'react';
-import { Plus, Search, Bot, ShieldCheck, Layers } from 'lucide-react';
+import { Plus, ShieldCheck, Layers } from 'lucide-react';
 
 interface NavbarProps {
   onOpenSubmit: () => void;
-  activeMode: 'keyword' | 'ai';
-  onToggleMode: (mode: 'keyword' | 'ai') => void;
   totalProducts: number;
   onOpenSeoInfo: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenSubmit,
-  activeMode,
-  onToggleMode,
   totalProducts,
   onOpenSeoInfo,
 }) => {
@@ -30,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">
-                OpenIndie
+                Deepchill
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50/90 text-indigo-700 border border-indigo-200/60">
                 Directory ({totalProducts})
@@ -40,37 +35,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               High-authority launchpad &amp; SEO backlinks for makers
             </p>
           </div>
-        </div>
-
-        {/* Discovery Mode Selector */}
-        <div className="hidden md:flex items-center p-1 rounded-xl bg-slate-100/80 border border-slate-200/70 text-xs font-semibold">
-          <button
-            id="nav-mode-keyword"
-            onClick={() => onToggleMode('keyword')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              activeMode === 'keyword'
-                ? 'bg-white text-slate-900 shadow-sm font-bold border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>Search Catalog</span>
-          </button>
-          <button
-            id="nav-mode-ai"
-            onClick={() => onToggleMode('ai')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-              activeMode === 'ai'
-                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-indigo-600'
-            }`}
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span>Ask AI (Gemini)</span>
-            <span className="px-1 py-0.2 text-[9px] uppercase tracking-wider rounded bg-indigo-400/30 text-white">
-              Smart
-            </span>
-          </button>
         </div>
 
         {/* Action Controls */}

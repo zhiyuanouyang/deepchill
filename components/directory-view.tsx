@@ -12,14 +12,19 @@ import {
   Tag,
   X,
   Layers,
-  Sparkles,
+  Terminal,
+  Server,
+  Zap,
+  Palette,
+  BarChart3,
+  Wrench,
 } from 'lucide-react';
-import { Product, ProductCategory, PricingModel } from '@/lib/types';
+import { Product, ProductCategory } from '@/lib/types';
 import { INITIAL_PRODUCTS } from '@/data/initial-products';
 import { Navbar } from '@/components/navbar';
 import { PrimaryProductListItem, SideProductListItem } from '@/components/product-list-item';
 import { PaginationControls } from '@/components/pagination-controls';
-import { AiSearchPanel } from '@/components/ai-search-panel';
+import { CompoundSearchBar } from '@/components/compound-search-bar';
 import { SubmitModal } from '@/components/submit-modal';
 import { ProjectDetailModal } from '@/components/project-detail-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
@@ -36,7 +41,17 @@ const CATEGORIES: ('All' | ProductCategory)[] = [
   'Developer Utilities',
 ];
 
-const PRICING_FILTERS: ('All' | PricingModel)[] = ['All', 'Open Source', 'Free', 'Freemium', 'Paid'];
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  All: Layers,
+  DevTools: Terminal,
+  'Open Source Infrastructure': Server,
+  'AI & Machine Learning': Bot,
+  Productivity: Zap,
+  'Design & Creative': Palette,
+  'SaaS & Analytics': BarChart3,
+  'Security & Privacy': ShieldCheck,
+  'Developer Utilities': Wrench,
+};
 
 const PRIMARY_PAGE_SIZE = 6;
 const SIDE_PAGE_SIZE = 6;
@@ -49,7 +64,6 @@ export function DirectoryView() {
   // Search & Filters state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'All' | ProductCategory>('All');
-  const [selectedPricing, setSelectedPricing] = useState<'All' | PricingModel>('All');
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
   // Pagination states
@@ -59,16 +73,43 @@ export function DirectoryView() {
   // Discovery Mode: 'keyword' | 'ai'
   const [activeMode, setActiveMode] = useState<'keyword' | 'ai'>('keyword');
 
+  // AI Filtering: populated only after user confirms Ask AI
+  const [aiFilterIds, setAiFilterIds] = useState<string[] | null>(null);
+  const [aiFilterQuery, setAiFilterQuery] = useState<string | null>(null);
+
   // Modals state
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [isSeoGuideOpen, setIsSeoGuideOpen] = useState(false);
 
-  // Reset pagination when filters change
-  useEffect(() => {
+  // Handlers that reset pagination when filters change
+  const handleSearchChange = (q: string) => {
+    setSearchQuery(q);
     setPrimaryPage(1);
     setSidePage(1);
-  }, [searchQuery, selectedCategory, selectedPricing, activeTag]);
+  };
+
+  const handleCategoryChange = (cat: 'All' | ProductCategory) => {
+    setSelectedCategory(cat);
+    setPrimaryPage(1);
+    setSidePage(1);
+  };
+
+  const handleTagChange = (tag: string | null) => {
+    setActiveTag(tag);
+    setPrimaryPage(1);
+    setSidePage(1);
+  };
+
+  const handleModeChange = (newMode: 'keyword' | 'ai') => {
+    setActiveMode(newMode);
+    if (newMode === 'keyword') {
+      setAiFilterIds(null);
+      setAiFilterQuery(null);
+    }
+    setPrimaryPage(1);
+    setSidePage(1);
+  };
 
   // Hydrate from localStorage once client mounts
   useEffect(() => {
@@ -80,7 +121,7 @@ export function DirectoryView() {
           if (Array.isArray(parsed) && parsed.length > 0) {
             const existingIds = new Set(parsed.map((p: Product) => p.id));
             const missing = INITIAL_PRODUCTS.filter((p) => !existingIds.has(p.id));
-            
+
             // Ensure any saved product gets proper defaults if missing totalPaid or paidAt
             const hydrated = parsed.map((p: Product) => {
               const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
@@ -162,9 +203,9 @@ export function DirectoryView() {
       setDetailProduct((prev) =>
         prev
           ? {
-              ...prev,
-              upvotes: isAlreadyUpvoted ? Math.max(0, prev.upvotes - 1) : prev.upvotes + 1,
-            }
+            ...prev,
+            upvotes: isAlreadyUpvoted ? Math.max(0, prev.upvotes - 1) : prev.upvotes + 1,
+          }
           : null
       );
     }
@@ -180,16 +221,22 @@ export function DirectoryView() {
   // Base filtered products (common filter for category, pricing, tags, search)
   const baseFilteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (selectedCategory !== 'All' && product.category !== selectedCategory) {
-        return false;
+      // In Ask AI mode: if AI recommendation was confirmed, filter to recommended IDs
+      if (activeMode === 'ai' && aiFilterIds !== null) {
+        if (!aiFilterIds.some((id) => id.toLowerCase() === product.id.toLowerCase())) {
+          return false;
+        }
       }
-      if (selectedPricing !== 'All' && product.pricing !== selectedPricing) {
+
+      if (selectedCategory !== 'All' && product.category !== selectedCategory) {
         return false;
       }
       if (activeTag && !product.tags.some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
         return false;
       }
-      if (searchQuery.trim()) {
+
+      // Keyword filtering applies only in Catalog mode
+      if (activeMode === 'keyword' && searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = product.name.toLowerCase().includes(q);
         const matchTagline = product.tagline.toLowerCase().includes(q);
@@ -202,7 +249,7 @@ export function DirectoryView() {
       }
       return true;
     });
-  }, [products, selectedCategory, selectedPricing, activeTag, searchQuery]);
+  }, [products, selectedCategory, activeTag, searchQuery, activeMode, aiFilterIds]);
 
   // 1. Trending List: Ranked by total paid bidding (higher = higher rank)
   const trendingProducts = useMemo(() => {
@@ -247,6 +294,14 @@ export function DirectoryView() {
     return products.filter((p) => p.pricing === 'Open Source').length;
   }, [products]);
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: products.length };
+    for (const p of products) {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    }
+    return counts;
+  }, [products]);
+
   return (
     <div className="min-h-screen relative overflow-x-hidden text-slate-900 bg-slate-50/60 pb-20">
       {/* Background Liquid Ambient Light Blobs */}
@@ -257,15 +312,13 @@ export function DirectoryView() {
       {/* Navigation */}
       <Navbar
         onOpenSubmit={() => setIsSubmitOpen(true)}
-        activeMode={activeMode}
-        onToggleMode={(mode) => setActiveMode(mode)}
         totalProducts={products.length}
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-2 pb-8 sm:pb-10 text-center max-w-3xl mx-auto">
+        <section className="pt-2 pb-6 sm:pb-8 text-center max-w-4xl mx-auto">
           {/* Subtle badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-700 bg-white/80 border border-indigo-100/80 shadow-xs mb-5">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
@@ -280,7 +333,7 @@ export function DirectoryView() {
             Projects
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed mb-6">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed mb-6 max-w-2xl mx-auto">
             A curated directory where independent developers launch their tools, gain real early
             traction, and earn verified, high-authority DoFollow backlinks for SEO.
           </p>
@@ -307,136 +360,128 @@ export function DirectoryView() {
             </div>
           </div>
 
-          {/* Quick Search & AI Toggle Bar */}
-          <div className="max-w-2xl mx-auto">
-            {activeMode === 'keyword' ? (
-              <div className="relative">
-                <Search className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 pointer-events-none" />
-                <input
-                  id="main-keyword-search"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by project name, keywords, tech stack (e.g. Postgres, Docker)..."
-                  className="w-full liquid-glass-input rounded-2xl pl-12 pr-28 py-3.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 outline-none transition-all shadow-sm"
-                />
-                {searchQuery ? (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-24 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                ) : null}
-                <button
-                  id="hero-switch-ai-btn"
-                  onClick={() => setActiveMode('ai')}
-                  className="absolute right-2 top-2 bottom-2 px-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                  title="Switch to conversational Gemini AI search"
-                >
-                  <Bot className="w-3.5 h-3.5" />
-                  <span>Ask AI</span>
-                </button>
-              </div>
-            ) : null}
-          </div>
-        </section>
-
-        {/* AI Ask Search Panel (active when AI mode is enabled) */}
-        {activeMode === 'ai' && (
-          <AiSearchPanel
+          {/* Modern Compound SaaS Search Bar */}
+          <CompoundSearchBar
+            mode={activeMode}
+            onModeChange={handleModeChange}
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
             products={products}
             onSelectProduct={(p) => setDetailProduct(p)}
             onApplyTagFilter={(tag) => {
-              setActiveTag(tag);
-              setActiveMode('keyword');
+              handleTagChange(tag);
+              handleModeChange('keyword');
             }}
-            onClose={() => setActiveMode('keyword')}
+            activeTag={activeTag}
+            onClearTagFilter={() => handleTagChange(null)}
+            onAiFilterApply={(recommendedIds, query) => {
+              setAiFilterIds(recommendedIds);
+              setAiFilterQuery(query);
+              setPrimaryPage(1);
+              setSidePage(1);
+            }}
+            onAiFilterClear={() => {
+              setAiFilterIds(null);
+              setAiFilterQuery(null);
+              setPrimaryPage(1);
+              setSidePage(1);
+            }}
           />
-        )}
+        </section>
 
         {/* Category & Filter Navigation Controls */}
-        <section className="mb-6 space-y-4">
-          {/* Categories Bar */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
-            {CATEGORIES.map((cat) => {
-              const isActive = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  id={`cat-filter-${cat.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
-                  onClick={() => {
-                    setSelectedCategory(cat);
-                    setActiveTag(null);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    isActive
-                      ? 'liquid-btn-primary text-white shadow-sm'
-                      : 'liquid-glass text-slate-600 hover:text-slate-900 hover:bg-white'
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
+        <section className="mb-6 space-y-3">
+          {/* Main Category Bar */}
+          <div className="liquid-glass rounded-2xl p-1.5 sm:p-2 shadow-xs border border-white/80">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-1 py-0.5 scroll-smooth">
+              {CATEGORIES.map((cat) => {
+                const isActive = selectedCategory === cat;
+                const IconComponent = CATEGORY_ICONS[cat] || Layers;
+                const count = categoryCounts[cat] ?? 0;
+
+                return (
+                  <button
+                    key={cat}
+                    id={`cat-filter-${cat.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
+                    onClick={() => {
+                      handleCategoryChange(cat);
+                      handleTagChange(null);
+                    }}
+                    className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'bg-slate-900 text-white shadow-sm ring-1 ring-slate-900/10'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                    }`}
+                  >
+                    <IconComponent
+                      className={`w-3.5 h-3.5 transition-colors ${
+                        isActive
+                          ? 'text-indigo-300'
+                          : 'text-slate-400 group-hover:text-slate-600'
+                      }`}
+                    />
+                    <span>{cat}</span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${
+                        isActive
+                          ? 'bg-slate-800 text-slate-300'
+                          : 'bg-slate-100/90 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-700'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Secondary Filters: Pricing Model, Active Tag, Clear filters (Sorting buttons removed) */}
-          <div className="liquid-glass rounded-2xl p-3 sm:px-4 sm:py-2.5 flex items-center justify-between gap-3 flex-wrap text-xs font-medium">
-            {/* Pricing pills */}
-            <div className="flex items-center gap-1 flex-wrap">
-              <span className="text-slate-400 mr-1 hidden sm:inline">Pricing:</span>
-              {PRICING_FILTERS.map((pf) => (
-                <button
-                  key={pf}
-                  id={`pricing-filter-${pf.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
-                  onClick={() => setSelectedPricing(pf)}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                    selectedPricing === pf
-                      ? 'bg-slate-900 text-white font-bold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
-                  }`}
-                >
-                  {pf}
-                </button>
-              ))}
-            </div>
-
-            {/* Active Tag indicator */}
-            {activeTag && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700">
-                <Tag className="w-3 h-3" />
-                <span>Tag: #{activeTag}</span>
-                <button
-                  onClick={() => setActiveTag(null)}
-                  className="hover:text-indigo-950 ml-0.5 cursor-pointer"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-
-            {/* Directory Results Counter / Reset */}
-            <div className="flex items-center gap-3 ml-auto text-slate-500 font-medium">
+          {/* Sub-toolbar: Active Tags, Product Counter, and Reset */}
+          <div className="flex items-center justify-between gap-3 px-2 flex-wrap text-xs text-slate-500 font-medium">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <span>
-                Matching <strong>{baseFilteredProducts.length}</strong> of{' '}
-                <strong>{products.length}</strong> products
+                Showing <strong className="text-slate-900 font-bold">{baseFilteredProducts.length}</strong> of{' '}
+                <span className="text-slate-600 font-semibold">{products.length}</span> curated projects
+                {activeMode === 'ai' && aiFilterQuery && (
+                  <span className="text-indigo-600 font-semibold ml-1.5 inline-flex items-center gap-1">
+                    (AI matches for &quot;{aiFilterQuery}&quot;)
+                  </span>
+                )}
               </span>
-              {(searchQuery || selectedCategory !== 'All' || selectedPricing !== 'All' || activeTag) && (
-                <button
-                  id="clear-all-filters-btn"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('All');
-                    setSelectedPricing('All');
-                    setActiveTag(null);
-                  }}
-                  className="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer underline underline-offset-2"
-                >
-                  Reset
-                </button>
+
+              {/* Active Tag indicator */}
+              {activeTag && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-semibold text-xs">
+                  <Tag className="w-3 h-3 text-indigo-500" />
+                  <span>Tag: #{activeTag}</span>
+                  <button
+                    onClick={() => handleTagChange(null)}
+                    className="hover:text-indigo-950 ml-0.5 cursor-pointer"
+                    title="Remove tag filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
               )}
             </div>
+
+            {/* Reset Filter Button */}
+            {(searchQuery || selectedCategory !== 'All' || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) && (
+              <button
+                id="clear-all-filters-btn"
+                onClick={() => {
+                  handleSearchChange('');
+                  handleCategoryChange('All');
+                  handleTagChange(null);
+                  setAiFilterIds(null);
+                  setAiFilterQuery(null);
+                }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Reset all filters</span>
+              </button>
+            )}
           </div>
         </section>
 
@@ -544,10 +589,11 @@ export function DirectoryView() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                  setSelectedPricing('All');
-                  setActiveTag(null);
+                  handleSearchChange('');
+                  handleCategoryChange('All');
+                  handleTagChange(null);
+                  setAiFilterIds(null);
+                  setAiFilterQuery(null);
                 }}
                 className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
               >
@@ -625,7 +671,7 @@ export function DirectoryView() {
             Submit Tool
           </button>
           <button
-            onClick={() => setActiveMode(activeMode === 'ai' ? 'keyword' : 'ai')}
+            onClick={() => handleModeChange(activeMode === 'ai' ? 'keyword' : 'ai')}
             className="hover:text-indigo-600 transition-colors text-indigo-600 font-semibold cursor-pointer"
           >
             Gemini AI Ask

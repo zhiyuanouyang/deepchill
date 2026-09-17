@@ -3,7 +3,6 @@
 import React from 'react';
 import { ExternalLink, ArrowUpRight, ShieldCheck, DollarSign, Clock, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { GithubIcon } from './icons';
 import { Product } from '@/lib/types';
 
 interface PrimaryProductListItemProps {
@@ -278,18 +277,17 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     }
   };
 
-  const formatRelativeTime = (timestamp?: string) => {
-    if (!timestamp) return 'Recent';
-    const now = Date.now();
-    const time = new Date(timestamp).getTime();
-    const diffSec = Math.max(0, Math.floor((now - time) / 1000));
-
-    if (diffSec < 60) return 'Just now';
-    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
-    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
-    return new Date(timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  };
+  const formattedRelativeTime = React.useMemo(() => {
+    if (!product.paidAt) return 'Recent';
+    try {
+      return new Date(product.paidAt).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return 'Recent';
+    }
+  }, [product.paidAt]);
 
   return (
     <article
@@ -327,7 +325,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
               </h4>
               <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded">
                 <Clock className="w-2.5 h-2.5" />
-                {formatRelativeTime(product.paidAt)}
+                {formattedRelativeTime}
               </span>
             </div>
 
