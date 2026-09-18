@@ -76,83 +76,81 @@ export const Navbar: React.FC<NavbarProps> = ({
           <ThemeToggle />
 
           {/* User Authentication Status */}
-          {!isLoading && (
-            <>
-              {user ? (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
-                    title={user.email || 'User Account'}
-                  >
-                    {avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={avatarUrl}
-                        alt="Avatar"
-                        className="w-6 h-6 rounded-full object-cover border border-indigo-200 dark:border-indigo-800"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                        {userInitial}
-                      </div>
-                    )}
-                    <span className="hidden md:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[110px] truncate">
-                      {user.email?.split('@')[0]}
-                    </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 transition-transform" />
-                  </button>
+          {isLoading ? (
+            <div className="w-20 h-8 sm:h-9 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 animate-pulse border border-transparent" />
+          ) : user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
+                title={user.email || 'User Account'}
+              >
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar"
+                    className="w-6 h-6 rounded-full object-cover border border-indigo-200 dark:border-indigo-800"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                    {userInitial}
+                  </div>
+                )}
+                <span className="hidden md:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[110px] truncate">
+                  {user.email?.split('@')[0]}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 transition-transform" />
+              </button>
 
-                  {/* Dropdown Menu */}
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 liquid-glass rounded-2xl border border-white/80 dark:border-white/10 shadow-xl py-2 z-50 animate-fadeIn">
-                      <div className="px-3.5 py-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                        <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                          Signed in as
-                        </p>
-                        <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                          {user.email}
-                        </p>
-                      </div>
+              {/* Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 liquid-glass rounded-2xl border border-white/80 dark:border-white/10 shadow-xl py-2 z-50 animate-fadeIn">
+                  <div className="px-3.5 py-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                    <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                      Signed in as
+                    </p>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                      {user.email}
+                    </p>
+                  </div>
 
-                      <div className="py-1">
-                        <button
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            onOpenSubmit();
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer text-left"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Submit New Project</span>
-                        </button>
-                      </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onOpenSubmit();
+                      }}
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer text-left"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Submit New Project</span>
+                    </button>
+                  </div>
 
-                      <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
-                        <button
-                          onClick={async () => {
-                            setDropdownOpen(false);
-                            await signOut();
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer text-left font-medium"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          <span>Sign Out</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                    <button
+                      onClick={async () => {
+                        setDropdownOpen(false);
+                        await signOut();
+                      }}
+                      className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer text-left font-medium"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
-                >
-                  <LogIn className="w-4 h-4 text-indigo-500" />
-                  <span>Sign In</span>
-                </Link>
               )}
-            </>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
+            >
+              <LogIn className="w-4 h-4 text-indigo-500" />
+              <span>Sign In</span>
+            </Link>
           )}
 
           {/* Submit Project Button */}
