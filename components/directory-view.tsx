@@ -129,6 +129,7 @@ export function DirectoryView() {
                 ...p,
                 totalPaid: p.totalPaid ?? fallback?.totalPaid ?? 0,
                 paidAt: p.paidAt ?? fallback?.paidAt ?? p.launchDate ?? new Date().toISOString(),
+                clicks: p.clicks ?? fallback?.clicks ?? 0,
               };
             });
 
@@ -263,8 +264,10 @@ export function DirectoryView() {
       if (bPaid !== aPaid) {
         return bPaid - aPaid;
       }
-      if (b.upvotes !== a.upvotes) {
-        return b.upvotes - a.upvotes;
+      const aClicks = a.clicks ?? 0;
+      const bClicks = b.clicks ?? 0;
+      if (bClicks !== aClicks) {
+        return bClicks - aClicks;
       }
       const aTime = new Date(a.paidAt || a.launchDate).getTime();
       const bTime = new Date(b.paidAt || b.launchDate).getTime();
@@ -526,8 +529,6 @@ export function DirectoryView() {
                     rank={(primaryPage - 1) * PRIMARY_PAGE_SIZE + idx + 1}
                     onSelectTag={(tag) => setActiveTag(tag)}
                     onRecordClick={handleRecordClick}
-                    onUpvote={handleUpvote}
-                    isUpvoted={upvotedIds.has(product.id)}
                   />
                 ))}
               </div>
@@ -566,8 +567,6 @@ export function DirectoryView() {
                     key={product.id}
                     product={product}
                     onRecordClick={handleRecordClick}
-                    onUpvote={handleUpvote}
-                    isUpvoted={upvotedIds.has(product.id)}
                   />
                 ))}
               </div>

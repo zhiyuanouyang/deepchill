@@ -18,7 +18,7 @@ import { Product } from '@/lib/types';
  * Rich Apple-inspired card exposing:
  * - Distinct Rank badge (#1 Gold, #2 Silver, #3 Bronze) with left accent bar
  * - 44px squircle logo, verified DoFollow SEO badge, pricing model, category
- * - Multi-proof metrics: Paid Bid, Clicks, Stars, Upvotes, SEO Details link
+ * - Multi-proof metrics: Paid Bid, Clicks, Stars, SEO Details link
  * - Tagline & rich description snippet
  * - Interactive tech stack / tags (clickable) & maker attribution
  * ────────────────────────────────────────────────────────────────────────── */
@@ -28,7 +28,7 @@ interface PrimaryProductListItemProps {
   rank: number;
   onSelectTag: (tag: string) => void;
   onRecordClick: (productId: string) => void;
-  onUpvote: (productId: string) => void;
+  onUpvote?: (productId: string) => void;
   isUpvoted?: boolean;
 }
 
@@ -37,8 +37,6 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
   rank,
   onSelectTag,
   onRecordClick,
-  onUpvote,
-  isUpvoted = false,
 }) => {
   const handleCardClick = () => {
     onRecordClick(product.id);
@@ -156,12 +154,14 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   </span>
                 )}
 
+                {/* Outbound User Clicks Metric */}
                 <span
-                  title={`${clickCount} outbound clicks`}
-                  className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] bg-indigo-50/80 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50"
+                  title={`${clickCount.toLocaleString()} user clicks through to website`}
+                  className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] bg-indigo-50/90 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50"
                 >
-                  <MousePointerClick className="w-3 h-3" />
-                  <span>{clickCount}</span>
+                  <MousePointerClick className="w-3.5 h-3.5" />
+                  <span>{clickCount.toLocaleString()}</span>
+                  <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">clicks</span>
                 </span>
 
                 {product.starsCount ? (
@@ -173,30 +173,6 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                     <span>{(product.starsCount / 1000).toFixed(1)}k</span>
                   </span>
                 ) : null}
-
-                {/* Upvote Pill */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpvote(product.id);
-                  }}
-                  title={isUpvoted ? 'Upvoted' : 'Upvote project'}
-                  className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
-                    isUpvoted
-                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
-                      : 'bg-slate-100/90 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 border-slate-200/60 dark:border-slate-700/60'
-                  }`}
-                >
-                  <ArrowUpRight
-                    className={`w-3 h-3 ${
-                      isUpvoted
-                        ? 'rotate-[-45deg] text-indigo-600 dark:text-indigo-400'
-                        : '-rotate-45 text-slate-400'
-                    }`}
-                  />
-                  <span>{product.upvotes}</span>
-                </button>
 
                 {/* SEO Landing Page Link */}
                 <Link
@@ -286,21 +262,19 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
  * - Smaller 28px squircle icon
  * - Compact 2-line title & relative time
  * - 1-line muted tagline
- * - Quiet, low-contrast metric (no loud buttons or overshadowing colors)
+ * - Outbound click metric & subtle SEO page link
  * ────────────────────────────────────────────────────────────────────────── */
 
 interface SideProductListItemProps {
   product: Product;
   onRecordClick: (productId: string) => void;
-  onUpvote: (productId: string) => void;
+  onUpvote?: (productId: string) => void;
   isUpvoted?: boolean;
 }
 
 export const SideProductListItem: React.FC<SideProductListItemProps> = ({
   product,
   onRecordClick,
-  onUpvote,
-  isUpvoted = false,
 }) => {
   const handleCardClick = () => {
     onRecordClick(product.id);
@@ -308,6 +282,8 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
       window.open(product.websiteUrl, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const clickCount = product.clicks ?? 0;
 
   const formattedRelativeTime = React.useMemo(() => {
     if (!product.paidAt) return 'Recent';
@@ -370,8 +346,16 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
         </div>
       </div>
 
-      {/* Minimal trailing info: quiet subtle upvote count & subtle SEO page link */}
+      {/* Trailing info: Outbound clicks count & subtle SEO page link */}
       <div className="flex items-center gap-1.5 shrink-0 text-slate-400 dark:text-slate-500">
+        <span
+          title={`${clickCount.toLocaleString()} user clicks through to website`}
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800/90 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60"
+        >
+          <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+          <span>{clickCount.toLocaleString()}</span>
+        </span>
+
         <Link
           href={`/directory/${product.id}`}
           onClick={(e) => e.stopPropagation()}
@@ -380,22 +364,6 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
         >
           <FileText className="w-3.5 h-3.5" />
         </Link>
-
-        <span
-          onClick={(e) => {
-            e.stopPropagation();
-            onUpvote(product.id);
-          }}
-          title={isUpvoted ? 'Upvoted' : 'Upvote'}
-          className={`inline-flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
-            isUpvoted
-              ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/50'
-              : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400'
-          }`}
-        >
-          <ArrowUpRight className={`w-3 h-3 ${isUpvoted ? 'rotate-[-45deg]' : '-rotate-45'}`} />
-          <span>{product.upvotes}</span>
-        </span>
       </div>
     </div>
   );
