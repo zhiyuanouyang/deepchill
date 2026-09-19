@@ -11,6 +11,7 @@ import {
   MousePointerClick,
   FileText,
   Crown,
+  Clock,
 } from 'lucide-react';
 import { Product } from '@/lib/types';
 
@@ -307,11 +308,11 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * SideProductListItem — Newest Releases (Secondary Sidebar Feed)
- * Minimal, clean, and understated row:
- * - Smaller 28px squircle icon
- * - Compact 2-line title & relative time
- * - 1-line muted tagline
- * - Outbound click metric & subtle SEO page link
+ * Slim, minimal, and balanced 3-tier card:
+ * - Left: Rank badge & 32px squircle logo
+ * - Content: Product name + Bid badge, plus short description that wraps
+ *   gracefully across 2 lines without being prematurely cut off
+ * - Meta footer: Timestamp on left; Outbound clicks & SEO page redirect on right
  * ────────────────────────────────────────────────────────────────────────── */
 
 interface SideProductListItemProps {
@@ -344,7 +345,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
       return 'bg-gradient-to-br from-slate-400 to-slate-600 text-white shadow-2xs ring-1 ring-slate-300/60 font-black';
     if (r === 3)
       return 'bg-gradient-to-br from-amber-700 to-amber-900 text-white shadow-2xs ring-1 ring-amber-600/60 font-black';
-    return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 font-bold';
+    return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700/80 font-bold';
   };
 
   const formattedDateTime = React.useMemo(() => {
@@ -373,20 +374,22 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
       title={`Open ${product.name} — ${product.websiteUrl}`}
       className="group relative cursor-pointer"
     >
-      <div className="relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-xs hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
-        <div className="flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-            {/* Rank Badge */}
+      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-xs hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">
+        {/* Row 1: Smaller Rank & Icon + Product Name (Left) & SEO Button (Right) */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            {/* Smaller Rank Badge */}
             <span
-              className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] shrink-0 select-none ${rankBadgeStyle(
+              className={`min-w-4 h-4 px-1 rounded flex items-center justify-center text-[9px] font-bold shrink-0 select-none ${rankBadgeStyle(
                 rank
               )}`}
+              title={`Rank #${rank}`}
             >
-              {rank}
+              #{rank}
             </span>
 
-            {/* Small Squircle Logo */}
-            <div className="relative w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
+            {/* Smaller Squircle Icon */}
+            <div className="relative w-5 h-5 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
               {product.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -400,67 +403,81 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
                   }}
                 />
               ) : null}
-              <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px] select-none">
+              <span className="font-bold text-slate-600 dark:text-slate-300 text-[10px] select-none">
                 {product.name.charAt(0)}
               </span>
             </div>
 
-            {/* Minimal 2-line Content */}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate min-w-0">
-                  {product.name}
-                </h4>
-                <span
-                  suppressHydrationWarning
-                  title={`Bid time: ${formattedDateTime}`}
-                  className="text-[10px] text-slate-400 dark:text-slate-500 font-medium shrink-0 font-mono"
-                >
-                  · {formattedDateTime}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
-                {product.tagline}
-              </p>
-            </div>
+            {/* Product Name */}
+            <h4 className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate min-w-0">
+              {product.name}
+            </h4>
           </div>
 
-          {/* Trailing info: Bid price + Outbound clicks count + subtle SEO page link */}
+          {/* SEO Button (Swapped to header) */}
+          <Link
+            id={`side-seo-link-${product.id}`}
+            href={`/directory/${product.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-0.5 font-semibold text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 border border-indigo-200/70 dark:border-indigo-800/50 px-1.5 py-0.5 rounded transition-colors cursor-pointer shrink-0"
+            title={`View ${product.name} SEO directory page`}
+          >
+            <FileText className="w-2.5 h-2.5" />
+            <span>SEO</span>
+            <ArrowUpRight className="w-2.5 h-2.5 opacity-70" />
+          </Link>
+        </div>
+
+        {/* Row 2: Description Text (Single line with ellipsis, expands on hover) */}
+        <p
+          title={product.tagline || product.description}
+          className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 hover:line-clamp-none group-hover:line-clamp-none transition-all duration-200 leading-relaxed mt-1.5"
+        >
+          {product.tagline || product.description}
+        </p>
+
+        {/* Row 3: Meta Footer: Timestamp (Left) & Clicks + Reduced Bid Price Badge (Right) */}
+        <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1.5 flex-wrap text-[10px]">
+          {/* Left: Timestamp with Clock icon */}
+          <div
+            suppressHydrationWarning
+            title={`Launch / bid timestamp: ${formattedDateTime}`}
+            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-mono shrink-0"
+          >
+            <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+            <span>{formattedDateTime}</span>
+          </div>
+
+          {/* Right: Outbound Clicks Counter & Reduced-size Bid Price Badge */}
           <div className="flex items-center gap-1.5 shrink-0">
+            <span
+              title={`${clickCount.toLocaleString()} user clicks through to website`}
+              className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium"
+            >
+              <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400 shrink-0" />
+              <span>{clickCount.toLocaleString()} clicks</span>
+            </span>
+
+            <span className="text-slate-200 dark:text-slate-700 select-none">·</span>
+
+            {/* Reduced-size Bid Price Badge */}
             {paidBidAmount > 0 ? (
               <span
                 title={`Featured Total Bid: $${paidBidAmount}`}
-                className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 sm:px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[10px] sm:text-[11px]"
+                className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200/80 dark:border-amber-800/60 text-[9px] shrink-0 leading-none"
               >
-                <DollarSign className="w-3 h-3 text-amber-600" />
+                <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
                 <span>{paidBidAmount}</span>
               </span>
             ) : (
               <span
-                title="No active bid"
-                className="inline-flex items-center gap-0.5 font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/90 px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60 text-[10px] sm:text-[11px]"
+                title="No active bid ($0)"
+                className="inline-flex items-center gap-0.5 font-medium text-slate-400 dark:text-slate-500 bg-slate-100/80 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/60 text-[9px] shrink-0 leading-none"
               >
-                <DollarSign className="w-3 h-3 text-slate-400" />
+                <DollarSign className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                 <span>0</span>
               </span>
             )}
-
-            <span
-              title={`${clickCount.toLocaleString()} user clicks through to website`}
-              className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800/90 px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60"
-            >
-              <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-              <span>{clickCount.toLocaleString()}</span>
-            </span>
-
-            <Link
-              href={`/directory/${product.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="p-1 rounded text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title={`View ${product.name} directory page`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-            </Link>
           </div>
         </div>
       </div>
