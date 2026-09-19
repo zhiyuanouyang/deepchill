@@ -1,14 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/client';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,52 +16,87 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isLoading: true,
   signOut: async () => {},
+  refreshSession: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [supabase] = useState(() => createClient());
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
+  const fetchSession = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/session', {
+        method: 'GET',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user ?? null);
+        setSession(data.session ?? null);
+      } else {
+        setUser(null);
+        setSession(null);
+      }
+    } catch (err) {
+      console.error('Error checking auth session:', err);
+      setUser(null);
+      setSession(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    async function initAuth() {
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadInitialSession() {
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        if (mounted) {
-          setSession(initialSession);
-          setUser(initialSession?.user ?? null);
-          setIsLoading(false);
+        const res = await fetch('/api/auth/session', {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!ignore) {
+            setUser(data.user ?? null);
+            setSession(data.session ?? null);
+          }
+        } else if (!ignore) {
+          setUser(null);
+          setSession(null);
         }
       } catch (err) {
         console.error('Error checking auth session:', err);
-        if (mounted) {
+        if (!ignore) {
+          setUser(null);
+          setSession(null);
+        }
+      } finally {
+        if (!ignore) {
           setIsLoading(false);
         }
       }
     }
 
-    initAuth();
+    loadInitialSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setIsLoading(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
+    // Re-verify session when window gains focus
+    const handleFocus = () => {
+      fetchSession();
     };
-  }, [supabase]);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      ignore = true;
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchSession]);
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+      });
       setUser(null);
       setSession(null);
     } catch (err) {
@@ -70,7 +105,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        signOut,
+        refreshSession: fetchSession,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -83,3 +126,4 @@ export function useAuth() {
   }
   return context;
 }
+

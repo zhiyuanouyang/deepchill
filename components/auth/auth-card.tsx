@@ -16,10 +16,8 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/auth-provider';
 import { GoogleIcon, GithubIcon, MicrosoftIcon, DiscordIcon } from '@/components/icons';
-import { Provider } from '@supabase/supabase-js';
 
 interface AuthCardProps {
   initialMode?: 'signin' | 'signup';
@@ -31,8 +29,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
   const rawNext = searchParams.get('next') || '/';
   const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
-  const { user, isLoading: isAuthLoading, signOut } = useAuth();
-  const [supabase] = useState(() => createClient());
+  const { user, isLoading: isAuthLoading, signOut, refreshSession } = useAuth();
 
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [method, setMethod] = useState<'password' | 'magic-link'>('password');
@@ -58,23 +55,33 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
     setSuccessMessage(null);
   }
 
-  // Handle OAuth Sign-in
+  // Handle OAuth Sign-in via /api/auth/oauth
   const handleOAuthSignIn = async (provider: 'google' | 'github' | 'azure' | 'discord') => {
     setErrorMessage(null);
     setSuccessMessage(null);
     setLoadingAction(`oauth-${provider}`);
 
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider as Provider,
-        options: {
-          redirectTo: redirectUrl,
-        },
+      const res = await fetch('/api/auth/oauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          next,
+        }),
       });
 
-      if (error) {
-        setErrorMessage(error.message);
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setErrorMessage(data.error || 'Failed to initiate social login');
+        setLoadingAction(null);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setErrorMessage('Failed to generate OAuth redirect URL');
         setLoadingAction(null);
       }
     } catch (err: unknown) {
@@ -83,7 +90,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
     }
   };
 
-  // Handle Password Sign In or Sign Up
+  // Handle Password Sign In or Sign Up via /api/auth/signin or /api/auth/signup
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -111,18 +118,22 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
 
       setLoadingAction('password-submit');
       try {
-        const { data, error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-          },
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password,
+            next,
+          }),
         });
 
-        if (error) {
-          setErrorMessage(error.message);
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setErrorMessage(data.error || 'An error occurred during sign up.');
         } else if (data.session) {
           setSuccessMessage('Account created successfully! Redirecting...');
+          await refreshSession();
           setTimeout(() => router.push(next), 1200);
         } else {
           // Email confirmation enabled on Supabase
@@ -137,15 +148,21 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
       // Sign In
       setLoadingAction('password-submit');
       try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
+        const res = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password,
+          }),
         });
 
-        if (error) {
-          setErrorMessage(error.message);
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setErrorMessage(data.error || 'Failed to sign in.');
         } else {
           setSuccessMessage('Signed in successfully! Redirecting...');
+          await refreshSession();
           setTimeout(() => router.push(next), 800);
         }
       } catch (err: unknown) {
@@ -156,7 +173,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
     }
   };
 
-  // Handle Magic Link (OTP)
+  // Handle Magic Link (OTP) via /api/auth/magic-link
   const handleMagicLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -170,15 +187,18 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
 
     setLoadingAction('magic-link-submit');
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
+      const res = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          next,
+        }),
       });
 
-      if (error) {
-        setErrorMessage(error.message);
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setErrorMessage(data.error || 'Failed to send magic link.');
       } else {
         setMagicLinkSent(true);
         setSuccessMessage(`A magic link has been sent to ${cleanEmail}. Click the link in your email to sign in!`);
