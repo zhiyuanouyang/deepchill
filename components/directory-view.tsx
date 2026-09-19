@@ -27,7 +27,6 @@ import { PaginationControls } from '@/components/pagination-controls';
 import { CompoundSearchBar } from '@/components/compound-search-bar';
 import { SubmitModal } from '@/components/submit-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
-import { useRouter } from 'next/navigation';
 
 const CATEGORIES: ('All' | ProductCategory)[] = [
   'All',
@@ -80,7 +79,6 @@ export function DirectoryView() {
   // Modals state
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [isSeoGuideOpen, setIsSeoGuideOpen] = useState(false);
-  const router = useRouter();
 
   // Handlers that reset pagination when filters change
   const handleSearchChange = (q: string) => {
@@ -202,8 +200,6 @@ export function DirectoryView() {
   // Add new submitted project
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prev) => [newProduct, ...prev]);
-    // Automatically redirect to the new permanent SEO landing page
-    router.push(`/directory/${newProduct.id}`);
   };
 
   // Base filtered products (common filter for category, pricing, tags, search)
@@ -358,7 +354,10 @@ export function DirectoryView() {
             onSearchChange={handleSearchChange}
             products={products}
             onSelectProduct={(p) => {
-              router.push(`/directory/${p.id}`);
+              handleRecordClick(p.id);
+              if (p.websiteUrl) {
+                window.open(p.websiteUrl, '_blank', 'noopener,noreferrer');
+              }
             }}
             onApplyTagFilter={(tag) => {
               handleTagChange(tag);

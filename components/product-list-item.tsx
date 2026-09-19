@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import {
   ExternalLink,
   ArrowUpRight,
@@ -9,7 +8,6 @@ import {
   DollarSign,
   Star,
   MousePointerClick,
-  FileText,
   Crown,
   Clock,
 } from 'lucide-react';
@@ -64,7 +62,7 @@ const RankHatIcon: React.FC<{ rank: number; className?: string }> = ({
  * Rich Apple-inspired card exposing:
  * - Stacked Rank Hat/Crown badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Grey Hat) above icon
  * - Bigger 56px squircle logo, verified DoFollow SEO badge, pricing model, category
- * - Multi-proof metrics: Paid Bid, Clicks, Stars, SEO Details link
+ * - Multi-proof metrics: Paid Bid, Clicks, Stars
  * - Tagline & rich description snippet
  * - Interactive tech stack / tags (clickable) & maker attribution
  * ────────────────────────────────────────────────────────────────────────── */
@@ -224,17 +222,6 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                     <span>{(product.starsCount / 1000).toFixed(1)}k</span>
                   </span>
                 ) : null}
-
-                {/* SEO Landing Page Link */}
-                <Link
-                  id={`seo-page-btn-${product.id}`}
-                  href={`/directory/${product.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  title={`View SEO page for ${product.name}`}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                </Link>
               </div>
             </div>
 
@@ -313,7 +300,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
  * - Left: Rank badge & 32px squircle logo
  * - Content: Product name + Bid badge, plus short description that wraps
  *   gracefully across 2 lines without being prematurely cut off
- * - Meta footer: Timestamp on left; Outbound clicks & SEO page redirect on right
+ * - Meta footer: Timestamp on left; Outbound clicks & Bid price on right
  * ────────────────────────────────────────────────────────────────────────── */
 
 interface SideProductListItemProps {
@@ -414,19 +401,6 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
               {product.name}
             </h4>
           </div>
-
-          {/* SEO Button (Swapped to header) */}
-          <Link
-            id={`side-seo-link-${product.id}`}
-            href={`/directory/${product.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-0.5 font-semibold text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50/80 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 border border-indigo-200/70 dark:border-indigo-800/50 px-1.5 py-0.5 rounded transition-colors cursor-pointer shrink-0"
-            title={`View ${product.name} SEO directory page`}
-          >
-            <FileText className="w-2.5 h-2.5" />
-            <span>SEO</span>
-            <ArrowUpRight className="w-2.5 h-2.5 opacity-70" />
-          </Link>
         </div>
 
         {/* Row 2: Description Text (Single line with ellipsis, expands on hover) */}
