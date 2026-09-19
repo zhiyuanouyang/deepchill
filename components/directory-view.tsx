@@ -125,10 +125,18 @@ export function DirectoryView() {
             // Ensure any saved product gets proper defaults if missing totalPaid or paidAt
             const hydrated = parsed.map((p: Product) => {
               const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
+              // If seed product has legacy pre-Sept-17 test timestamp, refresh to realistic real-time seed timestamp
+              const hasLegacySeedDate =
+                fallback &&
+                p.paidAt &&
+                new Date(p.paidAt).getTime() < new Date('2026-09-17T00:00:00.000Z').getTime();
               return {
                 ...p,
                 totalPaid: p.totalPaid ?? fallback?.totalPaid ?? 0,
-                paidAt: p.paidAt ?? fallback?.paidAt ?? p.launchDate ?? new Date().toISOString(),
+                paidAt:
+                  (hasLegacySeedDate ? fallback?.paidAt : (p.paidAt ?? fallback?.paidAt)) ??
+                  p.launchDate ??
+                  new Date().toISOString(),
                 clicks: p.clicks ?? fallback?.clicks ?? 0,
               };
             });

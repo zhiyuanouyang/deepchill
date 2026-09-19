@@ -14,6 +14,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { Product } from '@/lib/types';
+import { formatRelativeTime, formatExactDateTime } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * RankHatIcon — Crown for Top 3, Stylish Hat for Rank 4+
@@ -348,24 +349,24 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700/80 font-bold';
   };
 
-  const formattedDateTime = React.useMemo(() => {
-    const raw = product.paidAt || product.launchDate;
-    if (!raw) return 'Recent';
-    try {
-      const date = new Date(raw);
-      if (isNaN(date.getTime())) return 'Recent';
-      const pad = (n: number) => String(n).padStart(2, '0');
-      const yyyy = date.getFullYear();
-      const mm = pad(date.getMonth() + 1);
-      const dd = pad(date.getDate());
-      const hh = pad(date.getHours());
-      const min = pad(date.getMinutes());
-      const ss = pad(date.getSeconds());
-      return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-    } catch {
-      return 'Recent';
-    }
-  }, [product.paidAt, product.launchDate]);
+  const rawDate = product.paidAt || product.launchDate;
+  const [now, setNow] = React.useState<number>(() => Date.now());
+
+  React.useEffect(() => {
+    // Tick every 30 seconds to keep real-time relative times like "just now", "2 mins ago" freshly updated
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const relativeTime = React.useMemo(() => {
+    return formatRelativeTime(rawDate, now);
+  }, [rawDate, now]);
+
+  const exactDateTime = React.useMemo(() => {
+    return formatExactDateTime(rawDate);
+  }, [rawDate]);
 
   return (
     <article
@@ -441,11 +442,11 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
           {/* Left: Timestamp with Clock icon */}
           <div
             suppressHydrationWarning
-            title={`Launch / bid timestamp: ${formattedDateTime}`}
-            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-mono shrink-0"
+            title={`Launch / bid timestamp: ${exactDateTime} (${relativeTime})`}
+            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 shrink-0 select-none text-[10px]"
           >
             <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span>{formattedDateTime}</span>
+            <span suppressHydrationWarning>{relativeTime}</span>
           </div>
 
           {/* Right: Outbound Clicks Counter & Reduced-size Bid Price Badge */}
