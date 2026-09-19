@@ -267,6 +267,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
 interface SideProductListItemProps {
   product: Product;
+  rank: number;
   onRecordClick: (productId: string) => void;
   onUpvote?: (productId: string) => void;
   isUpvoted?: boolean;
@@ -274,6 +275,7 @@ interface SideProductListItemProps {
 
 export const SideProductListItem: React.FC<SideProductListItemProps> = ({
   product,
+  rank,
   onRecordClick,
 }) => {
   const handleCardClick = () => {
@@ -283,17 +285,24 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     }
   };
 
+  const paidBidAmount = product.totalPaid ?? 0;
   const clickCount = product.clicks ?? 0;
+
+  const rankBadgeStyle = (r: number) => {
+    if (r === 1)
+      return 'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-2xs ring-1 ring-amber-300/60 font-black';
+    if (r === 2)
+      return 'bg-gradient-to-br from-slate-400 to-slate-600 text-white shadow-2xs ring-1 ring-slate-300/60 font-black';
+    if (r === 3)
+      return 'bg-gradient-to-br from-amber-700 to-amber-900 text-white shadow-2xs ring-1 ring-amber-600/60 font-black';
+    return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 font-bold';
+  };
 
   const formattedRelativeTime = React.useMemo(() => {
     if (!product.paidAt) return 'Recent';
     try {
-      const diffMs = Date.now() - new Date(product.paidAt).getTime();
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays <= 0) return 'Today';
-      if (diffDays === 1) return '1d ago';
-      if (diffDays < 30) return `${diffDays}d ago`;
-      return new Date(product.paidAt).toLocaleDateString(undefined, {
+      const date = new Date(product.paidAt);
+      return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
       });
@@ -303,69 +312,100 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
   }, [product.paidAt]);
 
   return (
-    <div
+    <article
       id={`side-product-item-${product.id}`}
       onClick={handleCardClick}
       title={`Open ${product.name} — ${product.websiteUrl}`}
-      className="group flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/50 transition-colors cursor-pointer select-none"
+      className="group relative cursor-pointer"
     >
-      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-        {/* Small 28x28 Squircle Logo */}
-        <div className="relative w-7 h-7 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
-          {product.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.logoUrl}
-              alt=""
-              className="w-full h-full object-cover"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.currentTarget as HTMLElement).style.display = 'none';
-              }}
-            />
-          ) : null}
-          <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px] select-none">
-            {product.name.charAt(0)}
-          </span>
-        </div>
-
-        {/* Minimal 2-line Content */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
-              {product.name}
-            </h4>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
-              · {formattedRelativeTime}
+      <div className="relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-xs hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+            {/* Rank Badge */}
+            <span
+              className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] shrink-0 select-none ${rankBadgeStyle(
+                rank
+              )}`}
+            >
+              {rank}
             </span>
+
+            {/* Small Squircle Logo */}
+            <div className="relative w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
+              {product.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={product.logoUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <span className="font-bold text-slate-600 dark:text-slate-300 text-[11px] select-none">
+                {product.name.charAt(0)}
+              </span>
+            </div>
+
+            {/* Minimal 2-line Content */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                  {product.name}
+                </h4>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
+                  · {formattedRelativeTime}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
+                {product.tagline}
+              </p>
+            </div>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
-            {product.tagline}
-          </p>
+
+          {/* Trailing info: Bid price + Outbound clicks count + subtle SEO page link */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {paidBidAmount > 0 ? (
+              <span
+                title={`Featured Total Bid: $${paidBidAmount}`}
+                className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 sm:px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[10px] sm:text-[11px]"
+              >
+                <DollarSign className="w-3 h-3 text-amber-600" />
+                <span>{paidBidAmount} Bid</span>
+              </span>
+            ) : (
+              <span
+                title="No active bid"
+                className="inline-flex items-center gap-0.5 font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/90 px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60 text-[10px] sm:text-[11px]"
+              >
+                <DollarSign className="w-3 h-3 text-slate-400" />
+                <span>0 Bid</span>
+              </span>
+            )}
+
+            <span
+              title={`${clickCount.toLocaleString()} user clicks through to website`}
+              className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800/90 px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60"
+            >
+              <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+              <span>{clickCount.toLocaleString()}</span>
+            </span>
+
+            <Link
+              href={`/directory/${product.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="p-1 rounded text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title={`View ${product.name} directory page`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Trailing info: Outbound clicks count & subtle SEO page link */}
-      <div className="flex items-center gap-1.5 shrink-0 text-slate-400 dark:text-slate-500">
-        <span
-          title={`${clickCount.toLocaleString()} user clicks through to website`}
-          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800/90 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60"
-        >
-          <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-          <span>{clickCount.toLocaleString()}</span>
-        </span>
-
-        <Link
-          href={`/directory/${product.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="p-1 rounded hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-          title={`View ${product.name} directory page`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-    </div>
+    </article>
   );
 };
 

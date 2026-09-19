@@ -174,32 +174,7 @@ export function DirectoryView() {
     }
   }, [upvotedIds, isClientReady]);
 
-  // Handle Upvote toggle
-  const handleUpvote = (productId: string) => {
-    const isAlreadyUpvoted = upvotedIds.has(productId);
 
-    setUpvotedIds((prev) => {
-      const next = new Set(prev);
-      if (isAlreadyUpvoted) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
-      return next;
-    });
-
-    setProducts((prods) =>
-      prods.map((p) => {
-        if (p.id === productId) {
-          return {
-            ...p,
-            upvotes: isAlreadyUpvoted ? Math.max(0, p.upvotes - 1) : p.upvotes + 1,
-          };
-        }
-        return p;
-      })
-    );
-  };
 
   // Record outbound click on product
   const handleRecordClick = (productId: string) => {
@@ -560,12 +535,13 @@ export function DirectoryView() {
                 </span>
               </div>
 
-              {/* Minimal Unified Sidebar Card Container */}
-              <div className="liquid-glass rounded-2xl p-1.5 border border-slate-200/70 dark:border-white/[0.08] shadow-xs divide-y divide-slate-100 dark:divide-slate-800/60">
-                {paginatedNewest.map((product) => (
+              {/* Secondary List Items */}
+              <div className="flex flex-col space-y-2.5">
+                {paginatedNewest.map((product, idx) => (
                   <SideProductListItem
                     key={product.id}
                     product={product}
+                    rank={(sidePage - 1) * SIDE_PAGE_SIZE + idx + 1}
                     onRecordClick={handleRecordClick}
                   />
                 ))}
