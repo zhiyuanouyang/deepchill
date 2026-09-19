@@ -25,6 +25,10 @@ export interface Product {
   makerAvatar?: string;
   logoUrl?: string;
   upvotes: number;
+  clicks?: number;
+  features?: string[];
+  targetAudience?: string;
+  faq?: Array<{ question: string; answer: string }>;
   featured?: boolean;
   launchDate: string;
   badgeCode?: string;
@@ -45,4 +49,6 @@ export interface EnhanceSubmissionResponse {
   polishedTagline: string;
   suggestedTags: string[];
   seoAdvice: string;
+  suggestedFeatures?: string[];
+  targetAudience?: string;
 }

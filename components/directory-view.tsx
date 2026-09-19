@@ -26,8 +26,8 @@ import { PrimaryProductListItem, SideProductListItem } from '@/components/produc
 import { PaginationControls } from '@/components/pagination-controls';
 import { CompoundSearchBar } from '@/components/compound-search-bar';
 import { SubmitModal } from '@/components/submit-modal';
-import { ProjectDetailModal } from '@/components/project-detail-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
+import { useRouter } from 'next/navigation';
 
 const CATEGORIES: ('All' | ProductCategory)[] = [
   'All',
@@ -79,8 +79,8 @@ export function DirectoryView() {
 
   // Modals state
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [isSeoGuideOpen, setIsSeoGuideOpen] = useState(false);
+  const router = useRouter();
 
   // Handlers that reset pagination when filters change
   const handleSearchChange = (q: string) => {
@@ -198,24 +198,28 @@ export function DirectoryView() {
         return p;
       })
     );
+  };
 
-    if (detailProduct && detailProduct.id === productId) {
-      setDetailProduct((prev) =>
-        prev
-          ? {
-            ...prev,
-            upvotes: isAlreadyUpvoted ? Math.max(0, prev.upvotes - 1) : prev.upvotes + 1,
-          }
-          : null
-      );
-    }
+  // Record outbound click on product
+  const handleRecordClick = (productId: string) => {
+    setProducts((prods) =>
+      prods.map((p) => {
+        if (p.id === productId) {
+          return {
+            ...p,
+            clicks: (p.clicks ?? 0) + 1,
+          };
+        }
+        return p;
+      })
+    );
   };
 
   // Add new submitted project
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prev) => [newProduct, ...prev]);
-    // Automatically open its detail view
-    setDetailProduct(newProduct);
+    // Automatically redirect to the new permanent SEO landing page
+    router.push(`/directory/${newProduct.id}`);
   };
 
   // Base filtered products (common filter for category, pricing, tags, search)
@@ -367,7 +371,9 @@ export function DirectoryView() {
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
             products={products}
-            onSelectProduct={(p) => setDetailProduct(p)}
+            onSelectProduct={(p) => {
+              router.push(`/directory/${p.id}`);
+            }}
             onApplyTagFilter={(tag) => {
               handleTagChange(tag);
               handleModeChange('keyword');
@@ -491,7 +497,7 @@ export function DirectoryView() {
             {/* Primary List: Trending (Takes ~67% / 8 cols) */}
             <section className="lg:col-span-8 flex flex-col space-y-4">
               {/* Primary Header */}
-              <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200/70 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-slate-200/70 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                     <Flame className="w-4 h-4 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" />
@@ -499,27 +505,27 @@ export function DirectoryView() {
                   <div>
                     <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                       <span>Trending Projects</span>
-                      <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">
-                        Ranked by Total Paid Bids
+                      <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/70 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60">
+                        Primary Showcase
                       </span>
                     </h2>
                   </div>
                 </div>
 
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-medium hidden sm:inline">
-                  Page {primaryPage} of {totalTrendingPages}
+                  Ranked by Bids · Page {primaryPage} of {totalTrendingPages}
                 </span>
               </div>
 
-              {/* List View Items */}
-              <div className="flex flex-col space-y-3">
+              {/* Primary List Items */}
+              <div className="flex flex-col space-y-3.5">
                 {paginatedTrending.map((product, idx) => (
                   <PrimaryProductListItem
                     key={product.id}
                     product={product}
                     rank={(primaryPage - 1) * PRIMARY_PAGE_SIZE + idx + 1}
                     onSelectTag={(tag) => setActiveTag(tag)}
-                    onOpenDetails={(p) => setDetailProduct(p)}
+                    onRecordClick={handleRecordClick}
                     onUpvote={handleUpvote}
                     isUpvoted={upvotedIds.has(product.id)}
                   />
@@ -538,28 +544,28 @@ export function DirectoryView() {
 
             {/* Secondary Side List: Newest Releases (Takes ~33% / 4 cols) */}
             <aside className="lg:col-span-4 flex flex-col space-y-4">
-              {/* Side Header */}
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200/70 dark:border-slate-800">
+              {/* Secondary Header */}
+              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/70 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                    <Clock className="w-4 h-4" />
+                  <div className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center">
+                    <Clock className="w-3.5 h-3.5" />
                   </div>
-                  <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 tracking-tight">
                     Newest Releases
                   </h3>
                 </div>
-                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">
-                  Latest Paid
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/90 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60">
+                  Secondary Feed
                 </span>
               </div>
 
-              {/* Side List Items */}
-              <div className="flex flex-col space-y-2.5">
+              {/* Minimal Unified Sidebar Card Container */}
+              <div className="liquid-glass rounded-2xl p-1.5 border border-slate-200/70 dark:border-white/[0.08] shadow-xs divide-y divide-slate-100 dark:divide-slate-800/60">
                 {paginatedNewest.map((product) => (
                   <SideProductListItem
                     key={product.id}
                     product={product}
-                    onOpenDetails={(p) => setDetailProduct(p)}
+                    onRecordClick={handleRecordClick}
                     onUpvote={handleUpvote}
                     isUpvoted={upvotedIds.has(product.id)}
                   />
@@ -684,14 +690,6 @@ export function DirectoryView() {
         isOpen={isSubmitOpen}
         onClose={() => setIsSubmitOpen(false)}
         onSubmitProduct={handleAddProduct}
-      />
-
-      <ProjectDetailModal
-        product={detailProduct}
-        isOpen={!!detailProduct}
-        onClose={() => setDetailProduct(null)}
-        onUpvote={handleUpvote}
-        isUpvoted={detailProduct ? upvotedIds.has(detailProduct.id) : false}
       />
 
       <SeoGuideModal

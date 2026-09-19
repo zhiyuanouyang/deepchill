@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, Sparkles, Plus, Loader2, ShieldCheck, Info } from 'lucide-react';
+import { X, Sparkles, Plus, Loader2, ShieldCheck, Info, Globe, ListChecks, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Product, ProductCategory, PricingModel } from '@/lib/types';
 
@@ -35,6 +35,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [repoUrl, setRepoUrl] = useState('');
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
+  const [featuresInput, setFeaturesInput] = useState('');
+  const [targetAudience, setTargetAudience] = useState('');
   const [category, setCategory] = useState<ProductCategory>('DevTools');
   const [pricing, setPricing] = useState<PricingModel>('Open Source');
   const [tagsInput, setTagsInput] = useState('');
@@ -46,6 +48,14 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [aiLoading, setAiLoading] = useState(false);
   const [aiTip, setAiTip] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Computed SEO slug
+  const previewSlug = useMemo(() => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'your-product-name';
+  }, [name]);
 
   const handleAiEnhance = async () => {
     if (!name.trim()) {
@@ -74,6 +84,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
           const merged = Array.from(new Set([...currentTags, ...data.suggestedTags]));
           setTagsInput(merged.join(', '));
         }
+        if (data.suggestedFeatures && Array.isArray(data.suggestedFeatures) && !featuresInput) {
+          setFeaturesInput(data.suggestedFeatures.join('\n'));
+        }
+        if (data.targetAudience && !targetAudience) {
+          setTargetAudience(data.targetAudience);
+        }
         if (data.seoAdvice) {
           setAiTip(data.seoAdvice);
         }
@@ -93,8 +109,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     } else if (!/^https?:\/\//i.test(websiteUrl)) {
       newErrors.websiteUrl = 'URL must begin with http:// or https://';
     }
-    if (!tagline.trim()) newErrors.tagline = 'A concise tagline is required';
-    if (!description.trim()) newErrors.description = 'Please provide a project description';
+    if (!tagline.trim()) newErrors.tagline = 'A concise tagline is required for search listings';
+    if (!description.trim()) newErrors.description = 'Please provide a detailed project description for SEO crawling';
     if (!makerName.trim()) newErrors.makerName = 'Maker name or handle is required';
 
     setErrors(newErrors);
@@ -110,12 +126,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       .map((t) => t.trim().replace(/^#/, ''))
       .filter((t) => t.length > 0);
 
+    const parsedFeatures = featuresInput
+      .split('\n')
+      .map((f) => f.trim().replace(/^[-*•]\s*/, ''))
+      .filter(Boolean);
+
     const newProduct: Product = {
-      id:
-        name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '') || `proj-${Date.now()}`,
+      id: previewSlug,
       name: name.trim(),
       tagline: tagline.trim(),
       description: description.trim(),
@@ -124,10 +141,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       category,
       pricing,
       tags: parsedTags.length > 0 ? parsedTags : ['Indie', 'DevTools'],
+      features: parsedFeatures.length > 0 ? parsedFeatures : undefined,
+      targetAudience: targetAudience.trim() || undefined,
       makerName: makerName.trim(),
       makerHandle: makerHandle.trim() || undefined,
       logoUrl: logoUrl.trim() || undefined,
       upvotes: 1,
+      clicks: 0,
       featured: false,
       launchDate: new Date().toISOString().split('T')[0],
       dofollowApproved: true,
@@ -156,6 +176,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     setRepoUrl('');
     setTagline('');
     setDescription('');
+    setFeaturesInput('');
+    setTargetAudience('');
     setTagsInput('');
     setMakerName('');
     setMakerHandle('');
@@ -171,32 +193,40 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/75 backdrop-blur-md z-50 animate-in fade-in duration-200" />
         <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass dark:bg-slate-900/95 border border-white/80 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="flex items-start justify-between gap-4 mb-5">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Dialog.Title className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  Submit Your Project
+                  Launch &amp; Claim SEO Landing Page
                 </Dialog.Title>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                  <ShieldCheck className="w-3.5 h-3.5" /> High-Value Backlink
+                  <ShieldCheck className="w-3.5 h-3.5" /> High-Authority DoFollow Backlink
                 </span>
               </div>
               <Dialog.Description className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                Gain organic traffic, maker discovery, and verified direct DoFollow backlink indexing.
+                Generates a permanent SEO landing page under <code className="text-indigo-600 dark:text-indigo-400 font-semibold">/directory/[product-name]</code> with Schema.org rich snippets, direct outbound clicks, and maker discovery.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 id="submit-modal-close-btn"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </Dialog.Close>
           </div>
 
+          {/* Permanent URL Preview Banner */}
+          <div className="flex items-center gap-2 p-2.5 px-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/50 text-xs text-indigo-900 dark:text-indigo-200 mb-5">
+            <Globe className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span className="truncate">
+              Permanent SEO URL: <strong className="font-mono text-indigo-700 dark:text-indigo-300">/directory/{previewSlug}</strong>
+            </span>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
-            {/* Name & Website */}
+            {/* 1. Core Identity & URLs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -235,24 +265,10 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
             </div>
 
-            {/* GitHub Repo & Category */}
+            {/* Category & Pricing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  GitHub Repository <span className="text-slate-400 text-xs">(optional)</span>
-                </label>
-                <input
-                  id="input-repo-url"
-                  type="url"
-                  value={repoUrl}
-                  onChange={(e) => setRepoUrl(e.target.value)}
-                  placeholder="https://github.com/org/repo"
-                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Primary Category</label>
                 <select
                   id="select-category"
                   value={category}
@@ -266,10 +282,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Pricing Model & Logo URL */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Pricing Model</label>
                 <select
@@ -285,10 +298,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   ))}
                 </select>
               </div>
+            </div>
 
+            {/* Logo URL & GitHub Repo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Logo / Icon Image URL <span className="text-slate-400 text-xs">(optional)</span>
+                  Logo / Brand Icon URL <span className="text-slate-400 text-xs">(optional)</span>
                 </label>
                 <input
                   id="input-logo-url"
@@ -299,27 +315,41 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
                 />
               </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  GitHub Repository <span className="text-slate-400 text-xs">(optional)</span>
+                </label>
+                <input
+                  id="input-repo-url"
+                  type="url"
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  placeholder="https://github.com/org/repo"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
             </div>
 
             {/* Tagline + AI Optimize Button */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="font-bold text-slate-700 dark:text-slate-300">
-                  Tagline (1-sentence summary) <span className="text-rose-500">*</span>
+                  SEO Tagline (1-Sentence Value Prop) <span className="text-rose-500">*</span>
                 </label>
                 <button
                   type="button"
                   id="btn-ai-enhance-tagline"
                   onClick={handleAiEnhance}
                   disabled={aiLoading}
-                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   {aiLoading ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                   )}
-                  <span>AI Polish &amp; Tag Suggester</span>
+                  <span>AI Polish &amp; SEO Auto-Suggest</span>
                 </button>
               </div>
               <input
@@ -327,7 +357,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 type="text"
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
-                placeholder="e.g., Open source scheduling infrastructure for everyone"
+                placeholder="e.g., The open source Firebase alternative with Postgres"
                 className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
                   errors.tagline ? 'border-rose-400' : ''
                 }`}
@@ -338,14 +368,14 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* Detailed Description */}
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Detailed Description <span className="text-rose-500">*</span>
+                Comprehensive Description (SEO Content) <span className="text-rose-500">*</span>
               </label>
               <textarea
                 id="textarea-description"
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Explain what your product solves, key features, and why indie/open-source users love it..."
+                placeholder="Describe what problem your product solves, core architecture, and unique benefits for organic search crawling..."
                 className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
                   errors.description ? 'border-rose-400' : ''
                 }`}
@@ -355,19 +385,54 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               )}
             </div>
 
-            {/* Tags & Tech Stack */}
+            {/* Key Features for SEO Landing Page */}
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Tech Stack / Keywords <span className="text-slate-400 text-xs">(comma separated)</span>
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                <ListChecks className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Key Features &amp; Highlights (1 per line)</span>
+                <span className="text-slate-400 text-xs font-normal">(displayed in SEO feature grid)</span>
               </label>
-              <input
-                id="input-tags"
-                type="text"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="e.g., Next.js, PostgreSQL, Docker, TypeScript, Self-Hosted"
-                className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+              <textarea
+                id="textarea-features"
+                rows={3}
+                value={featuresInput}
+                onChange={(e) => setFeaturesInput(e.target.value)}
+                placeholder="Realtime database subscriptions&#10;Instant auto-generated REST/GraphQL APIs&#10;Vector store for AI embeddings with pgvector"
+                className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none font-mono text-xs"
               />
+            </div>
+
+            {/* Target Audience & Keywords */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Target Audience</span>
+                  <span className="text-slate-400 text-xs font-normal">(who it&apos;s for)</span>
+                </label>
+                <input
+                  id="input-target-audience"
+                  type="text"
+                  value={targetAudience}
+                  onChange={(e) => setTargetAudience(e.target.value)}
+                  placeholder="e.g., Full-stack engineers, SaaS founders, teams"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Keywords / Tech Stack <span className="text-slate-400 text-xs">(comma separated)</span>
+                </label>
+                <input
+                  id="input-tags"
+                  type="text"
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  placeholder="PostgreSQL, Auth, Docker, TypeScript, Next.js"
+                  className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
+                />
+              </div>
             </div>
 
             {/* Maker Info */}
@@ -381,7 +446,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   type="text"
                   value={makerName}
                   onChange={(e) => setMakerName(e.target.value)}
-                  placeholder="e.g., Sarah Chen"
+                  placeholder="e.g., Paul Copplestone"
                   className={`w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none ${
                     errors.makerName ? 'border-rose-400' : ''
                   }`}
@@ -393,14 +458,14 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
               <div>
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Maker Twitter / GitHub handle
+                  Maker Twitter / GitHub Handle
                 </label>
                 <input
                   id="input-maker-handle"
                   type="text"
                   value={makerHandle}
                   onChange={(e) => setMakerHandle(e.target.value)}
-                  placeholder="@sarahbuilds"
+                  placeholder="@kiwicopple"
                   className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 outline-none"
                 />
               </div>
@@ -410,7 +475,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40">
               <div className="flex items-center justify-between mb-1.5">
                 <label className="font-bold text-amber-900 dark:text-amber-300 text-sm flex items-center gap-1.5">
-                  <span>🔥 Bidding &amp; Sponsor Boost</span>
+                  <span>🔥 Sponsor Boost &amp; Trending Rank</span>
                   <span className="text-[11px] font-normal text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">
                     Determines Trending List Ranking
                   </span>
@@ -418,7 +483,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 <span className="text-sm font-extrabold text-amber-900 dark:text-amber-300">${biddingAmount}</span>
               </div>
               <p className="text-xs text-amber-800/80 dark:text-amber-300/70 mb-3">
-                Higher total paid bidding secures top visibility in the Trending directory list. Latest payments appear instantly on the Newest list.
+                Higher total paid bidding secures top placement in the Trending directory list and drives more outbound clicks.
               </p>
 
               <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -454,7 +519,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               </div>
             </div>
 
-            {/* AI SEO Tip */}
+            {/* AI SEO Advice */}
             {aiTip && (
               <div className="p-3 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-2.5">
                 <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
@@ -480,7 +545,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 className="liquid-btn-primary px-6 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/10"
               >
                 <Plus className="w-4 h-4" />
-                <span>Launch &amp; Claim Backlink</span>
+                <span>Publish Permanent SEO Page</span>
               </button>
             </div>
           </form>

@@ -19,6 +19,12 @@ export async function POST(req: NextRequest) {
         polishedTagline: `${name} — Built for modern developers and indie creators.`,
         suggestedTags: ['Open Source', 'DevTools', 'Indie', 'Productivity'],
         seoAdvice: 'Include clear developer keywords in your README to maximize backlink referral value.',
+        suggestedFeatures: [
+          'High performance and lightweight architecture',
+          'Zero-lockin developer friendly API design',
+          'Seamless integration with modern tech stacks',
+        ],
+        targetAudience: 'Software developers, indie makers, and engineering teams',
       });
     }
 
@@ -29,7 +35,9 @@ Project Description: ${description || 'A developer tool or indie product'}
 Please create:
 1. A punchy, high-converting 1-sentence tagline (under 75 characters, clean, no hype verbs).
 2. Exactly 4-5 high-relevance technical/category tags (e.g. ['PostgreSQL', 'DevOps', 'TypeScript']).
-3. A brief 1-sentence SEO tip for boosting backlink conversion.`;
+3. A brief 1-sentence SEO tip for boosting backlink conversion.
+4. Exactly 3 key feature highlight bullet points (concise, clear value propositions).
+5. A concise target audience description (e.g. "Full-stack developers and SaaS founders").`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
@@ -46,8 +54,13 @@ Please create:
               items: { type: Type.STRING },
             },
             seoAdvice: { type: Type.STRING },
+            suggestedFeatures: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+            },
+            targetAudience: { type: Type.STRING },
           },
-          required: ['polishedTagline', 'suggestedTags', 'seoAdvice'],
+          required: ['polishedTagline', 'suggestedTags', 'seoAdvice', 'suggestedFeatures', 'targetAudience'],
         },
       },
     });
@@ -57,6 +70,14 @@ Please create:
       polishedTagline: parsed.polishedTagline || `${name} — Built for modern developers and creators.`,
       suggestedTags: Array.isArray(parsed.suggestedTags) ? parsed.suggestedTags : ['DevTools', 'Indie'],
       seoAdvice: parsed.seoAdvice || 'Include clear developer keywords in your project documentation.',
+      suggestedFeatures: Array.isArray(parsed.suggestedFeatures)
+        ? parsed.suggestedFeatures
+        : [
+            'High performance and lightweight architecture',
+            'Zero-lockin developer friendly API design',
+            'Seamless integration with modern tech stacks',
+          ],
+      targetAudience: parsed.targetAudience || 'Developers, indie makers, and modern tech teams',
     });
   } catch (err: unknown) {
     console.error('Error in /api/ai/enhance-submission:', err);
