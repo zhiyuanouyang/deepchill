@@ -347,18 +347,24 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 font-bold';
   };
 
-  const formattedRelativeTime = React.useMemo(() => {
-    if (!product.paidAt) return 'Recent';
+  const formattedDateTime = React.useMemo(() => {
+    const raw = product.paidAt || product.launchDate;
+    if (!raw) return 'Recent';
     try {
-      const date = new Date(product.paidAt);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
+      const date = new Date(raw);
+      if (isNaN(date.getTime())) return 'Recent';
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      const mm = pad(date.getMonth() + 1);
+      const dd = pad(date.getDate());
+      const hh = pad(date.getHours());
+      const min = pad(date.getMinutes());
+      const ss = pad(date.getSeconds());
+      return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
     } catch {
       return 'Recent';
     }
-  }, [product.paidAt]);
+  }, [product.paidAt, product.launchDate]);
 
   return (
     <article
@@ -402,11 +408,15 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
             {/* Minimal 2-line Content */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 min-w-0">
-                <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate min-w-0">
                   {product.name}
                 </h4>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
-                  · {formattedRelativeTime}
+                <span
+                  suppressHydrationWarning
+                  title={`Bid time: ${formattedDateTime}`}
+                  className="text-[10px] text-slate-400 dark:text-slate-500 font-medium shrink-0 font-mono"
+                >
+                  · {formattedDateTime}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
@@ -423,7 +433,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
                 className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 sm:px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[10px] sm:text-[11px]"
               >
                 <DollarSign className="w-3 h-3 text-amber-600" />
-                <span>{paidBidAmount} Bid</span>
+                <span>{paidBidAmount}</span>
               </span>
             ) : (
               <span
@@ -431,7 +441,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
                 className="inline-flex items-center gap-0.5 font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/90 px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700/60 text-[10px] sm:text-[11px]"
               >
                 <DollarSign className="w-3 h-3 text-slate-400" />
-                <span>0 Bid</span>
+                <span>0</span>
               </span>
             )}
 

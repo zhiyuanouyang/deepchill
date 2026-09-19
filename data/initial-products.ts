@@ -28,7 +28,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 75200,
     dofollowApproved: true,
     totalPaid: 450,
-    paidAt: '2026-09-14T18:30:00.000Z',
+    paidAt: '2026-09-14T18:30:24.000Z',
   },
   {
     id: 'coolify',
@@ -57,7 +57,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 42300,
     dofollowApproved: true,
     totalPaid: 320,
-    paidAt: '2026-09-16T15:20:00.000Z',
+    paidAt: '2026-09-16T15:20:18.000Z',
   },
   {
     id: 'penpot',
@@ -86,7 +86,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 33100,
     dofollowApproved: true,
     totalPaid: 180,
-    paidAt: '2026-09-16T17:45:00.000Z',
+    paidAt: '2026-09-16T17:45:52.000Z',
   },
   {
     id: 'dub-co',
@@ -115,7 +115,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 19800,
     dofollowApproved: true,
     totalPaid: 260,
-    paidAt: '2026-09-16T18:50:00.000Z',
+    paidAt: '2026-09-16T18:50:09.000Z',
   },
   {
     id: 'documenso',
@@ -144,7 +144,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 9400,
     dofollowApproved: true,
     totalPaid: 90,
-    paidAt: '2026-09-12T10:15:00.000Z',
+    paidAt: '2026-09-12T10:15:37.000Z',
   },
   {
     id: 'bruno',
@@ -173,7 +173,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 26500,
     dofollowApproved: true,
     totalPaid: 390,
-    paidAt: '2026-09-15T09:30:00.000Z',
+    paidAt: '2026-09-15T09:30:44.000Z',
   },
   {
     id: 'cal-com',
@@ -202,7 +202,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 32400,
     dofollowApproved: true,
     totalPaid: 210,
-    paidAt: '2026-09-13T14:10:00.000Z',
+    paidAt: '2026-09-13T14:10:11.000Z',
   },
   {
     id: 'pocketbase',
@@ -231,7 +231,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 41200,
     dofollowApproved: true,
     totalPaid: 350,
-    paidAt: '2026-09-16T19:10:00.000Z',
+    paidAt: '2026-09-16T19:10:33.000Z',
   },
   {
     id: 'typebot',
@@ -260,7 +260,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 7800,
     dofollowApproved: true,
     totalPaid: 120,
-    paidAt: '2026-09-16T19:20:00.000Z',
+    paidAt: '2026-09-16T19:20:15.000Z',
   },
   {
     id: 'excalidraw',
@@ -289,7 +289,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 88900,
     dofollowApproved: true,
     totalPaid: 500,
-    paidAt: '2026-09-11T12:00:00.000Z',
+    paidAt: '2026-09-11T12:00:58.000Z',
   },
   {
     id: 'hoppscotch',
@@ -318,7 +318,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 65100,
     dofollowApproved: true,
     totalPaid: 240,
-    paidAt: '2026-09-16T16:05:00.000Z',
+    paidAt: '2026-09-16T16:05:41.000Z',
   },
   {
     id: 'plunk',
@@ -347,7 +347,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 4200,
     dofollowApproved: true,
     totalPaid: 60,
-    paidAt: '2026-09-16T19:24:00.000Z',
+    paidAt: '2026-09-16T19:24:26.000Z',
   },
   {
     id: 'vaultwarden',
@@ -376,7 +376,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 39500,
     dofollowApproved: true,
     totalPaid: 310,
-    paidAt: '2026-09-14T08:20:00.000Z',
+    paidAt: '2026-09-14T08:20:05.000Z',
   },
   {
     id: 'activepieces',
@@ -405,6 +405,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     starsCount: 11200,
     dofollowApproved: true,
     totalPaid: 150,
-    paidAt: '2026-09-15T21:40:00.000Z',
+    paidAt: '2026-09-15T21:40:49.000Z',
   },
 ];
