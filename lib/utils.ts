@@ -95,3 +95,18 @@ export function formatExactDateTime(
   }
 }
 
+/**
+ * Extracts a clean hostname / domain from a website URL
+ * e.g., "https://supabase.com/docs" -> "supabase.com"
+ */
+export function extractDomain(url: string | undefined | null): string {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`);
+    return parsed.hostname.replace(/^www\./, '');
+  } catch {
+    return url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '').split('/')[0] || '';
+  }
+}
+
+

@@ -5,6 +5,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { X, Sparkles, Plus, Loader2, ShieldCheck, Info, ListChecks, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Product, ProductCategory, PricingModel } from '@/lib/types';
+import { extractDomain } from '@/lib/utils';
 
 interface SubmitModalProps {
   isOpen: boolean;
@@ -131,8 +132,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       .map((f) => f.trim().replace(/^[-*•]\s*/, ''))
       .filter(Boolean);
 
+    const rawDomain = extractDomain(websiteUrl.trim());
+    const tagsArray = parsedTags.length > 0 ? parsedTags : ['Indie', 'DevTools'];
+    const nowIso = new Date().toISOString();
+
     const newProduct: Product = {
       id: previewSlug,
+      domain: rawDomain,
       name: name.trim(),
       tagline: tagline.trim(),
       description: description.trim(),
@@ -140,7 +146,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       repoUrl: repoUrl.trim() || undefined,
       category,
       pricing,
-      tags: parsedTags.length > 0 ? parsedTags : ['Indie', 'DevTools'],
+      tags: tagsArray,
+      categoryTags: [category, ...tagsArray],
       features: parsedFeatures.length > 0 ? parsedFeatures : undefined,
       targetAudience: targetAudience.trim() || undefined,
       makerName: makerName.trim(),
@@ -148,12 +155,18 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       logoUrl: logoUrl.trim() || undefined,
       upvotes: 1,
       clicks: 0,
+      totalClicks: 0,
+      totalBid: biddingAmount,
+      mostRecentBid: {
+        bidPrice: biddingAmount,
+        bidTime: nowIso,
+      },
       featured: false,
-      launchDate: new Date().toISOString().split('T')[0],
+      launchDate: nowIso.split('T')[0],
       dofollowApproved: true,
       starsCount: repoUrl ? 1 : undefined,
       totalPaid: biddingAmount,
-      paidAt: new Date().toISOString(),
+      paidAt: nowIso,
     };
 
     onSubmitProduct(newProduct);

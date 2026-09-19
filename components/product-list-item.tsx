@@ -11,7 +11,7 @@ import {
   Crown,
   Clock,
 } from 'lucide-react';
-import { Product } from '@/lib/types';
+import { Product, TrendingProduct, NewestReleaseProduct } from '@/lib/types';
 import { formatRelativeTime, formatExactDateTime } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ const RankHatIcon: React.FC<{ rank: number; className?: string }> = ({
  * ────────────────────────────────────────────────────────────────────────── */
 
 interface PrimaryProductListItemProps {
-  product: Product;
+  product: TrendingProduct | Product;
   rank: number;
   onSelectTag: (tag: string) => void;
   onRecordClick: (productId: string) => void;
@@ -89,8 +89,9 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
     }
   };
 
-  const paidBidAmount = product.totalPaid ?? 0;
-  const clickCount = product.clicks ?? 0;
+  const paidBidAmount = product.totalBid ?? (product as Product).totalPaid ?? 0;
+  const clickCount = product.totalClicks ?? (product as Product).clicks ?? 0;
+  const displayTags = product.categoryTags ?? (product as Product).tags ?? [];
 
   const rankBadgeStyle = (r: number) => {
     if (r === 1)
@@ -106,7 +107,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
     <article
       id={`product-list-item-${product.id}`}
       onClick={handleCardClick}
-      title={`Open ${product.name} — ${product.websiteUrl}`}
+      title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
       className="group relative cursor-pointer"
     >
       <div className="relative rounded-2xl p-3.5 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
@@ -257,9 +258,9 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                 </span>
 
                 {/* Interactive Tech Stack / Tags */}
-                {product.tags && product.tags.length > 0 && (
+                {displayTags && displayTags.length > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {product.tags.slice(0, 4).map((tag) => (
+                    {displayTags.slice(0, 4).map((tag) => (
                       <button
                         key={tag}
                         type="button"
@@ -272,9 +273,9 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                         #{tag}
                       </button>
                     ))}
-                    {product.tags.length > 4 && (
+                    {displayTags.length > 4 && (
                       <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                        +{product.tags.length - 4}
+                        +{displayTags.length - 4}
                       </span>
                     )}
                   </div>
@@ -304,7 +305,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
  * ────────────────────────────────────────────────────────────────────────── */
 
 interface SideProductListItemProps {
-  product: Product;
+  product: NewestReleaseProduct | Product;
   rank: number;
   onRecordClick: (productId: string) => void;
   onUpvote?: (productId: string) => void;
@@ -323,8 +324,12 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     }
   };
 
-  const paidBidAmount = product.totalPaid ?? 0;
-  const clickCount = product.clicks ?? 0;
+  const paidBidAmount =
+    product.mostRecentBid?.bidPrice ??
+    ('totalBid' in product ? (product as any).totalBid : undefined) ??
+    (product as Product).totalPaid ??
+    0;
+  const clickCount = product.totalClicks ?? (product as Product).clicks ?? 0;
 
   const rankBadgeStyle = (r: number) => {
     if (r === 1)
@@ -336,7 +341,10 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     return 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700/80 font-bold';
   };
 
-  const rawDate = product.paidAt || product.launchDate;
+  const rawDate =
+    product.mostRecentBid?.bidTime ||
+    (product as Product).paidAt ||
+    product.launchDate;
   const [now, setNow] = React.useState<number>(() => Date.now());
 
   React.useEffect(() => {
@@ -359,7 +367,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     <article
       id={`side-product-item-${product.id}`}
       onClick={handleCardClick}
-      title={`Open ${product.name} — ${product.websiteUrl}`}
+      title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
       className="group relative cursor-pointer"
     >
       <div className="relative rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-xs hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">

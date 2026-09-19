@@ -19,7 +19,15 @@ import {
   BarChart3,
   Wrench,
 } from 'lucide-react';
-import { Product, ProductCategory } from '@/lib/types';
+import {
+  Product,
+  ProductCategory,
+  TrendingProduct,
+  NewestReleaseProduct,
+  toTrendingProduct,
+  toNewestReleaseProduct,
+} from '@/lib/types';
+import { extractDomain } from '@/lib/utils';
 import { INITIAL_PRODUCTS } from '@/data/initial-products';
 import { Navbar } from '@/components/navbar';
 import { PrimaryProductListItem, SideProductListItem } from '@/components/product-list-item';
@@ -120,7 +128,7 @@ export function DirectoryView() {
             const existingIds = new Set(parsed.map((p: Product) => p.id));
             const missing = INITIAL_PRODUCTS.filter((p) => !existingIds.has(p.id));
 
-            // Ensure any saved product gets proper defaults if missing totalPaid or paidAt
+            // Ensure any saved product gets proper defaults for ground-truth schema
             const hydrated = parsed.map((p: Product) => {
               const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
               // If seed product has legacy pre-Sept-17 test timestamp, refresh to realistic real-time seed timestamp
@@ -128,14 +136,41 @@ export function DirectoryView() {
                 fallback &&
                 p.paidAt &&
                 new Date(p.paidAt).getTime() < new Date('2026-09-17T00:00:00.000Z').getTime();
+
+              const paidAt =
+                (hasLegacySeedDate ? fallback?.paidAt : (p.paidAt ?? fallback?.paidAt)) ??
+                p.launchDate ??
+                new Date().toISOString();
+
+              const totalBid =
+                p.totalBid ?? p.totalPaid ?? fallback?.totalBid ?? fallback?.totalPaid ?? 0;
+              const totalClicks =
+                p.totalClicks ?? p.clicks ?? fallback?.totalClicks ?? fallback?.clicks ?? 0;
+              const domain =
+                p.domain ||
+                fallback?.domain ||
+                extractDomain(p.websiteUrl || fallback?.websiteUrl);
+              const categoryTags =
+                p.categoryTags ||
+                fallback?.categoryTags || [p.category, ...(p.tags || [])];
+
+              const mostRecentBid =
+                (hasLegacySeedDate ? fallback?.mostRecentBid : p.mostRecentBid) ||
+                fallback?.mostRecentBid || {
+                  bidPrice: totalBid,
+                  bidTime: paidAt,
+                };
+
               return {
                 ...p,
-                totalPaid: p.totalPaid ?? fallback?.totalPaid ?? 0,
-                paidAt:
-                  (hasLegacySeedDate ? fallback?.paidAt : (p.paidAt ?? fallback?.paidAt)) ??
-                  p.launchDate ??
-                  new Date().toISOString(),
-                clicks: p.clicks ?? fallback?.clicks ?? 0,
+                domain,
+                totalBid,
+                totalPaid: totalBid,
+                mostRecentBid,
+                paidAt: mostRecentBid.bidTime,
+                totalClicks,
+                clicks: totalClicks,
+                categoryTags,
               };
             });
 
@@ -187,9 +222,11 @@ export function DirectoryView() {
     setProducts((prods) =>
       prods.map((p) => {
         if (p.id === productId) {
+          const updatedClicks = (p.totalClicks ?? p.clicks ?? 0) + 1;
           return {
             ...p,
-            clicks: (p.clicks ?? 0) + 1,
+            totalClicks: updatedClicks,
+            clicks: updatedClicks,
           };
         }
         return p;
@@ -215,7 +252,12 @@ export function DirectoryView() {
       if (selectedCategory !== 'All' && product.category !== selectedCategory) {
         return false;
       }
-      if (activeTag && !product.tags.some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
+      if (
+        activeTag &&
+        !(product.categoryTags || product.tags || []).some(
+          (t) => t.toLowerCase() === activeTag.toLowerCase()
+        )
+      ) {
         return false;
       }
 
@@ -223,11 +265,14 @@ export function DirectoryView() {
       if (activeMode === 'keyword' && searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = product.name.toLowerCase().includes(q);
-        const matchTagline = product.tagline.toLowerCase().includes(q);
+        const matchDomain = product.domain?.toLowerCase().includes(q);
+        const matchTagline = product.tagline?.toLowerCase().includes(q);
         const matchDesc = product.description.toLowerCase().includes(q);
-        const matchTags = product.tags.some((t) => t.toLowerCase().includes(q));
+        const matchTags = (product.categoryTags || product.tags || []).some((t) =>
+          t.toLowerCase().includes(q)
+        );
         const matchMaker = product.makerName.toLowerCase().includes(q);
-        if (!matchName && !matchTagline && !matchDesc && !matchTags && !matchMaker) {
+        if (!matchName && !matchDomain && !matchTagline && !matchDesc && !matchTags && !matchMaker) {
           return false;
         }
       }
@@ -235,32 +280,44 @@ export function DirectoryView() {
     });
   }, [products, selectedCategory, activeTag, searchQuery, activeMode, aiFilterIds]);
 
-  // 1. Trending List: Ranked by total paid bidding (higher = higher rank)
-  const trendingProducts = useMemo(() => {
-    return [...baseFilteredProducts].sort((a, b) => {
-      const aPaid = a.totalPaid ?? 0;
-      const bPaid = b.totalPaid ?? 0;
-      if (bPaid !== aPaid) {
-        return bPaid - aPaid;
-      }
-      const aClicks = a.clicks ?? 0;
-      const bClicks = b.clicks ?? 0;
-      if (bClicks !== aClicks) {
-        return bClicks - aClicks;
-      }
-      const aTime = new Date(a.paidAt || a.launchDate).getTime();
-      const bTime = new Date(b.paidAt || b.launchDate).getTime();
-      return bTime - aTime;
-    });
+  // 1. Trending List: Partial projection from grounding truth, ranked by total bids
+  const trendingProducts: TrendingProduct[] = useMemo(() => {
+    return [...baseFilteredProducts]
+      .sort((a, b) => {
+        const aPaid = a.totalBid ?? a.totalPaid ?? 0;
+        const bPaid = b.totalBid ?? b.totalPaid ?? 0;
+        if (bPaid !== aPaid) {
+          return bPaid - aPaid;
+        }
+        const aClicks = a.totalClicks ?? a.clicks ?? 0;
+        const bClicks = b.totalClicks ?? b.clicks ?? 0;
+        if (bClicks !== aClicks) {
+          return bClicks - aClicks;
+        }
+        const aTime = new Date(
+          a.mostRecentBid?.bidTime || a.paidAt || a.launchDate
+        ).getTime();
+        const bTime = new Date(
+          b.mostRecentBid?.bidTime || b.paidAt || b.launchDate
+        ).getTime();
+        return bTime - aTime;
+      })
+      .map(toTrendingProduct);
   }, [baseFilteredProducts]);
 
-  // 2. Newest List: Ranked by payment timestamp (latest paid shows first)
-  const newestProducts = useMemo(() => {
-    return [...baseFilteredProducts].sort((a, b) => {
-      const aTime = new Date(a.paidAt || a.launchDate).getTime();
-      const bTime = new Date(b.paidAt || b.launchDate).getTime();
-      return bTime - aTime;
-    });
+  // 2. Newest List: Partial projection from grounding truth, ranked by latest bid timestamp
+  const newestProducts: NewestReleaseProduct[] = useMemo(() => {
+    return [...baseFilteredProducts]
+      .sort((a, b) => {
+        const aTime = new Date(
+          a.mostRecentBid?.bidTime || a.paidAt || a.launchDate
+        ).getTime();
+        const bTime = new Date(
+          b.mostRecentBid?.bidTime || b.paidAt || b.launchDate
+        ).getTime();
+        return bTime - aTime;
+      })
+      .map(toNewestReleaseProduct);
   }, [baseFilteredProducts]);
 
   // Paginated slices
