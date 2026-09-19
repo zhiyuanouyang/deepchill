@@ -213,3 +213,34 @@
 .dark .liquid-blob-3 {
   background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.03) 65%, transparent 100%);
 }
+
+/* Categories page entrance animation */
+@keyframes categoriesEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.categories-entrance {
+  animation: categoriesEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categories-entrance {
+    animation: none;
+  }
+}
+
+/* Hide scrollbar for category index nav */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

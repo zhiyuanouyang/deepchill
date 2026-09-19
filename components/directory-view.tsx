@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Search,
   Flame,
@@ -64,14 +65,32 @@ const PRIMARY_PAGE_SIZE = 6;
 const SIDE_PAGE_SIZE = 6;
 
 export function DirectoryView() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [upvotedIds, setUpvotedIds] = useState<Set<string>>(new Set());
   const [isClientReady, setIsClientReady] = useState(false);
 
   // Search & Filters state
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'All' | ProductCategory>('All');
+  const [selectedCategory, setSelectedCategory] = useState<'All' | ProductCategory>(() => {
+    // Will be overridden by useEffect below on client mount if URL param present
+    return 'All';
+  });
   const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // Initialize category from URL search params (e.g. /?category=DevTools)
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      const decoded = decodeURIComponent(categoryParam);
+      const matched = CATEGORIES.find(
+        (c) => c !== 'All' && c.toLowerCase() === decoded.toLowerCase()
+      );
+      if (matched && matched !== 'All') {
+        setSelectedCategory(matched);
+      }
+    }
+  }, [searchParams]);
 
   // Pagination states
   const [primaryPage, setPrimaryPage] = useState(1);
