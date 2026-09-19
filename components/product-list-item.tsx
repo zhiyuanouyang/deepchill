@@ -10,14 +10,58 @@ import {
   Star,
   MousePointerClick,
   FileText,
+  Crown,
 } from 'lucide-react';
 import { Product } from '@/lib/types';
 
 /* ─────────────────────────────────────────────────────────────────────────────
+ * RankHatIcon — Crown for Top 3, Stylish Hat for Rank 4+
+ * 1st place: Golden Crown
+ * 2nd place: Silver Crown
+ * 3rd place: Bronze Crown
+ * Rank 4+: Grey classic hat style
+ * ────────────────────────────────────────────────────────────────────────── */
+const RankHatIcon: React.FC<{ rank: number; className?: string }> = ({
+  rank,
+  className = 'w-3 h-3',
+}) => {
+  if (rank === 1) {
+    return <Crown className={`${className} fill-amber-950 stroke-amber-950`} />;
+  }
+  if (rank === 2) {
+    return (
+      <Crown
+        className={`${className} fill-slate-800 stroke-slate-800 dark:fill-slate-900 dark:stroke-slate-900`}
+      />
+    );
+  }
+  if (rank === 3) {
+    return <Crown className={`${className} fill-amber-200 stroke-amber-200`} />;
+  }
+  // Rank 4+: classic hat style other than crown (stylish top hat / fedora)
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`${className} stroke-current`}
+      aria-hidden="true"
+    >
+      <path d="M2 18h20" />
+      <path d="M6 18V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v11" />
+      <path d="M6 14h12" />
+    </svg>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
  * PrimaryProductListItem — Trending Projects (Hero / Primary Showcase)
  * Rich Apple-inspired card exposing:
- * - Distinct Rank badge (#1 Gold, #2 Silver, #3 Bronze) with left accent bar
- * - 44px squircle logo, verified DoFollow SEO badge, pricing model, category
+ * - Stacked Rank Hat/Crown badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Grey Hat) above icon
+ * - Bigger 56px squircle logo, verified DoFollow SEO badge, pricing model, category
  * - Multi-proof metrics: Paid Bid, Clicks, Stars, SEO Details link
  * - Tagline & rich description snippet
  * - Interactive tech stack / tags (clickable) & maker attribution
@@ -50,12 +94,12 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
   const rankBadgeStyle = (r: number) => {
     if (r === 1)
-      return 'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-xs shadow-amber-500/40 ring-1 ring-amber-300/60 font-black';
+      return 'bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 text-amber-950 shadow-xs shadow-amber-500/40 ring-1 ring-amber-400/80 font-black';
     if (r === 2)
-      return 'bg-gradient-to-br from-slate-400 to-slate-600 text-white shadow-xs ring-1 ring-slate-300/60 font-black';
+      return 'bg-gradient-to-r from-slate-200 via-slate-100 to-slate-300 dark:from-slate-200 dark:via-slate-100 dark:to-slate-300 text-slate-850 dark:text-slate-900 shadow-xs shadow-slate-400/30 ring-1 ring-slate-300/80 font-black';
     if (r === 3)
-      return 'bg-gradient-to-br from-amber-700 to-amber-900 text-white shadow-xs ring-1 ring-amber-600/60 font-black';
-    return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 font-bold';
+      return 'bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-amber-100 shadow-xs shadow-amber-900/40 ring-1 ring-amber-600/80 font-black';
+    return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700/80 font-bold shadow-2xs';
   };
 
   return (
@@ -79,35 +123,40 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
           />
         )}
 
-        {/* Row 1: Rank + Logo + Title & Badges + Proof Metrics */}
-        <div className="flex items-start gap-3">
-          {/* Rank Badge */}
-          <span
-            className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs shrink-0 select-none mt-0.5 ${rankBadgeStyle(
-              rank
-            )}`}
-          >
-            {rank}
-          </span>
+        {/* Main Row: (Left: Rank Crown/Hat + Bigger Logo) + (Right: Title, Badges, Metrics, Content) */}
+        <div className="flex items-start gap-3.5">
+          {/* Left Column: Stacked Rank Crown/Hat Badge + Bigger Squircle App Logo */}
+          <div className="flex flex-col items-center shrink-0">
+            {/* Rank Crown/Hat Badge with Number */}
+            <div
+              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] tracking-tight shrink-0 select-none transition-transform duration-200 group-hover:-translate-y-0.5 ${rankBadgeStyle(
+                rank
+              )}`}
+              title={`Rank #${rank}`}
+            >
+              <RankHatIcon rank={rank} className="w-3 h-3 shrink-0" />
+              <span>{rank}</span>
+            </div>
 
-          {/* Squircle App Logo */}
-          <div className="relative w-11 h-11 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-2xs">
-            {product.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.logoUrl}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = 'none';
-                }}
-              />
-            ) : null}
-            <span className="font-bold text-indigo-600 dark:text-indigo-400 text-base select-none">
-              {product.name.charAt(0)}
-            </span>
+            {/* Bigger Squircle App Logo */}
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-xs mt-1.5 transition-transform duration-200 group-hover:scale-[1.02]">
+              {product.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={product.logoUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <span className="font-bold text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl select-none">
+                {product.name.charAt(0)}
+              </span>
+            </div>
           </div>
 
           {/* Main Title & Proof Metrics Block */}
