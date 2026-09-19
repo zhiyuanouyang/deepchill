@@ -20,6 +20,7 @@ import {
   Clock,
   Flame,
   Sparkles,
+  Plus,
 } from 'lucide-react';
 import {
   Product,
@@ -603,6 +604,161 @@ const SecondaryCategoryRow: React.FC<{
   );
 };
 
+/* ─── Primary Item Placeholder (When < 3 Top Bid Items) ───────────────────── */
+
+const PrimaryCategoryPlaceholder: React.FC<{
+  rank: number;
+  categoryName: string;
+  onOpenSubmit: (category?: ProductCategory) => void;
+}> = ({ rank, categoryName, onOpenSubmit }) => {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenSubmit(categoryName as ProductCategory)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenSubmit(categoryName as ProductCategory);
+        }
+      }}
+      aria-label={`Submit your project to claim Rank #${rank} in ${categoryName}`}
+      className="group relative rounded-2xl bg-slate-50/40 dark:bg-slate-800/20 hover:bg-white dark:hover:bg-slate-800/70 border-2 border-dashed border-slate-200/90 dark:border-white/[0.08] hover:border-indigo-400 dark:hover:border-indigo-500/70 p-3 sm:p-3.5 transition-all duration-200 shadow-2xs hover:shadow-sm cursor-pointer"
+    >
+      <div className="relative">
+        {/* Top 3 rank colored left accent line */}
+        {rank <= 3 && (
+          <div
+            className={`absolute -left-3 sm:-left-3.5 top-2 bottom-2 w-1 rounded-r-full opacity-60 group-hover:opacity-100 transition-opacity ${
+              rank === 1
+                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
+                : rank === 2
+                ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-500'
+                : 'bg-gradient-to-b from-amber-600 via-amber-700 to-amber-800'
+            }`}
+          />
+        )}
+
+        <div className="flex items-start gap-3">
+          {/* Left Column: Stacked Rank Crown/Hat Badge + Squircle Add Logo */}
+          <div className="flex flex-col items-center shrink-0">
+            {/* Rank Crown/Hat Badge with Number */}
+            <div
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] tracking-tight shrink-0 select-none transition-transform duration-200 group-hover:-translate-y-0.5 opacity-80 group-hover:opacity-100 ${primaryRankBadgeStyle(
+                rank
+              )}`}
+              title={`Available Rank #${rank} in ${categoryName}`}
+            >
+              <RankHatIcon rank={rank} className="w-2.5 h-2.5 shrink-0" />
+              <span>{rank}</span>
+            </div>
+
+            {/* Squircle App Logo Placeholder */}
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-800/60 group-hover:border-indigo-400 dark:group-hover:border-indigo-500 group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-950/30 flex items-center justify-center shrink-0 ring-1 ring-black/[0.04] dark:ring-white/[0.04] shadow-2xs mt-1 transition-all duration-200 group-hover:scale-[1.03]">
+              <Plus className="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+            </div>
+          </div>
+
+          {/* Right Column: Title, Badges, Tagline, Call to Action */}
+          <div className="flex-1 min-w-0">
+            {/* Top row: Claim Rank + Spot Badge + Quick Action */}
+            <div className="flex items-center justify-between gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1 truncate">
+                  <span>Claim Rank #{rank}</span>
+                  <ArrowRight className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </h4>
+
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-200/70 dark:border-indigo-800/60 shrink-0">
+                  <Sparkles className="w-2.5 h-2.5 text-indigo-500" />
+                  <span>Available Spot</span>
+                </span>
+              </div>
+
+              {/* Total Bid / CTA prompt */}
+              <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 text-[10px] font-semibold transition-colors">
+                  <Plus className="w-2.5 h-2.5 text-indigo-500 shrink-0" />
+                  <span>Submit Project</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Tagline snippet */}
+            <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-1 leading-relaxed mt-0.5">
+              Launch in {categoryName} to gain high-authority backlinks &amp; traffic
+            </p>
+
+            {/* Domain indicator */}
+            <div className="mt-1 flex items-center gap-1 text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
+              <span className="truncate group-hover:underline">
+                + Click to submit your product here
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Secondary Item Placeholder (When < 3 Recent Bid Items) ────────────────── */
+
+const SecondaryCategoryPlaceholder: React.FC<{
+  rank: number;
+  categoryName: string;
+  onOpenSubmit: (category?: ProductCategory) => void;
+}> = ({ rank, categoryName, onOpenSubmit }) => {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenSubmit(categoryName as ProductCategory)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenSubmit(categoryName as ProductCategory);
+        }
+      }}
+      title={`Submit project for recent bids slot #${rank} in ${categoryName}`}
+      className="group relative cursor-pointer block"
+    >
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border border-dashed border-slate-200/90 dark:border-slate-800/80 hover:border-indigo-300 dark:hover:border-indigo-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-all duration-150">
+        {/* Left: Mini rank, Mini 20px squircle add icon, prompt text */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* Mini Rank Badge */}
+          <span
+            className={`min-w-4 h-4 px-1 rounded flex items-center justify-center text-[8.5px] font-bold shrink-0 select-none opacity-80 group-hover:opacity-100 ${secondaryRankBadgeStyle(
+              rank
+            )}`}
+            title={`Available recent bid slot #${rank}`}
+          >
+            #{rank}
+          </span>
+
+          {/* Mini Squircle Add Logo */}
+          <div className="relative w-5 h-5 rounded-md overflow-hidden bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700 group-hover:border-indigo-400 flex items-center justify-center shrink-0 transition-colors">
+            <Plus className="w-3 h-3 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+          </div>
+
+          {/* Placeholder Name */}
+          <h5 className="text-xs font-medium text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+            Submit new project (Slot #{rank})
+          </h5>
+        </div>
+
+        {/* Right: Small action badge */}
+        <div className="flex items-center gap-2 shrink-0 text-[10px]">
+          <span className="inline-flex items-center gap-0.5 font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded text-[9px] shrink-0 border border-indigo-200/70 dark:border-indigo-800/50 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors">
+            <Plus className="w-2.5 h-2.5 text-indigo-500 shrink-0" />
+            <span>Submit</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Vivid Category Card Component ────────────────────────────────────────── */
 
 const CategorySection: React.FC<{
@@ -610,7 +766,7 @@ const CategorySection: React.FC<{
   index: number;
   now: number;
   onRecordClick: (id: string) => void;
-  onOpenSubmit: () => void;
+  onOpenSubmit: (category?: ProductCategory) => void;
 }> = ({ category, index, now, onRecordClick, onOpenSubmit }) => {
   const IconComponent = CATEGORY_ICONS[category.name] || Layers;
   const theme = CATEGORY_THEMES[category.name] || {
@@ -619,6 +775,9 @@ const CategorySection: React.FC<{
     ring: 'ring-indigo-500/20',
     border: 'border-indigo-200/60 dark:border-indigo-800/40',
   };
+
+  const primaryRemaining = Math.max(0, 3 - category.primaryTopProjects.length);
+  const secondaryRemaining = Math.max(0, 3 - category.secondaryRecentProjects.length);
 
   return (
     <section
@@ -660,7 +819,7 @@ const CategorySection: React.FC<{
             </div>
           </div>
 
-          {/* Primary List: Top 3 Ranked by Total Bid */}
+          {/* Primary List: Top 3 Ranked by Total Bid (with Placeholders if < 3) */}
           <div className="mt-4">
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -672,62 +831,69 @@ const CategorySection: React.FC<{
               </span>
             </div>
 
-            {category.primaryTopProjects.length > 0 ? (
-              <div className="space-y-2.5">
-                {category.primaryTopProjects.map((project, i) => (
-                  <PrimaryCategoryRow
-                    key={project.id}
-                    project={project}
-                    rank={i + 1}
-                    onRecordClick={onRecordClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="py-7 text-center bg-slate-50/60 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800/80">
-                <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 mb-2">
-                  No projects in this category yet.
-                </p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenSubmit();
-                  }}
-                  className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors cursor-pointer"
-                >
-                  Be the first to submit →
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Secondary List: 3 Ranked by Most Recent Bid (Subdued, bottom placement) */}
-        {category.secondaryRecentProjects.length > 0 && (
-          <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/70">
-            <div className="flex items-center justify-between mb-2 px-1">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                <span>Recent Bids</span>
-              </div>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                Latest Activity
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              {category.secondaryRecentProjects.map((project, i) => (
-                <SecondaryCategoryRow
+            <div className="space-y-2.5">
+              {category.primaryTopProjects.map((project, i) => (
+                <PrimaryCategoryRow
                   key={project.id}
-                  product={project}
+                  project={project}
                   rank={i + 1}
-                  now={now}
                   onRecordClick={onRecordClick}
                 />
               ))}
+
+              {primaryRemaining > 0 &&
+                Array.from({ length: primaryRemaining }).map((_, idx) => {
+                  const rank = category.primaryTopProjects.length + idx + 1;
+                  return (
+                    <PrimaryCategoryPlaceholder
+                      key={`prim-placeholder-${category.name}-${rank}`}
+                      rank={rank}
+                      categoryName={category.name}
+                      onOpenSubmit={onOpenSubmit}
+                    />
+                  );
+                })}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Secondary List: 3 Ranked by Most Recent Bid (with Placeholders if < 3) */}
+        <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/70">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+              <span>Recent Bids</span>
+            </div>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+              Latest Activity
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            {category.secondaryRecentProjects.map((project, i) => (
+              <SecondaryCategoryRow
+                key={project.id}
+                product={project}
+                rank={i + 1}
+                now={now}
+                onRecordClick={onRecordClick}
+              />
+            ))}
+
+            {secondaryRemaining > 0 &&
+              Array.from({ length: secondaryRemaining }).map((_, idx) => {
+                const rank = category.secondaryRecentProjects.length + idx + 1;
+                return (
+                  <SecondaryCategoryPlaceholder
+                    key={`sec-placeholder-${category.name}-${rank}`}
+                    rank={rank}
+                    categoryName={category.name}
+                    onOpenSubmit={onOpenSubmit}
+                  />
+                );
+              })}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -786,9 +952,15 @@ export function CategoriesView() {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
+  const [submitCategory, setSubmitCategory] = useState<ProductCategory | undefined>(undefined);
   const [isSeoGuideOpen, setIsSeoGuideOpen] = useState(false);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [now, setNow] = useState<number>(() => Date.now());
+
+  const handleOpenSubmit = useCallback((cat?: ProductCategory) => {
+    setSubmitCategory(cat);
+    setIsSubmitOpen(true);
+  }, []);
 
   // Real-time ticker for relative timestamps
   useEffect(() => {
@@ -912,7 +1084,7 @@ export function CategoriesView() {
     <div className="min-h-screen relative overflow-x-hidden text-slate-900 dark:text-slate-100 bg-slate-50/60 dark:bg-[#0b0f19] pb-20 transition-colors duration-250">
       {/* Navigation */}
       <Navbar
-        onOpenSubmit={() => setIsSubmitOpen(true)}
+        onOpenSubmit={() => handleOpenSubmit(undefined)}
         totalProducts={products.length}
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
@@ -944,7 +1116,7 @@ export function CategoriesView() {
                 index={i}
                 now={now}
                 onRecordClick={handleRecordClick}
-                onOpenSubmit={() => setIsSubmitOpen(true)}
+                onOpenSubmit={handleOpenSubmit}
               />
             ))}
           </div>
@@ -972,7 +1144,7 @@ export function CategoriesView() {
             SEO Guidelines
           </button>
           <button
-            onClick={() => setIsSubmitOpen(true)}
+            onClick={() => handleOpenSubmit(undefined)}
             className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
           >
             Submit Project
@@ -983,14 +1155,18 @@ export function CategoriesView() {
       {/* Modals */}
       <SubmitModal
         isOpen={isSubmitOpen}
-        onClose={() => setIsSubmitOpen(false)}
+        onClose={() => {
+          setIsSubmitOpen(false);
+          setSubmitCategory(undefined);
+        }}
         onSubmitProduct={handleAddProduct}
+        defaultCategory={submitCategory}
       />
 
       <SeoGuideModal
         isOpen={isSeoGuideOpen}
         onClose={() => setIsSeoGuideOpen(false)}
-        onOpenSubmit={() => setIsSubmitOpen(true)}
+        onOpenSubmit={() => handleOpenSubmit(undefined)}
       />
     </div>
   );

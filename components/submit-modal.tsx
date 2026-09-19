@@ -11,6 +11,7 @@ interface SubmitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitProduct: (product: Product) => void;
+  defaultCategory?: ProductCategory;
 }
 
 const CATEGORIES: ProductCategory[] = [
@@ -30,6 +31,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   isOpen,
   onClose,
   onSubmitProduct,
+  defaultCategory,
 }) => {
   const [name, setName] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -38,7 +40,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [description, setDescription] = useState('');
   const [featuresInput, setFeaturesInput] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
-  const [category, setCategory] = useState<ProductCategory>('DevTools');
+  const [category, setCategory] = useState<ProductCategory>(defaultCategory || 'DevTools');
+
+  React.useEffect(() => {
+    if (isOpen && defaultCategory) {
+      setCategory(defaultCategory);
+    }
+  }, [isOpen, defaultCategory]);
   const [pricing, setPricing] = useState<PricingModel>('Open Source');
   const [tagsInput, setTagsInput] = useState('');
   const [makerName, setMakerName] = useState('');
@@ -195,6 +203,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     setMakerName('');
     setMakerHandle('');
     setLogoUrl('');
+    setCategory(defaultCategory || 'DevTools');
     setAiTip(null);
     setErrors({});
     onClose();
