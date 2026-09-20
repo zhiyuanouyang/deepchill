@@ -327,26 +327,23 @@ const CategoryIndex: React.FC<{
               key={cat.name}
               id={`cat-nav-${slug}`}
               onClick={() => onJumpTo(slug)}
-              className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
-              }`}
+              className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${isActive
+                ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
+                }`}
             >
               <IconComponent
-                className={`w-3.5 h-3.5 transition-colors ${
-                  isActive
-                    ? 'text-indigo-300 dark:text-indigo-200'
-                    : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                }`}
+                className={`w-3.5 h-3.5 transition-colors ${isActive
+                  ? 'text-indigo-300 dark:text-indigo-200'
+                  : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                  }`}
               />
               <span>{cat.name}</span>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${
-                  isActive
-                    ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
-                    : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                }`}
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${isActive
+                  ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
+                  : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                  }`}
               >
                 {cat.projectCount}
               </span>
@@ -387,13 +384,12 @@ const PrimaryCategoryRow: React.FC<{
         {/* Top 3 left subtle accent strip */}
         {rank <= 3 && (
           <div
-            className={`absolute left-0 top-0 bottom-0 w-1 ${
-              rank === 1
-                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
-                : rank === 2
+            className={`absolute left-0 top-0 bottom-0 w-1 ${rank === 1
+              ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
+              : rank === 2
                 ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-500'
                 : 'bg-gradient-to-b from-amber-600 via-amber-700 to-amber-800'
-            }`}
+              }`}
           />
         )}
 
@@ -461,7 +457,7 @@ const PrimaryCategoryRow: React.FC<{
                     title={`Total Bid: $${paidBidAmount}`}
                   >
                     <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>${paidBidAmount}</span>
+                    <span>{paidBidAmount}</span>
                   </span>
                 )}
 
@@ -595,7 +591,7 @@ const SecondaryCategoryRow: React.FC<{
               className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1 py-0.5 rounded text-[9px] shrink-0 border border-amber-200/70 dark:border-amber-800/50"
             >
               <DollarSign className="w-2.5 h-2.5 text-amber-500 shrink-0" />
-              <span>${bidPrice}</span>
+              <span>{bidPrice}</span>
             </span>
           )}
         </div>
@@ -629,13 +625,12 @@ const PrimaryCategoryPlaceholder: React.FC<{
         {/* Top 3 rank colored left accent line */}
         {rank <= 3 && (
           <div
-            className={`absolute -left-3 sm:-left-3.5 top-2 bottom-2 w-1 rounded-r-full opacity-60 group-hover:opacity-100 transition-opacity ${
-              rank === 1
-                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
-                : rank === 2
+            className={`absolute -left-3 sm:-left-3.5 top-2 bottom-2 w-1 rounded-r-full opacity-60 group-hover:opacity-100 transition-opacity ${rank === 1
+              ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
+              : rank === 2
                 ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-500'
                 : 'bg-gradient-to-b from-amber-600 via-amber-700 to-amber-800'
-            }`}
+              }`}
           />
         )}
 
