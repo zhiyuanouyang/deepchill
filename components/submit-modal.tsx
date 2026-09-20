@@ -213,7 +213,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/75 backdrop-blur-md z-50 animate-in fade-in duration-200" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass dark:bg-slate-900/95 border border-white/80 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-1.5rem)] sm:w-full max-w-2xl max-h-[90dvh] overflow-y-auto z-50 p-4 sm:p-8 rounded-2xl sm:rounded-3xl liquid-glass dark:bg-slate-900/95 border border-white/80 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-5">
             <div>

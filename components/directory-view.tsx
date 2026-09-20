@@ -378,16 +378,16 @@ export function DirectoryView() {
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-2 pb-6 sm:pb-8 text-center max-w-4xl mx-auto">
+        <section className="pt-2 pb-5 sm:pb-8 text-center max-w-4xl mx-auto">
           {/* Subtle badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-slate-800/80 border border-indigo-100/80 dark:border-indigo-900/60 shadow-xs mb-5">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-            <span>High-Authority Directory &amp; SEO Launchpad for Makers</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-slate-800/80 border border-indigo-100/80 dark:border-indigo-900/60 shadow-xs mb-4 sm:mb-5 max-w-full">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping shrink-0" />
+            <span className="truncate">High-Authority Directory &amp; SEO Launchpad for Makers</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] sm:leading-[1.15] mb-3 sm:mb-4 px-1">
             Discover Great{' '}
             <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-indigo-300 bg-clip-text text-transparent">
               Indie &amp; Open Source
@@ -395,27 +395,27 @@ export function DirectoryView() {
             Projects
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-6 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-5 sm:mb-6 max-w-2xl mx-auto px-2">
             A curated directory where independent developers launch their tools, gain real early
             traction, and earn verified, high-authority DoFollow backlinks for SEO.
           </p>
 
           {/* Metric Stats Pills */}
-          <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap text-xs font-medium text-slate-600 dark:text-slate-300 mb-8">
-            <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+          <div className="flex items-center justify-center gap-1.5 sm:gap-4 flex-wrap text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 px-1">
+            <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <span>
                 <strong className="text-slate-900 dark:text-white">{products.length}</strong> Curated Projects
               </span>
             </div>
-            <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-amber-500" />
+            <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+              <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>
                 <strong className="text-slate-900 dark:text-white">{openSourceCount}</strong> Open Source Repos
               </span>
             </div>
-            <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>
                 <strong className="text-slate-900 dark:text-white">100%</strong> Direct DoFollow SEO Links
               </span>

@@ -236,10 +236,11 @@
   }
 }
 
-/* Hide scrollbar for category index nav */
+/* Hide scrollbar for category index nav with iOS momentum scrolling */
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;

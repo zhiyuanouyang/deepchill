@@ -110,7 +110,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
       title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
       className="group relative cursor-pointer"
     >
-      <div className="relative rounded-2xl p-3.5 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+      <div className="relative rounded-2xl p-3 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
         {/* Top 3 left accent indicator */}
         {rank <= 3 && (
           <div
@@ -125,22 +125,22 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
         )}
 
         {/* Main Row: (Left: Rank Crown/Hat + Bigger Logo) + (Right: Title, Badges, Metrics, Content) */}
-        <div className="flex items-start gap-3.5">
+        <div className="flex items-start gap-2.5 sm:gap-3.5">
           {/* Left Column: Stacked Rank Crown/Hat Badge + Bigger Squircle App Logo */}
           <div className="flex flex-col items-center shrink-0">
             {/* Rank Crown/Hat Badge with Number */}
             <div
-              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] tracking-tight shrink-0 select-none transition-transform duration-200 group-hover:-translate-y-0.5 ${rankBadgeStyle(
+              className={`inline-flex items-center justify-center gap-1 px-1.5 py-0.5 sm:px-2 rounded-full text-[9px] sm:text-[10px] tracking-tight shrink-0 select-none transition-transform duration-200 group-hover:-translate-y-0.5 ${rankBadgeStyle(
                 rank
               )}`}
               title={`Rank #${rank}`}
             >
-              <RankHatIcon rank={rank} className="w-3 h-3 shrink-0" />
+              <RankHatIcon rank={rank} className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
               <span>{rank}</span>
             </div>
 
-            {/* Bigger Squircle App Logo */}
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-xs mt-1.5 transition-transform duration-200 group-hover:scale-[1.02]">
+            {/* Squircle App Logo */}
+            <div className="relative w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-xs mt-1 sm:mt-1.5 transition-transform duration-200 group-hover:scale-[1.02]">
               {product.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -326,7 +326,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
 
   const paidBidAmount =
     product.mostRecentBid?.bidPrice ??
-    ('totalBid' in product ? (product as any).totalBid : undefined) ??
+    ('totalBid' in product ? (product as { totalBid?: number }).totalBid : undefined) ??
     (product as Product).totalPaid ??
     0;
   const clickCount = product.totalClicks ?? (product as Product).clicks ?? 0;

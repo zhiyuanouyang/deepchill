@@ -60,7 +60,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-md z-50 animate-in fade-in duration-200" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass border border-white/80 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-1.5rem)] sm:w-full max-w-3xl max-h-[90dvh] overflow-y-auto z-50 p-4 sm:p-8 rounded-2xl sm:rounded-3xl liquid-glass border border-white/80 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-start gap-4">

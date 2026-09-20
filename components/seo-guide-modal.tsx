@@ -19,7 +19,7 @@ export const SeoGuideModal: React.FC<SeoGuideModalProps> = ({
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-md z-50 animate-in fade-in duration-200" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto z-50 p-6 sm:p-8 rounded-3xl liquid-glass border border-white/80 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-1.5rem)] sm:w-full max-w-2xl max-h-[90dvh] overflow-y-auto z-50 p-4 sm:p-8 rounded-2xl sm:rounded-3xl liquid-glass border border-white/80 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center">

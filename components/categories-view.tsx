@@ -254,48 +254,48 @@ const CategoriesHero: React.FC<{ totalProducts: number; categoryCount: number }>
   totalProducts,
   categoryCount,
 }) => (
-  <section className="pt-2 pb-6 sm:pb-8 text-center max-w-4xl mx-auto categories-entrance">
+  <section className="pt-2 pb-5 sm:pb-8 text-center max-w-4xl mx-auto categories-entrance">
     {/* Subtle badge with live ping dot matching main page */}
-    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-slate-800/80 border border-indigo-100/80 dark:border-indigo-900/60 shadow-xs mb-5">
-      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-      <span>Category Directory &amp; Tech Ecosystem Map</span>
+    <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-slate-800/80 border border-indigo-100/80 dark:border-indigo-900/60 shadow-xs mb-4 sm:mb-5 max-w-full">
+      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping shrink-0" />
+      <span className="truncate">Category Directory &amp; Tech Ecosystem Map</span>
     </div>
 
     {/* Hero Headline with Gradient Text */}
-    <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-4">
+    <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] sm:leading-[1.15] mb-3 sm:mb-4 px-1">
       Explore Verified Projects by{' '}
       <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-indigo-300 bg-clip-text text-transparent">
         Category
       </span>
     </h1>
 
-    <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-6 max-w-2xl mx-auto">
+    <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed mb-5 sm:mb-6 max-w-2xl mx-auto px-2">
       Discover the highest-ranked tools, indie SaaS, and open-source infrastructure across
       specialized niches, ranked by maker backing and real-time community engagement.
     </p>
 
     {/* Metric Stats Pills */}
-    <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap text-xs font-medium text-slate-600 dark:text-slate-300 mb-8">
-      <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-        <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+    <div className="flex items-center justify-center gap-1.5 sm:gap-4 flex-wrap text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 px-1">
+      <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+        <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
         <span>
           <strong className="text-slate-900 dark:text-white">{categoryCount}</strong> Categories
         </span>
       </div>
-      <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+      <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
         <span>
           <strong className="text-slate-900 dark:text-white">{totalProducts}</strong> Curated Projects
         </span>
       </div>
-      <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+      <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <span>
           <strong className="text-slate-900 dark:text-white">100%</strong> Direct DoFollow SEO Links
         </span>
       </div>
-      <div className="liquid-glass-pill px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-        <Flame className="w-3.5 h-3.5 text-amber-500" />
+      <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+        <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
         <span>
           <strong className="text-slate-900 dark:text-white">Live</strong> Bid Rankings
         </span>
@@ -313,7 +313,7 @@ const CategoryIndex: React.FC<{
 }> = ({ categories, activeSlug, onJumpTo }) => (
   <nav
     aria-label="Category quick navigation"
-    className="sticky top-20 z-30 mb-8 categories-entrance"
+    className="sticky top-16 sm:top-20 z-30 mb-6 sm:mb-8 categories-entrance"
   >
     <div className="liquid-glass rounded-2xl p-1.5 sm:p-2 shadow-xs border border-white/80 dark:border-white/10">
       <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-1 py-0.5 scroll-smooth">
@@ -780,7 +780,7 @@ const CategorySection: React.FC<{
       className="categories-entrance h-full"
       style={{ animationDelay: `${Math.min(index * 60, 400)}ms` }}
     >
-      <div className="h-full rounded-3xl bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between">
+      <div className="h-full rounded-2xl sm:rounded-3xl bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md transition-all duration-300 p-4 sm:p-6 flex flex-col justify-between">
         <div>
           {/* Card Header: Vivid Category Badge, Title, Description, and Count */}
           <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
@@ -1084,7 +1084,7 @@ export function CategoriesView() {
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6">
         {/* Editorial Hero Section */}
         <CategoriesHero totalProducts={products.length} categoryCount={categoryData.length} />
 
