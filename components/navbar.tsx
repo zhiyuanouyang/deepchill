@@ -20,13 +20,12 @@ import { useAuth } from '@/components/auth/auth-provider';
 
 interface NavbarProps {
   onOpenSubmit: () => void;
-  totalProducts: number;
+  totalProducts?: number;
   onOpenSeoInfo: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenSubmit,
-  totalProducts,
   onOpenSeoInfo,
 }) => {
   const { user, isLoading, signOut } = useAuth();
@@ -72,46 +71,41 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       ref={headerRef}
-      className="sticky top-2 sm:top-4 z-40 w-full max-w-7xl mx-auto px-2.5 sm:px-6 mb-4 sm:mb-8"
+      className="sticky top-2 sm:top-3 md:top-4 z-40 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 mb-3 sm:mb-6"
     >
-      <div className="liquid-glass rounded-2xl px-3 py-2 sm:px-6 sm:py-3 border border-white/80 dark:border-white/10 shadow-lg shadow-slate-900/5 dark:shadow-black/20 transition-all">
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
+      <div className="liquid-glass rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 border border-white/80 dark:border-white/10 shadow-lg shadow-slate-900/5 dark:shadow-black/20 transition-all overflow-hidden">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           {/* Brand / Logo */}
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0"
+            className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0 min-w-0"
           >
-            <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md shadow-indigo-950/10 dark:shadow-indigo-500/20 shrink-0 transition-transform group-hover:scale-105">
+            <div className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl overflow-hidden shadow-sm shadow-indigo-950/10 dark:shadow-indigo-500/20 shrink-0 transition-transform group-hover:scale-105">
               <Image
                 src="/logo.svg"
                 alt="Deepchill Logo"
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="w-full h-full object-cover"
                 priority
               />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-extrabold text-base sm:text-xl tracking-tight text-slate-900 dark:text-white truncate">
-                  Deepchill
-                </span>
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50/90 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 shrink-0">
-                  Directory ({totalProducts})
-                </span>
-              </div>
-              <p className="hidden md:block text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                High-authority launchpad &amp; SEO backlinks for makers
+              <span className="font-extrabold text-sm sm:text-base md:text-lg lg:text-xl tracking-tight text-slate-900 dark:text-white truncate block">
+                Deepchill
+              </span>
+              <p className="hidden xl:block text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                Launchpad &amp; SEO backlinks for makers
               </p>
             </div>
           </Link>
 
-          {/* Center Nav Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Center Nav Links (Visible on large screens >= 1024px to prevent overflow on medium screens) */}
+          <nav className="hidden lg:flex items-center gap-1">
             <Link
               href="/"
-              className={`text-xs font-semibold px-3 py-2 rounded-xl transition-colors ${
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
                 pathname === '/'
                   ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
                   : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/70 dark:hover:bg-slate-800/60'
@@ -121,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </Link>
             <Link
               href="/categories"
-              className={`text-xs font-semibold px-3 py-2 rounded-xl transition-colors ${
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
                 pathname === '/categories'
                   ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50'
                   : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/70 dark:hover:bg-slate-800/60'
@@ -132,15 +126,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Action Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Backlink SEO Perks modal trigger (Desktop) */}
+          <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
+            {/* Backlink SEO Perks modal trigger (Extra large screens only) */}
             <button
               id="nav-seo-guide-btn"
               onClick={onOpenSeoInfo}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
+              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
               title="Learn how our DoFollow backlinks boost your website's domain authority"
             >
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>SEO &amp; Backlinks</span>
             </button>
 
@@ -149,12 +143,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* User Authentication Status */}
             {isLoading ? (
-              <div className="w-8 h-8 sm:w-20 sm:h-9 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 animate-pulse border border-transparent" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-16 md:h-8 rounded-lg sm:rounded-xl bg-slate-200/60 dark:bg-slate-800/60 animate-pulse" />
             ) : user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-1.5 p-1 sm:px-3 sm:py-2 rounded-xl bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs"
+                  className="flex items-center gap-1 sm:gap-1.5 p-1 sm:px-2 sm:py-1 md:px-2.5 md:py-1.5 rounded-lg sm:rounded-xl bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
                   title={user.email || 'User Account'}
                   aria-label="User Account Menu"
                 >
@@ -163,24 +157,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <img
                       src={avatarUrl}
                       alt="Avatar"
-                      className="w-6 h-6 rounded-full object-cover border border-indigo-200 dark:border-indigo-800 shrink-0"
+                      className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-indigo-200 dark:border-indigo-800 shrink-0"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-xs shrink-0">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-xs shrink-0">
                       {userInitial}
                     </div>
                   )}
-                  <span className="hidden md:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                  <span className="hidden xl:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[90px] truncate">
                     {user.email?.split('@')[0]}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 transition-transform hidden sm:inline-block" />
+                  <ChevronDown className="w-3 h-3 text-slate-400 transition-transform hidden sm:inline-block shrink-0" />
                 </button>
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 liquid-glass rounded-2xl border border-white/80 dark:border-white/10 shadow-xl py-2 z-50 animate-fadeIn">
-                    <div className="px-3.5 py-2 border-b border-slate-200/60 dark:border-slate-800/60">
-                      <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                  <div className="absolute right-0 mt-2 w-52 liquid-glass rounded-2xl border border-white/80 dark:border-white/10 shadow-xl py-2 z-50 animate-fadeIn">
+                    <div className="px-3.5 py-1.5 border-b border-slate-200/60 dark:border-slate-800/60">
+                      <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
                         Signed in as
                       </p>
                       <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
@@ -196,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         }}
                         className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer text-left"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                         <span>Submit New Project</span>
                       </button>
                     </div>
@@ -209,7 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         }}
                         className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer text-left font-medium"
                       >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
                       </button>
                     </div>
@@ -219,70 +213,71 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
+                className="flex items-center justify-center gap-1 p-1.5 sm:px-2.5 sm:py-1.5 md:px-3 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
                 title="Sign In"
                 aria-label="Sign In"
               >
-                <LogIn className="w-4 h-4 text-indigo-500" />
+                <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
                 <span className="hidden sm:inline">Sign In</span>
               </Link>
             )}
 
-            {/* Submit Project Button (Adaptive text on mobile: 'Submit' vs 'Submit Project') */}
+            {/* Submit Project Button (Responsive: icon-only on < 380px, 'Submit' on 380px-639px, 'Submit Project' on >= 640px) */}
             <button
               id="nav-submit-project-btn"
               onClick={onOpenSubmit}
-              className="liquid-btn-primary flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white cursor-pointer shadow-md shrink-0 whitespace-nowrap"
+              className="liquid-btn-primary flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-1.5 sm:px-3 sm:py-1.5 md:px-3.5 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-white cursor-pointer shadow-md shrink-0 whitespace-nowrap"
+              title="Submit Project"
             >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="hidden sm:inline">Submit Project</span>
-              <span className="sm:hidden">Submit</span>
+              <span className="hidden min-[380px]:inline sm:hidden">Submit</span>
             </button>
 
-            {/* Mobile Menu Hamburger Toggle */}
+            {/* Mobile / Tablet Menu Hamburger Toggle (shown on screens < 1024px) */}
             <button
               id="nav-mobile-menu-toggle"
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex md:hidden items-center justify-center w-8 h-8 rounded-xl text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              className="flex lg:hidden items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
-                <X className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700 dark:text-slate-200" />
               ) : (
-                <Menu className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                <Menu className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700 dark:text-slate-200" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown Drawer Menu */}
+        {/* Mobile / Tablet Dropdown Drawer Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-3 pt-3 border-t border-slate-200/70 dark:border-slate-800/70 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="lg:hidden mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-slate-200/70 dark:border-slate-800/70 flex flex-col gap-1.5 sm:gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
             <nav className="flex flex-col gap-1">
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
                   pathname === '/'
                     ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold'
                     : 'text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
                 }`}
               >
-                <Compass className="w-4 h-4 text-indigo-500" />
+                <Compass className="w-4 h-4 text-indigo-500 shrink-0" />
                 <span>Directory Home</span>
               </Link>
               <Link
                 href="/categories"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
                   pathname === '/categories'
                     ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold'
                     : 'text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
                 }`}
               >
-                <LayoutGrid className="w-4 h-4 text-indigo-500" />
+                <LayoutGrid className="w-4 h-4 text-indigo-500 shrink-0" />
                 <span>All Categories</span>
               </Link>
               <button
@@ -290,20 +285,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setMobileMenuOpen(false);
                   onOpenSeoInfo();
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60 text-left transition-colors cursor-pointer"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60 text-left transition-colors cursor-pointer"
               >
-                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span>SEO &amp; DoFollow Backlinks Guide</span>
               </button>
             </nav>
 
+            {/* Quick Mobile Submit Button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenSubmit();
+              }}
+              className="liquid-btn-primary flex items-center justify-center gap-2 w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-md cursor-pointer mt-1"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Submit New Project</span>
+            </button>
+
             {/* Mobile Footer Status */}
             <div className="pt-2 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between gap-2 text-xs">
-              <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                {totalProducts} curated products
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                Indie &amp; Open Source Launchpad
               </span>
               {!user ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-xs">
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
