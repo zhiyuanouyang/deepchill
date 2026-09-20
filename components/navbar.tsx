@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, ShieldCheck, Layers, LogIn, LogOut, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
+import { Plus, ShieldCheck, LogIn, LogOut, ChevronDown } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/components/auth/auth-provider';
 
@@ -40,9 +41,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="liquid-glass rounded-2xl px-4 py-3 sm:px-6 flex items-center justify-between gap-4 transition-all">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 via-indigo-950 to-indigo-900 dark:from-indigo-600 dark:to-violet-600 text-white shadow-md shadow-indigo-900/10 dark:shadow-indigo-500/20 transition-transform group-hover:scale-105">
-            <Layers className="w-5 h-5 text-indigo-200" />
-            <div className="absolute inset-0 rounded-xl bg-white/10 pointer-events-none" />
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-indigo-950/10 dark:shadow-indigo-500/20 transition-transform group-hover:scale-105">
+            <Image
+              src="/logo.svg"
+              alt="Deepchill Logo"
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
