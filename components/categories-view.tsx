@@ -754,6 +754,40 @@ const SecondaryCategoryPlaceholder: React.FC<{
   );
 };
 
+/* ─── Primary Empty Placeholder (Non-clickable filler slot) ────────────────── */
+
+const PrimaryEmptyPlaceholder: React.FC<{ rank: number }> = ({ rank }) => (
+  <div aria-hidden="true" className="relative rounded-2xl bg-slate-50/20 dark:bg-slate-800/10 border border-dashed border-slate-100/80 dark:border-white/[0.04] p-3 sm:p-3.5">
+    <div className="flex items-start gap-3 opacity-30">
+      <div className="flex flex-col items-center shrink-0">
+        <div className={`inline-flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] tracking-tight shrink-0 select-none ${primaryRankBadgeStyle(rank)}`}>
+          <RankHatIcon rank={rank} className="w-2.5 h-2.5 shrink-0" />
+          <span>{rank}</span>
+        </div>
+        <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-white/40 dark:bg-slate-800/30 flex items-center justify-center shrink-0 mt-1" />
+      </div>
+      <div className="flex-1 min-w-0 pt-1 space-y-1.5">
+        <div className="h-3.5 w-28 rounded bg-slate-200/60 dark:bg-slate-700/40" />
+        <div className="h-2.5 w-40 rounded bg-slate-100/60 dark:bg-slate-700/30" />
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── Secondary Empty Placeholder (Non-clickable filler slot) ───────────────── */
+
+const SecondaryEmptyPlaceholder: React.FC<{ rank: number }> = ({ rank }) => (
+  <div aria-hidden="true" className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl opacity-25">
+    <span
+      className={`min-w-4 h-4 px-1 rounded flex items-center justify-center text-[8.5px] font-bold shrink-0 select-none ${secondaryRankBadgeStyle(rank)}`}
+    >
+      #{rank}
+    </span>
+    <div className="w-5 h-5 rounded-md bg-slate-200/50 dark:bg-slate-700/30 border border-dashed border-slate-200 dark:border-slate-700 shrink-0" />
+    <div className="h-2.5 w-28 rounded bg-slate-200/50 dark:bg-slate-700/30" />
+  </div>
+);
+
 /* ─── Vivid Category Card Component ────────────────────────────────────────── */
 
 const CategorySection: React.FC<{
@@ -836,15 +870,24 @@ const CategorySection: React.FC<{
                 />
               ))}
 
+              {/* One clickable Submit placeholder, then silent empty slots */}
               {primaryRemaining > 0 &&
                 Array.from({ length: primaryRemaining }).map((_, idx) => {
                   const rank = category.primaryTopProjects.length + idx + 1;
+                  if (idx === 0) {
+                    return (
+                      <PrimaryCategoryPlaceholder
+                        key={`prim-placeholder-${category.name}-${rank}`}
+                        rank={rank}
+                        categoryName={category.name}
+                        onOpenSubmit={onOpenSubmit}
+                      />
+                    );
+                  }
                   return (
-                    <PrimaryCategoryPlaceholder
-                      key={`prim-placeholder-${category.name}-${rank}`}
+                    <PrimaryEmptyPlaceholder
+                      key={`prim-empty-${category.name}-${rank}`}
                       rank={rank}
-                      categoryName={category.name}
-                      onOpenSubmit={onOpenSubmit}
                     />
                   );
                 })}
@@ -875,15 +918,24 @@ const CategorySection: React.FC<{
               />
             ))}
 
+            {/* One clickable Submit placeholder, then silent empty slots */}
             {secondaryRemaining > 0 &&
               Array.from({ length: secondaryRemaining }).map((_, idx) => {
                 const rank = category.secondaryRecentProjects.length + idx + 1;
+                if (idx === 0) {
+                  return (
+                    <SecondaryCategoryPlaceholder
+                      key={`sec-placeholder-${category.name}-${rank}`}
+                      rank={rank}
+                      categoryName={category.name}
+                      onOpenSubmit={onOpenSubmit}
+                    />
+                  );
+                }
                 return (
-                  <SecondaryCategoryPlaceholder
-                    key={`sec-placeholder-${category.name}-${rank}`}
+                  <SecondaryEmptyPlaceholder
+                    key={`sec-empty-${category.name}-${rank}`}
                     rank={rank}
-                    categoryName={category.name}
-                    onOpenSubmit={onOpenSubmit}
                   />
                 );
               })}
