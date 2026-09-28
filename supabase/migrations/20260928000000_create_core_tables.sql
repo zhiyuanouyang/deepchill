@@ -1,6 +1,6 @@
 -- =============================================================================
--- Grounding Truth Schema for DeepChill on Supabase Postgres
--- =============================================================================
+-- Migration: 20260928000000_create_core_tables.sql
+-- Description: Core schema definition for DeepChill
 --
 -- Tables:
 --   1. categories   (id, display_name, descriptions)
@@ -25,9 +25,11 @@ create table if not exists public.categories (
   updated_at timestamptz not null default now()
 );
 
+-- Unique index to prevent duplicate category names
 create unique index if not exists idx_categories_display_name
   on public.categories (display_name);
 
+-- RLS: categories
 alter table public.categories enable row level security;
 
 create policy "Allow public read access to categories"
@@ -54,12 +56,14 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+-- Index foreign key and lookup columns
 create index if not exists idx_profiles_uid
   on public.profiles (uid);
 
 create index if not exists idx_profiles_email
   on public.profiles (email);
 
+-- RLS: profiles
 alter table public.profiles enable row level security;
 
 create policy "Allow public read access to profiles"
@@ -81,6 +85,7 @@ create policy "Allow users to update own profile"
   using ((select auth.uid()) = uid)
   with check ((select auth.uid()) = uid);
 
+-- Trigger: Automatically sync profile when a user signs up via Supabase Auth
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -129,6 +134,7 @@ create table if not exists public.projects (
   updated_at timestamptz not null default now()
 );
 
+-- Best Practice Indexes: FK user_id, category, and recency
 create index if not exists idx_projects_user_id
   on public.projects (user_id);
 
@@ -138,6 +144,7 @@ create index if not exists idx_projects_category
 create index if not exists idx_projects_created_at
   on public.projects (created_at desc);
 
+-- RLS: projects
 alter table public.projects enable row level security;
 
 create policy "Allow public read access to projects"
@@ -175,6 +182,7 @@ create table if not exists public.bids (
   created_at timestamptz not null default now()
 );
 
+-- Performance & FK Indexes: bids
 create index if not exists idx_bids_project_id
   on public.bids (project_id);
 
@@ -184,6 +192,7 @@ create index if not exists idx_bids_project_price
 create index if not exists idx_bids_created_at
   on public.bids (created_at desc);
 
+-- RLS: bids
 alter table public.bids enable row level security;
 
 create policy "Allow public read access to bids"
@@ -207,6 +216,7 @@ create table if not exists public.total_clicks (
   updated_at timestamptz not null default now()
 );
 
+-- RLS: total_clicks
 alter table public.total_clicks enable row level security;
 
 create policy "Allow public read access to total_clicks"
@@ -215,6 +225,7 @@ create policy "Allow public read access to total_clicks"
   to public
   using (true);
 
+-- Atomic RPC function to increment clicks safely
 create or replace function public.increment_project_clicks(p_project_id uuid)
 returns integer
 language plpgsql
@@ -245,6 +256,7 @@ create table if not exists public.total_bids (
   updated_at timestamptz not null default now()
 );
 
+-- RLS: total_bids
 alter table public.total_bids enable row level security;
 
 create policy "Allow public read access to total_bids"
@@ -257,6 +269,7 @@ create policy "Allow public read access to total_bids"
 -- AUTOMATION & COUNTER TRIGGERS
 -- =============================================================================
 
+-- Automatically initialize total_clicks and total_bids row when a project is created
 create or replace function public.initialize_project_counters()
 returns trigger
 language plpgsql
@@ -281,6 +294,7 @@ create trigger on_project_created_init_counters
   after insert on public.projects
   for each row execute function public.initialize_project_counters();
 
+-- Automatically increment total_bids when a bid is placed
 create or replace function public.update_total_bids_on_insert()
 returns trigger
 language plpgsql
@@ -304,6 +318,7 @@ create trigger on_bid_created_update_total
   after insert on public.bids
   for each row execute function public.update_total_bids_on_insert();
 
+-- Generic timestamp updater
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql

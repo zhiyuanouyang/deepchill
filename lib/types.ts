@@ -180,3 +180,57 @@ export interface EnhanceSubmissionResponse {
   suggestedFeatures?: string[];
   targetAudience?: string;
 }
+
+/**
+ * Supabase Database Table Definitions
+ */
+export interface Profile {
+  id: string;
+  uid: string;
+  display_name: string | null;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Category {
+  id: string;
+  display_name: string;
+  descriptions: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Project {
+  id: string;
+  url: string;
+  name: string;
+  tagline: string | null;
+  discription: string | null;
+  description?: string | null;
+  icon_url: string | null;
+  user_id: string | null;
+  category: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Bid {
+  id: string;
+  project_id: string;
+  price: number;
+  created_at: string;
+}
+
+export interface TotalClicks {
+  project_id: string;
+  count: number;
+  updated_at: string;
+}
+
+export interface TotalBids {
+  project_id: string;
+  count: number;
+  updated_at: string;
+}
+
