@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Loader2,
   Check,
+  User as UserIcon,
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { GoogleIcon, GithubIcon, MicrosoftIcon, DiscordIcon } from '@/components/icons';
@@ -29,12 +30,14 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
   const rawNext = searchParams.get('next') || '/';
   const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
-  const { user, isLoading: isAuthLoading, signOut, refreshSession } = useAuth();
+  const { user, profile, displayName: authDisplayName, isLoading: isAuthLoading, signOut, refreshSession } = useAuth();
+  const effectiveDisplayName = profile?.display_name || authDisplayName || (user?.email ? user.email.split('@')[0] : '');
 
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [method, setMethod] = useState<'password' | 'magic-link'>('password');
 
   // Form states
+  const [displayNameInput, setDisplayNameInput] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -107,6 +110,11 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
     }
 
     if (mode === 'signup') {
+      const cleanDisplayName = displayNameInput.trim();
+      if (!cleanDisplayName) {
+        setErrorMessage('Please enter your display name.');
+        return;
+      }
       if (password.length < 6) {
         setErrorMessage('Password must be at least 6 characters long.');
         return;
@@ -124,6 +132,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
           body: JSON.stringify({
             email: cleanEmail,
             password,
+            displayName: cleanDisplayName,
             next,
           }),
         });
@@ -132,12 +141,12 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
         if (!res.ok || data.error) {
           setErrorMessage(data.error || 'An error occurred during sign up.');
         } else if (data.session) {
-          setSuccessMessage('Account created successfully! Redirecting...');
+          setSuccessMessage(`Account created successfully! Welcome, ${cleanDisplayName}! Redirecting...`);
           await refreshSession();
           setTimeout(() => router.push(next), 1200);
         } else {
           // Email confirmation enabled on Supabase
-          setSuccessMessage('Account created! Please check your email to confirm your registration.');
+          setSuccessMessage(`Account created for ${cleanDisplayName}! Please check your email to confirm your registration.`);
         }
       } catch (err: unknown) {
         setErrorMessage(err instanceof Error ? err.message : 'An error occurred during sign up.');
@@ -222,9 +231,16 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
           Already Signed In
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Signed in as</p>
-        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-800/80 py-1.5 px-3 rounded-xl inline-block border border-slate-200/60 dark:border-slate-700/60 mb-6">
-          {user.email}
-        </p>
+        <div className="flex flex-col items-center gap-1 mb-6">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100 bg-slate-100/80 dark:bg-slate-800/80 py-1.5 px-3.5 rounded-xl inline-block border border-slate-200/60 dark:border-slate-700/60">
+            {effectiveDisplayName || user.email}
+          </p>
+          {effectiveDisplayName && user.email && effectiveDisplayName !== user.email && (
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              {user.email}
+            </p>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3">
           <button
@@ -497,6 +513,25 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = 'signin' }) =>
       ) : (
         /* Password Form */
         <form onSubmit={handlePasswordSubmit} className="space-y-3.5">
+          {mode === 'signup' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Display Name
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  value={displayNameInput}
+                  onChange={(e) => setDisplayNameInput(e.target.value)}
+                  placeholder="e.g. Alex Chen"
+                  className="liquid-glass-input w-full pl-9 pr-3 py-2.5 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all"
+                />
+                <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Email Address

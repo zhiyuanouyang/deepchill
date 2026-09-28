@@ -6,6 +6,7 @@ import { X, Sparkles, Plus, Loader2, ShieldCheck, Info, ListChecks, Users } from
 import confetti from 'canvas-confetti';
 import { Product, ProductCategory, PricingModel } from '@/lib/types';
 import { extractDomain } from '@/lib/utils';
+import { useAuth } from '@/components/auth/auth-provider';
 
 interface SubmitModalProps {
   isOpen: boolean;
@@ -42,17 +43,26 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [targetAudience, setTargetAudience] = useState('');
   const [category, setCategory] = useState<ProductCategory>(defaultCategory || 'DevTools');
 
-  React.useEffect(() => {
-    if (isOpen && defaultCategory) {
-      setCategory(defaultCategory);
-    }
-  }, [isOpen, defaultCategory]);
   const [pricing, setPricing] = useState<PricingModel>('Open Source');
   const [tagsInput, setTagsInput] = useState('');
   const [makerName, setMakerName] = useState('');
   const [makerHandle, setMakerHandle] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [biddingAmount, setBiddingAmount] = useState<number>(50);
+
+  const { profile, displayName } = useAuth();
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (defaultCategory) {
+        setCategory(defaultCategory);
+      }
+      const initialMaker = profile?.display_name || displayName;
+      if (initialMaker && !makerName) {
+        setMakerName(initialMaker);
+      }
+    }
+  }, [isOpen, defaultCategory, profile?.display_name, displayName, makerName]);
 
   const [aiLoading, setAiLoading] = useState(false);
   const [aiTip, setAiTip] = useState<string | null>(null);

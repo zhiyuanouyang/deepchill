@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSubmit,
   onOpenSeoInfo,
 }) => {
-  const { user, isLoading, signOut } = useAuth();
+  const { user, profile, displayName, isLoading, signOut } = useAuth();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -60,11 +60,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const userInitial = (
-    user?.email?.[0] ||
-    user?.user_metadata?.full_name?.[0] ||
-    'U'
-  ).toUpperCase();
+  const currentUserName =
+    profile?.display_name?.trim() ||
+    displayName?.trim() ||
+    (user?.user_metadata?.display_name as string)?.trim() ||
+    (user?.user_metadata?.full_name as string)?.trim() ||
+    user?.email?.split('@')[0] ||
+    'Maker';
+
+  const userInitial = (currentUserName[0] || 'U').toUpperCase();
   const avatarUrl =
     user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
@@ -73,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       ref={headerRef}
       className="sticky top-2 sm:top-3 md:top-4 z-40 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 mb-3 sm:mb-6"
     >
-      <div className="liquid-glass rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 border border-white/80 dark:border-white/10 shadow-lg shadow-slate-900/5 dark:shadow-black/20 transition-all overflow-hidden">
+      <div className="liquid-glass rounded-xl sm:rounded-2xl px-2.5 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 border border-white/80 dark:border-white/10 shadow-lg shadow-slate-900/5 dark:shadow-black/20 transition-all">
         <div className="flex items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           {/* Brand / Logo */}
           <Link
@@ -149,37 +153,42 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-1 sm:gap-1.5 p-1 sm:px-2 sm:py-1 md:px-2.5 md:py-1.5 rounded-lg sm:rounded-xl bg-white/70 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer shadow-xs shrink-0"
-                  title={user.email || 'User Account'}
+                  title={currentUserName}
                   aria-label="User Account Menu"
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatarUrl}
-                      alt="Avatar"
+                      alt={currentUserName}
                       className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-indigo-200 dark:border-indigo-800 shrink-0"
                     />
                   ) : (
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-xs shrink-0">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-xs shrink-0">
                       {userInitial}
                     </div>
                   )}
-                  <span className="hidden xl:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[90px] truncate">
-                    {user.email?.split('@')[0]}
+                  <span className="hidden sm:inline-block text-xs font-semibold text-slate-800 dark:text-slate-100 max-w-[120px] truncate">
+                    {currentUserName}
                   </span>
                   <ChevronDown className="w-3 h-3 text-slate-400 transition-transform hidden sm:inline-block shrink-0" />
                 </button>
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-52 liquid-glass rounded-2xl border border-white/80 dark:border-white/10 shadow-xl py-2 z-50 animate-fadeIn">
-                    <div className="px-3.5 py-1.5 border-b border-slate-200/60 dark:border-slate-800/60">
-                      <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-950/20 dark:shadow-black/60 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800">
+                      <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                         Signed in as
                       </p>
-                      <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                        {user.email}
+                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate mt-0.5">
+                        {currentUserName}
                       </p>
+                      {user.email && (
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          {user.email}
+                        </p>
+                      )}
                     </div>
 
                     <div className="py-1">
@@ -188,20 +197,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setDropdownOpen(false);
                           onOpenSubmit();
                         }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer text-left"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Submit New Project</span>
                       </button>
                     </div>
 
-                    <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                    <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
                       <button
                         onClick={async () => {
                           setDropdownOpen(false);
                           await signOut();
                         }}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer text-left font-medium"
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer text-left font-medium"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -327,15 +336,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </Link>
                 </div>
               ) : (
-                <button
-                  onClick={async () => {
-                    setMobileMenuOpen(false);
-                    await signOut();
-                  }}
-                  className="text-rose-600 dark:text-rose-400 font-medium hover:underline text-[11px]"
-                >
-                  Sign Out ({user.email?.split('@')[0]})
-                </button>
+                <div className="flex items-center justify-between gap-2 w-full">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatarUrl}
+                        alt={currentUserName}
+                        className="w-5 h-5 rounded-full object-cover border border-indigo-200 dark:border-indigo-800 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                        {userInitial}
+                      </div>
+                    )}
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      {currentUserName}
+                    </span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setMobileMenuOpen(false);
+                      await signOut();
+                    }}
+                    className="text-rose-600 dark:text-rose-400 font-medium hover:underline text-[11px] shrink-0"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               )}
             </div>
           </div>
