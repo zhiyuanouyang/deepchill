@@ -8,7 +8,7 @@
 --   3. projects     (id, url, name, tagline, discription, icon_url, user_id, category)
 --   4. bids         (id, project_id, price, created_at)
 --   5. total_clicks (project_id, count)
---   6. total_bids   (project_id, count)
+--   6. total_bids   (project_id, price)
 -- =============================================================================
 
 -- Enable UUID extension if not already enabled
@@ -252,7 +252,7 @@ $$;
 -- =============================================================================
 create table if not exists public.total_bids (
   project_id uuid primary key references public.projects(id) on delete cascade,
-  count integer not null default 0 check (count >= 0),
+  price integer not null default 0 check (price >= 0),
   updated_at timestamptz not null default now()
 );
 
@@ -281,7 +281,7 @@ begin
   values (new.id, 0)
   on conflict (project_id) do nothing;
 
-  insert into public.total_bids (project_id, count)
+  insert into public.total_bids (project_id, price)
   values (new.id, 0)
   on conflict (project_id) do nothing;
 
@@ -302,11 +302,11 @@ security definer
 set search_path = ''
 as $$
 begin
-  insert into public.total_bids (project_id, count, updated_at)
-  values (new.project_id, 1, now())
+  insert into public.total_bids (project_id, price, updated_at)
+  values (new.project_id, new.price, now())
   on conflict (project_id)
   do update set
-    count = public.total_bids.count + 1,
+    price = public.total_bids.price + new.price,
     updated_at = now();
 
   return new;

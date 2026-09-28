@@ -230,7 +230,7 @@ export interface TotalClicks {
 
 export interface TotalBids {
   project_id: string;
-  count: number;
+  price: number;
   updated_at: string;
 }
 
