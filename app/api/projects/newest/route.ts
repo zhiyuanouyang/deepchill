@@ -13,24 +13,8 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     let query = supabase
-      .from('projects')
-      .select(`
-        id,
-        url,
-        name,
-        tagline,
-        discription,
-        description,
-        icon_url,
-        user_id,
-        category,
-        created_at,
-        updated_at,
-        total_bids ( price ),
-        total_clicks ( count ),
-        bids ( id, price, created_at )
-      `)
-      .order('created_at', { referencedTable: 'bids', ascending: false, nullsFirst: false })
+      .from('newest_projects')
+      .select('*')
       .limit(limit);
 
     if (category && category !== 'All') {

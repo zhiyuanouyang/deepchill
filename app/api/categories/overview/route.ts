@@ -17,16 +17,18 @@ export interface CategoryCardOverview {
   projectCount: number;
   primaryTopProjects: TrendingProduct[];
   secondaryRecentProjects: NewestReleaseProduct[];
+  updatedAt?: string;
 }
 
 export async function GET() {
   try {
     const supabase = await createClient();
 
-    // 1. Fetch all categories
+    // 1. Fetch all categories ordered by updated_at descending
     const { data: categories, error: catError } = await supabase
       .from('categories')
-      .select('id, display_name, descriptions, count')
+      .select('id, display_name, descriptions, count, updated_at')
+      .order('updated_at', { ascending: false })
       .order('count', { ascending: false })
       .order('display_name', { ascending: true });
 
@@ -100,6 +102,7 @@ export async function GET() {
         projectCount: cat.count || catProjects.length,
         primaryTopProjects: sortedByBid,
         secondaryRecentProjects: sortedByRecent,
+        updatedAt: cat.updated_at,
       };
     });
 

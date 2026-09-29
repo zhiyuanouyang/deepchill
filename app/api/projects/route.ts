@@ -14,22 +14,8 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
-    let query = supabase.from('projects').select(`
-      id,
-      url,
-      name,
-      tagline,
-      discription,
-      description,
-      icon_url,
-      user_id,
-      category,
-      created_at,
-      updated_at,
-      total_bids ( price ),
-      total_clicks ( count ),
-      bids ( id, price, created_at )
-    `);
+    const tableName = sort === 'newest' ? 'newest_projects' : 'trending_projects';
+    let query = supabase.from(tableName).select('*');
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
@@ -39,14 +25,6 @@ export async function GET(request: Request) {
       query = query.or(
         `name.ilike.%${q.trim()}%,tagline.ilike.%${q.trim()}%,discription.ilike.%${q.trim()}%,url.ilike.%${q.trim()}%`
       );
-    }
-
-    if (sort === 'trending') {
-      query = query.order('price', { referencedTable: 'total_bids', ascending: false, nullsFirst: false });
-    } else if (sort === 'newest') {
-      query = query.order('created_at', { referencedTable: 'bids', ascending: false, nullsFirst: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
     }
 
     query = query.limit(limit);

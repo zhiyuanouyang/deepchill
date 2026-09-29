@@ -13,6 +13,7 @@ export type PricingModel = 'Free' | 'Freemium' | 'Open Source' | 'Paid';
 export interface MostRecentBidInfo {
   bidPrice: number;
   bidTime: string;
+  hasBid?: boolean;
 }
 
 export interface Product {
@@ -24,6 +25,8 @@ export interface Product {
   logoUrl?: string;
   totalBid: number;
   mostRecentBid: MostRecentBidInfo;
+  latestBidTime?: string | null;
+  hasBid?: boolean;
   totalClicks: number;
   categoryTags: string[];
 
@@ -73,6 +76,8 @@ export interface TrendingProduct {
   makerHandle?: string;
   dofollowApproved?: boolean;
   starsCount?: number;
+  latestBidTime?: string | null;
+  hasBid?: boolean;
 }
 
 /**
@@ -90,6 +95,8 @@ export interface NewestReleaseProduct {
   mostRecentBid: MostRecentBidInfo;
   totalClicks: number;
   launchDate?: string;
+  latestBidTime?: string | null;
+  hasBid?: boolean;
 }
 
 /**
@@ -141,6 +148,8 @@ export function toTrendingProduct(product: Product): TrendingProduct {
     makerHandle: product.makerHandle,
     dofollowApproved: product.dofollowApproved,
     starsCount: product.starsCount,
+    latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
+    hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
   };
 }
 
@@ -159,9 +168,12 @@ export function toNewestReleaseProduct(product: Product): NewestReleaseProduct {
     mostRecentBid: product.mostRecentBid ?? {
       bidPrice: product.totalPaid ?? 0,
       bidTime: product.paidAt ?? product.launchDate,
+      hasBid: product.hasBid,
     },
     totalClicks: product.totalClicks ?? product.clicks ?? 0,
     launchDate: product.launchDate,
+    latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
+    hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
   };
 }
 

@@ -375,53 +375,64 @@ export function DirectoryView({
     });
   }, [products, selectedCategory, activeTag, searchQuery, activeMode, aiFilterIds]);
 
-  // 1. Trending List: From Supabase backend /api/projects/trending (total_bids.price join desc)
+  // 1. Trending List: Fetched directly ordered from Supabase (trending_projects view)
   const trendingProducts: TrendingProduct[] = useMemo(() => {
-    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
-      return [...baseFilteredProducts]
-        .sort((a, b) => {
-          const aPaid = a.totalBid ?? a.totalPaid ?? 0;
-          const bPaid = b.totalBid ?? b.totalPaid ?? 0;
-          if (bPaid !== aPaid) return bPaid - aPaid;
-          const aClicks = a.totalClicks ?? a.clicks ?? 0;
-          const bClicks = b.totalClicks ?? b.clicks ?? 0;
-          if (bClicks !== aClicks) return bClicks - aClicks;
-          const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
-          const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
-          return bTime - aTime;
-        })
-        .map(toTrendingProduct);
-    }
-    if (dbTrendingProducts && dbTrendingProducts.length > 0) {
-      return dbTrendingProducts;
-    }
-    return [...baseFilteredProducts]
-      .sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0))
-      .map(toTrendingProduct);
-  }, [baseFilteredProducts, dbTrendingProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
+    const list = dbTrendingProducts && dbTrendingProducts.length > 0
+      ? dbTrendingProducts
+      : baseFilteredProducts.map(toTrendingProduct);
 
-  // 2. Newest List: From Supabase backend /api/projects/newest (bids.created_at join desc)
-  const newestProducts: NewestReleaseProduct[] = useMemo(() => {
     if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
-      return [...baseFilteredProducts]
-        .sort((a, b) => {
-          const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
-          const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
-          return bTime - aTime;
-        })
-        .map(toNewestReleaseProduct);
+      return list.filter((p) => {
+        if (activeMode === 'ai' && aiFilterIds !== null) {
+          if (!aiFilterIds.some((id) => id.toLowerCase() === p.id.toLowerCase())) return false;
+        }
+        if (activeTag && !(p.categoryTags || []).some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
+          return false;
+        }
+        if (activeMode === 'keyword' && searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(q) ||
+            p.domain?.toLowerCase().includes(q) ||
+            p.tagline?.toLowerCase().includes(q) ||
+            p.description.toLowerCase().includes(q) ||
+            (p.categoryTags || []).some((t) => t.toLowerCase().includes(q)) ||
+            p.makerName.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      });
     }
-    if (dbNewestProducts && dbNewestProducts.length > 0) {
-      return dbNewestProducts;
+
+    return list;
+  }, [dbTrendingProducts, baseFilteredProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
+
+  // 2. Newest List: Fetched directly ordered from Supabase (newest_projects view)
+  const newestProducts: NewestReleaseProduct[] = useMemo(() => {
+    const list = dbNewestProducts && dbNewestProducts.length > 0
+      ? dbNewestProducts
+      : baseFilteredProducts.map(toNewestReleaseProduct);
+
+    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
+      return list.filter((p) => {
+        if (activeMode === 'ai' && aiFilterIds !== null) {
+          if (!aiFilterIds.some((id) => id.toLowerCase() === p.id.toLowerCase())) return false;
+        }
+        if (activeMode === 'keyword' && searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(q) ||
+            p.domain?.toLowerCase().includes(q) ||
+            p.tagline?.toLowerCase().includes(q) ||
+            p.description.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      });
     }
-    return [...baseFilteredProducts]
-      .sort((a, b) => {
-        const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
-        const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
-        return bTime - aTime;
-      })
-      .map(toNewestReleaseProduct);
-  }, [baseFilteredProducts, dbNewestProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
+
+    return list;
+  }, [dbNewestProducts, baseFilteredProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
 
   // Paginated slices
   const totalTrendingPages = Math.max(1, Math.ceil(trendingProducts.length / PRIMARY_PAGE_SIZE));
@@ -457,6 +468,50 @@ export function DirectoryView({
     }
     return counts;
   }, [dbCategories, products]);
+
+  // Main Category Bar items: 'All' followed by categories sorted by updated_at timestamp descending
+  const sortedCategoryBarItems = useMemo<('All' | ProductCategory)[]>(() => {
+    const defaultCategories: ProductCategory[] = [
+      'DevTools',
+      'Open Source Infrastructure',
+      'AI & Machine Learning',
+      'Productivity',
+      'Design & Creative',
+      'SaaS & Analytics',
+      'Security & Privacy',
+      'Developer Utilities',
+    ];
+
+    if (!dbCategories || dbCategories.length === 0) {
+      return CATEGORIES;
+    }
+
+    // Sort dbCategories by updated_at descending
+    const sortedDb = [...dbCategories].sort((a, b) => {
+      const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+      const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+      return timeB - timeA;
+    });
+
+    const orderedNames: ProductCategory[] = [];
+    const seen = new Set<string>();
+
+    for (const cat of sortedDb) {
+      if (cat.display_name && defaultCategories.includes(cat.display_name as ProductCategory)) {
+        orderedNames.push(cat.display_name as ProductCategory);
+        seen.add(cat.display_name);
+      }
+    }
+
+    // Append any default categories not found in database records
+    for (const cat of defaultCategories) {
+      if (!seen.has(cat)) {
+        orderedNames.push(cat);
+      }
+    }
+
+    return ['All', ...orderedNames];
+  }, [dbCategories]);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden text-slate-900 dark:text-slate-100 bg-slate-50/60 dark:bg-[#0b0f19] pb-20 transition-colors duration-250">
@@ -555,7 +610,7 @@ export function DirectoryView({
           {/* Main Category Bar */}
           <div className="liquid-glass rounded-2xl p-1.5 sm:p-2 shadow-xs border border-white/80 dark:border-white/10">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-1 py-0.5 scroll-smooth">
-              {CATEGORIES.map((cat) => {
+              {sortedCategoryBarItems.map((cat) => {
                 const isActive = selectedCategory === cat;
                 const IconComponent = CATEGORY_ICONS[cat] || Layers;
                 const count = categoryCounts[cat] ?? 0;

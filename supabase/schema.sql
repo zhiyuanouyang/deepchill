@@ -21,12 +21,16 @@ create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
   display_name text not null,
   descriptions text,
+  count integer not null default 0 check (count >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create unique index if not exists idx_categories_display_name
   on public.categories (display_name);
+
+create index if not exists idx_categories_updated_at
+  on public.categories (updated_at desc);
 
 alter table public.categories enable row level security;
 
@@ -304,6 +308,37 @@ create trigger on_bid_created_update_total
   after insert on public.bids
   for each row execute function public.update_total_bids_on_insert();
 
+-- Automatically update category updated_at timestamp when a bid is placed
+create or replace function public.on_bid_created_update_category_timestamp()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_category text;
+begin
+  select category into v_category
+  from public.projects
+  where id = new.project_id;
+
+  if v_category is not null and v_category <> '' then
+    update public.categories
+    set updated_at = now()
+    where display_name = v_category
+       or lower(display_name) = lower(v_category)
+       or id::text = v_category;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_bid_created_update_category_timestamp on public.bids;
+create trigger on_bid_created_update_category_timestamp
+  after insert on public.bids
+  for each row execute function public.on_bid_created_update_category_timestamp();
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -329,11 +364,91 @@ create trigger set_projects_updated_at
   before update on public.projects
   for each row execute function public.set_updated_at();
 
+drop trigger if exists set_total_clicks_updated_at on public.total_clicks;
+create trigger set_total_clicks_updated_at
+  before update on public.total_clicks
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_total_bids_updated_at on public.total_bids;
+create trigger set_total_bids_updated_at
+  before update on public.total_bids
+  for each row execute function public.set_updated_at();
+
+-- =============================================================================
+-- DIRECT ORDERED VIEWS (Supabase Data API Access)
+-- =============================================================================
+
+create or replace view public.trending_projects as
+select
+  p.id,
+  p.url,
+  p.name,
+  p.tagline,
+  p.discription,
+  p.description,
+  p.icon_url,
+  p.user_id,
+  p.category,
+  p.created_at,
+  p.updated_at,
+  coalesce(tb.price, 0) as total_bid_price,
+  coalesce(tc.count, 0) as total_clicks_count,
+  lb.created_at as latest_bid_time,
+  coalesce(lb.price, 0) as latest_bid_price
+from public.projects p
+left join public.total_bids tb on tb.project_id = p.id
+left join public.total_clicks tc on tc.project_id = p.id
+left join lateral (
+  select b.created_at, b.price
+  from public.bids b
+  where b.project_id = p.id
+  order by b.created_at desc
+  limit 1
+) lb on true
+order by
+  coalesce(tb.price, 0) desc,
+  coalesce(tc.count, 0) desc,
+  lb.created_at desc nulls last,
+  p.created_at desc;
+
+create or replace view public.newest_projects as
+select
+  p.id,
+  p.url,
+  p.name,
+  p.tagline,
+  p.discription,
+  p.description,
+  p.icon_url,
+  p.user_id,
+  p.category,
+  p.created_at,
+  p.updated_at,
+  coalesce(tb.price, 0) as total_bid_price,
+  coalesce(tc.count, 0) as total_clicks_count,
+  lb.created_at as latest_bid_time,
+  coalesce(lb.price, 0) as latest_bid_price
+from public.projects p
+left join public.total_bids tb on tb.project_id = p.id
+left join public.total_clicks tc on tc.project_id = p.id
+left join lateral (
+  select b.created_at, b.price
+  from public.bids b
+  where b.project_id = p.id
+  order by b.created_at desc
+  limit 1
+) lb on true
+order by
+  lb.created_at desc nulls last,
+  p.created_at desc;
+
 -- =============================================================================
 -- ROLE PRIVILEGES (Supabase Data API Access)
 -- =============================================================================
 grant usage on schema public to anon, authenticated;
 grant select on all tables in schema public to anon, authenticated;
+grant select on public.trending_projects to anon, authenticated;
+grant select on public.newest_projects to anon, authenticated;
 grant insert, update, delete on public.projects to authenticated;
 grant insert, update on public.profiles to authenticated;
 grant insert on public.bids to authenticated;

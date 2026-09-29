@@ -15,24 +15,8 @@ export async function getTrendingProjects(
     const supabase = await createClient();
 
     let query = supabase
-      .from('projects')
-      .select(`
-        id,
-        url,
-        name,
-        tagline,
-        discription,
-        description,
-        icon_url,
-        user_id,
-        category,
-        created_at,
-        updated_at,
-        total_bids ( price ),
-        total_clicks ( count ),
-        bids ( id, price, created_at )
-      `)
-      .order('price', { referencedTable: 'total_bids', ascending: false, nullsFirst: false })
+      .from('trending_projects')
+      .select('*')
       .limit(limit);
 
     if (category && category !== 'All') {
@@ -60,24 +44,8 @@ export async function getNewestProjects(
     const supabase = await createClient();
 
     let query = supabase
-      .from('projects')
-      .select(`
-        id,
-        url,
-        name,
-        tagline,
-        discription,
-        description,
-        icon_url,
-        user_id,
-        category,
-        created_at,
-        updated_at,
-        total_bids ( price ),
-        total_clicks ( count ),
-        bids ( id, price, created_at )
-      `)
-      .order('created_at', { referencedTable: 'bids', ascending: false, nullsFirst: false })
+      .from('newest_projects')
+      .select('*')
       .limit(limit);
 
     if (category && category !== 'All') {
@@ -105,24 +73,8 @@ export async function getAllProjects(
     const supabase = await createClient();
 
     let query = supabase
-      .from('projects')
-      .select(`
-        id,
-        url,
-        name,
-        tagline,
-        discription,
-        description,
-        icon_url,
-        user_id,
-        category,
-        created_at,
-        updated_at,
-        total_bids ( price ),
-        total_clicks ( count ),
-        bids ( id, price, created_at )
-      `)
-      .order('price', { referencedTable: 'total_bids', ascending: false, nullsFirst: false })
+      .from('trending_projects')
+      .select('*')
       .limit(limit);
 
     if (category && category !== 'All') {
@@ -148,6 +100,7 @@ export async function getCategories(): Promise<Category[]> {
     const { data: categories, error } = await supabase
       .from('categories')
       .select('id, display_name, descriptions, count, created_at, updated_at')
+      .order('updated_at', { ascending: false })
       .order('count', { ascending: false })
       .order('display_name', { ascending: true });
 

@@ -13,6 +13,11 @@ export async function POST(
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(id)) {
+      return NextResponse.json({ success: true, count: 1 });
+    }
+
     const supabase = await createClient();
 
     // Call RPC to atomically increment clicks

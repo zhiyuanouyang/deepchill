@@ -123,6 +123,7 @@ interface CategoryData {
   projectCount: number;
   primaryTopProjects: TrendingProduct[];
   secondaryRecentProjects: NewestReleaseProduct[];
+  updatedAt?: string;
 }
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
@@ -177,12 +178,19 @@ function buildCategoryData(products: Product[]): CategoryData[] {
 
   return CATEGORIES.map((cat) => {
     const catProds = grouped[cat] || [];
+    let latestTime = 0;
+    for (const p of catProds) {
+      const t = new Date(p.mostRecentBid?.bidTime || p.paidAt || p.launchDate || 0).getTime();
+      if (t > latestTime) latestTime = t;
+    }
+
     return {
       name: cat,
       description: CATEGORY_DESCRIPTIONS[cat] ?? '',
       projectCount: catProds.length,
       primaryTopProjects: rankPrimaryTopProducts(catProds),
       secondaryRecentProjects: rankSecondaryRecentProducts(catProds),
+      updatedAt: latestTime > 0 ? new Date(latestTime).toISOString() : undefined,
     };
   });
 }
@@ -1028,34 +1036,6 @@ export function CategoriesView() {
     }
   }, []);
 
-  // Scrollspy to automatically highlight the current category in view
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPos = window.scrollY + 180;
-      let currentSlug: string | null = null;
-
-      for (const cat of CATEGORIES) {
-        const slug = categorySlug(cat);
-        const el = document.getElementById(`category-${slug}`);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            currentSlug = slug;
-            break;
-          }
-        }
-      }
-
-      if (currentSlug) {
-        setActiveSlug(currentSlug);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const [dbCategoryData, setDbCategoryData] = useState<CategoryData[] | null>(null);
 
   const fetchOverview = useCallback(async () => {
@@ -1071,6 +1051,7 @@ export function CategoriesView() {
             projectCount: c.projectCount ?? 0,
             primaryTopProjects: c.primaryTopProjects || [],
             secondaryRecentProjects: c.secondaryRecentProjects || [],
+            updatedAt: c.updatedAt || c.updated_at,
           }));
           setDbCategoryData(mapped);
         }
@@ -1117,16 +1098,52 @@ export function CategoriesView() {
     fetchOverview();
   }, [fetchOverview]);
 
-  // Build category data with primary top 3 and secondary bottom 3 (using API data first)
+  // Build category data with primary top 3 and secondary bottom 3 (sorted by updated_at timestamp descending)
   const categoryData = useMemo(() => {
+    let list: CategoryData[];
     if (dbCategoryData && dbCategoryData.length > 0) {
       // Return API categories matching the app's CATEGORIES list or all with projects
       const existingNames = new Set(CATEGORIES as string[]);
       const appCategories = dbCategoryData.filter((c) => existingNames.has(c.name));
-      return appCategories.length > 0 ? appCategories : dbCategoryData;
+      list = appCategories.length > 0 ? appCategories : dbCategoryData;
+    } else {
+      list = buildCategoryData(products);
     }
-    return buildCategoryData(products);
+
+    return [...list].sort((a, b) => {
+      const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return timeB - timeA;
+    });
   }, [dbCategoryData, products]);
+
+  // Scrollspy to automatically highlight the current category in view
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 180;
+      let currentSlug: string | null = null;
+
+      for (const cat of categoryData) {
+        const slug = categorySlug(cat.name);
+        const el = document.getElementById(`category-${slug}`);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            currentSlug = slug;
+            break;
+          }
+        }
+      }
+
+      if (currentSlug) {
+        setActiveSlug(currentSlug);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [categoryData]);
 
   // Smooth scroll to category section
   const handleJumpTo = useCallback((slug: string) => {

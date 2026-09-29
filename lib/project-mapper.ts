@@ -48,6 +48,7 @@ export function extractMostRecentBid(row: JoinedProjectRow): MostRecentBidInfo {
     return {
       bidPrice: sorted[0].price,
       bidTime: sorted[0].created_at,
+      hasBid: true,
     };
   }
 
@@ -55,6 +56,7 @@ export function extractMostRecentBid(row: JoinedProjectRow): MostRecentBidInfo {
   return {
     bidPrice: total,
     bidTime: row.created_at || new Date().toISOString(),
+    hasBid: false,
   };
 }
 
@@ -84,6 +86,8 @@ export function mapRowToProduct(row: JoinedProjectRow): Product {
     totalClicks,
     totalBid,
     mostRecentBid,
+    latestBidTime: mostRecentBid.hasBid ? mostRecentBid.bidTime : null,
+    hasBid: mostRecentBid.hasBid,
     featured: totalBid >= 200,
     launchDate: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
     dofollowApproved: true,
@@ -111,6 +115,8 @@ export function mapRowToTrendingProduct(row: JoinedProjectRow): TrendingProduct 
     makerHandle: product.makerHandle,
     dofollowApproved: product.dofollowApproved,
     starsCount: product.starsCount,
+    latestBidTime: product.latestBidTime,
+    hasBid: product.hasBid,
   };
 }
 
@@ -127,5 +133,7 @@ export function mapRowToNewestProduct(row: JoinedProjectRow): NewestReleaseProdu
     mostRecentBid: product.mostRecentBid,
     totalClicks: product.totalClicks,
     launchDate: product.launchDate,
+    latestBidTime: product.latestBidTime,
+    hasBid: product.hasBid,
   };
 }
