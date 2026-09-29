@@ -197,8 +197,9 @@ export interface Category {
   id: string;
   display_name: string;
   descriptions: string | null;
-  created_at: string;
-  updated_at: string;
+  count: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Project {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -23,6 +23,7 @@ import {
 import {
   Product,
   ProductCategory,
+  Category,
   TrendingProduct,
   NewestReleaseProduct,
   toTrendingProduct,
@@ -69,14 +70,92 @@ export function DirectoryView() {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [upvotedIds, setUpvotedIds] = useState<Set<string>>(new Set());
   const [isClientReady, setIsClientReady] = useState(false);
+  const [dbCategories, setDbCategories] = useState<Category[]>([]);
+  const [dbTrendingProducts, setDbTrendingProducts] = useState<TrendingProduct[] | null>(null);
+  const [dbNewestProducts, setDbNewestProducts] = useState<NewestReleaseProduct[] | null>(null);
 
   // Search & Filters state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'All' | ProductCategory>(() => {
-    // Will be overridden by useEffect below on client mount if URL param present
     return 'All';
   });
   const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // Fetch categories from Supabase categories table
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.categories && Array.isArray(data.categories)) {
+          setDbCategories(data.categories);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load categories:', e);
+    }
+  }, []);
+
+  // Fetch trending products (sorted by total_bids.price join with products table desc)
+  const fetchTrending = useCallback(async (cat: 'All' | ProductCategory) => {
+    try {
+      const url = cat && cat !== 'All'
+        ? `/api/projects/trending?category=${encodeURIComponent(cat)}`
+        : '/api/projects/trending';
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.products) {
+          setDbTrendingProducts(data.products);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch trending projects:', e);
+    }
+  }, []);
+
+  // Fetch newest releases (sorted by bids.created_at join with products table desc)
+  const fetchNewest = useCallback(async (cat: 'All' | ProductCategory) => {
+    try {
+      const url = cat && cat !== 'All'
+        ? `/api/projects/newest?category=${encodeURIComponent(cat)}`
+        : '/api/projects/newest';
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.products) {
+          setDbNewestProducts(data.products);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch newest releases:', e);
+    }
+  }, []);
+
+  // Fetch all products from Supabase
+  const fetchAllProducts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/projects');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.products && data.products.length > 0) {
+          setProducts(data.products);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch all products:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchAllProducts();
+  }, [fetchCategories, fetchAllProducts]);
+
+  useEffect(() => {
+    fetchTrending(selectedCategory);
+    fetchNewest(selectedCategory);
+  }, [selectedCategory, fetchTrending, fetchNewest]);
 
   // Initialize category from URL search params (e.g. /?category=DevTools)
   useEffect(() => {
@@ -251,11 +330,17 @@ export function DirectoryView() {
         return p;
       })
     );
+    // Persist click in Supabase
+    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
   };
 
   // Add new submitted project
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prev) => [newProduct, ...prev]);
+    // Refresh categories and project lists to reflect incremented category count
+    fetchCategories();
+    fetchTrending(selectedCategory);
+    fetchNewest(selectedCategory);
   };
 
   // Base filtered products (common filter for category, pricing, tags, search)
@@ -299,45 +384,53 @@ export function DirectoryView() {
     });
   }, [products, selectedCategory, activeTag, searchQuery, activeMode, aiFilterIds]);
 
-  // 1. Trending List: Partial projection from grounding truth, ranked by total bids
+  // 1. Trending List: From Supabase backend /api/projects/trending (total_bids.price join desc)
   const trendingProducts: TrendingProduct[] = useMemo(() => {
+    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
+      return [...baseFilteredProducts]
+        .sort((a, b) => {
+          const aPaid = a.totalBid ?? a.totalPaid ?? 0;
+          const bPaid = b.totalBid ?? b.totalPaid ?? 0;
+          if (bPaid !== aPaid) return bPaid - aPaid;
+          const aClicks = a.totalClicks ?? a.clicks ?? 0;
+          const bClicks = b.totalClicks ?? b.clicks ?? 0;
+          if (bClicks !== aClicks) return bClicks - aClicks;
+          const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
+          const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
+          return bTime - aTime;
+        })
+        .map(toTrendingProduct);
+    }
+    if (dbTrendingProducts && dbTrendingProducts.length > 0) {
+      return dbTrendingProducts;
+    }
     return [...baseFilteredProducts]
-      .sort((a, b) => {
-        const aPaid = a.totalBid ?? a.totalPaid ?? 0;
-        const bPaid = b.totalBid ?? b.totalPaid ?? 0;
-        if (bPaid !== aPaid) {
-          return bPaid - aPaid;
-        }
-        const aClicks = a.totalClicks ?? a.clicks ?? 0;
-        const bClicks = b.totalClicks ?? b.clicks ?? 0;
-        if (bClicks !== aClicks) {
-          return bClicks - aClicks;
-        }
-        const aTime = new Date(
-          a.mostRecentBid?.bidTime || a.paidAt || a.launchDate
-        ).getTime();
-        const bTime = new Date(
-          b.mostRecentBid?.bidTime || b.paidAt || b.launchDate
-        ).getTime();
-        return bTime - aTime;
-      })
+      .sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0))
       .map(toTrendingProduct);
-  }, [baseFilteredProducts]);
+  }, [baseFilteredProducts, dbTrendingProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
 
-  // 2. Newest List: Partial projection from grounding truth, ranked by latest bid timestamp
+  // 2. Newest List: From Supabase backend /api/projects/newest (bids.created_at join desc)
   const newestProducts: NewestReleaseProduct[] = useMemo(() => {
+    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
+      return [...baseFilteredProducts]
+        .sort((a, b) => {
+          const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
+          const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
+          return bTime - aTime;
+        })
+        .map(toNewestReleaseProduct);
+    }
+    if (dbNewestProducts && dbNewestProducts.length > 0) {
+      return dbNewestProducts;
+    }
     return [...baseFilteredProducts]
       .sort((a, b) => {
-        const aTime = new Date(
-          a.mostRecentBid?.bidTime || a.paidAt || a.launchDate
-        ).getTime();
-        const bTime = new Date(
-          b.mostRecentBid?.bidTime || b.paidAt || b.launchDate
-        ).getTime();
+        const aTime = new Date(a.mostRecentBid?.bidTime || a.paidAt || a.launchDate || '').getTime();
+        const bTime = new Date(b.mostRecentBid?.bidTime || b.paidAt || b.launchDate || '').getTime();
         return bTime - aTime;
       })
       .map(toNewestReleaseProduct);
-  }, [baseFilteredProducts]);
+  }, [baseFilteredProducts, dbNewestProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
 
   // Paginated slices
   const totalTrendingPages = Math.max(1, Math.ceil(trendingProducts.length / PRIMARY_PAGE_SIZE));
@@ -356,13 +449,23 @@ export function DirectoryView() {
     return products.filter((p) => p.pricing === 'Open Source').length;
   }, [products]);
 
+  // Category counts fetched from Supabase categories table with fallback
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: products.length };
-    for (const p of products) {
-      counts[p.category] = (counts[p.category] || 0) + 1;
+    const counts: Record<string, number> = {};
+    let totalFromDb = 0;
+    for (const c of dbCategories) {
+      counts[c.display_name] = c.count;
+      totalFromDb += c.count;
+    }
+    counts['All'] = totalFromDb > 0 ? totalFromDb : products.length;
+
+    for (const cat of CATEGORIES) {
+      if (counts[cat] === undefined) {
+        counts[cat] = products.filter((p) => p.category === cat).length;
+      }
     }
     return counts;
-  }, [products]);
+  }, [dbCategories, products]);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden text-slate-900 dark:text-slate-100 bg-slate-50/60 dark:bg-[#0b0f19] pb-20 transition-colors duration-250">

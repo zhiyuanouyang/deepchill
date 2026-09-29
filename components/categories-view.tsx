@@ -1095,6 +1095,34 @@ export function CategoriesView() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const [dbCategoryData, setDbCategoryData] = useState<CategoryData[] | null>(null);
+
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories/overview');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.categories && Array.isArray(data.categories) && data.categories.length > 0) {
+          // Map to CategoryData format
+          const mapped: CategoryData[] = data.categories.map((c: any) => ({
+            name: c.name as ProductCategory,
+            description: c.description || CATEGORY_DESCRIPTIONS[c.name as ProductCategory] || '',
+            projectCount: c.projectCount ?? 0,
+            primaryTopProjects: c.primaryTopProjects || [],
+            secondaryRecentProjects: c.secondaryRecentProjects || [],
+          }));
+          setDbCategoryData(mapped);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load category overview from API:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOverview();
+  }, [fetchOverview]);
+
   // Record outbound click
   const handleRecordClick = useCallback((productId: string) => {
     setProducts((prods) =>
@@ -1106,15 +1134,25 @@ export function CategoriesView() {
         return p;
       })
     );
+    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
   }, []);
 
   // Add new submitted project
   const handleAddProduct = useCallback((newProduct: Product) => {
     setProducts((prev) => [newProduct, ...prev]);
-  }, []);
+    fetchOverview();
+  }, [fetchOverview]);
 
-  // Build category data with primary top 3 and secondary bottom 3
-  const categoryData = useMemo(() => buildCategoryData(products), [products]);
+  // Build category data with primary top 3 and secondary bottom 3 (using API data first)
+  const categoryData = useMemo(() => {
+    if (dbCategoryData && dbCategoryData.length > 0) {
+      // Return API categories matching the app's CATEGORIES list or all with projects
+      const existingNames = new Set(CATEGORIES as string[]);
+      const appCategories = dbCategoryData.filter((c) => existingNames.has(c.name));
+      return appCategories.length > 0 ? appCategories : dbCategoryData;
+    }
+    return buildCategoryData(products);
+  }, [dbCategoryData, products]);
 
   // Smooth scroll to category section
   const handleJumpTo = useCallback((slug: string) => {

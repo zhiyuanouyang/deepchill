@@ -65,6 +65,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   }, [isOpen, defaultCategory, profile?.display_name, displayName, makerName]);
 
   const [aiLoading, setAiLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiTip, setAiTip] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -136,9 +137,11 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate() || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     const parsedTags = tagsInput
       .split(',')
@@ -154,7 +157,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     const tagsArray = parsedTags.length > 0 ? parsedTags : ['Indie', 'DevTools'];
     const nowIso = new Date().toISOString();
 
-    const newProduct: Product = {
+    let newProduct: Product = {
       id: previewSlug,
       domain: rawDomain,
       name: name.trim(),
@@ -186,6 +189,42 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       totalPaid: biddingAmount,
       paidAt: nowIso,
     };
+
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          websiteUrl: websiteUrl.trim(),
+          repoUrl: repoUrl.trim() || undefined,
+          tagline: tagline.trim(),
+          description: description.trim(),
+          category,
+          pricing,
+          tags: tagsArray,
+          makerName: makerName.trim(),
+          makerHandle: makerHandle.trim() || undefined,
+          logoUrl: logoUrl.trim() || undefined,
+          biddingAmount,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.product) {
+          newProduct = {
+            ...newProduct,
+            ...data.product,
+            id: data.product.id || newProduct.id,
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Backend submission notice:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
 
     onSubmitProduct(newProduct);
 
@@ -566,10 +605,20 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <button
                 type="submit"
                 id="btn-submit-project-final"
-                className="liquid-btn-primary px-6 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/10"
+                disabled={isSubmitting}
+                className="liquid-btn-primary px-6 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-900/10 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Plus className="w-4 h-4" />
-                <span>Submit Product</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Submitting to Directory...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    <span>Submit Product</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
