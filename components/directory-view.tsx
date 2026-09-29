@@ -293,15 +293,15 @@ export function DirectoryView({
     setDbTrendingProducts((prev) =>
       prev
         ? prev.map((p) => {
-            if (p.id === productId) {
-              const updatedClicks = (p.totalClicks ?? 0) + 1;
-              return {
-                ...p,
-                totalClicks: updatedClicks,
-              };
-            }
-            return p;
-          })
+          if (p.id === productId) {
+            const updatedClicks = (p.totalClicks ?? 0) + 1;
+            return {
+              ...p,
+              totalClicks: updatedClicks,
+            };
+          }
+          return p;
+        })
         : prev
     );
 
@@ -309,20 +309,20 @@ export function DirectoryView({
     setDbNewestProducts((prev) =>
       prev
         ? prev.map((p) => {
-            if (p.id === productId) {
-              const updatedClicks = (p.totalClicks ?? 0) + 1;
-              return {
-                ...p,
-                totalClicks: updatedClicks,
-              };
-            }
-            return p;
-          })
+          if (p.id === productId) {
+            const updatedClicks = (p.totalClicks ?? 0) + 1;
+            return {
+              ...p,
+              totalClicks: updatedClicks,
+            };
+          }
+          return p;
+        })
         : prev
     );
 
     // 4. Persist click count to Supabase in the background (no refetch needed)
-    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
+    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => { });
   };
 
   // Add new submitted project
@@ -623,26 +623,23 @@ export function DirectoryView({
                       handleCategoryChange(cat);
                       handleTagChange(null);
                     }}
-                    className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                      isActive
-                        ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
-                    }`}
+                    className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${isActive
+                      ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
+                      }`}
                   >
                     <IconComponent
-                      className={`w-3.5 h-3.5 transition-colors ${
-                        isActive
-                          ? 'text-indigo-300 dark:text-indigo-200'
-                          : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                      }`}
+                      className={`w-3.5 h-3.5 transition-colors ${isActive
+                        ? 'text-indigo-300 dark:text-indigo-200'
+                        : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                        }`}
                     />
                     <span>{cat}</span>
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${
-                        isActive
-                          ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
-                          : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                      }`}
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${isActive
+                        ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
+                        : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                        }`}
                     >
                       {count}
                     </span>
@@ -702,7 +699,7 @@ export function DirectoryView({
         </section>
 
         {/* Dual List View Layout (Primary: Trending on left, Secondary: Newest on right) */}
-        {baseFilteredProducts.length > 0 ? (
+        {(trendingProducts.length > 0 || newestProducts.length > 0 || baseFilteredProducts.length > 0) ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-14 items-start">
             {/* Primary List: Trending (Takes ~67% / 8 cols) */}
             <section className="lg:col-span-8 flex flex-col space-y-4">

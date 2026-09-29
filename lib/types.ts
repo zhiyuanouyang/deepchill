@@ -78,6 +78,8 @@ export interface TrendingProduct {
   starsCount?: number;
   latestBidTime?: string | null;
   hasBid?: boolean;
+  mostRecentBid?: MostRecentBidInfo;
+  launchDate?: string;
 }
 
 /**
@@ -97,6 +99,7 @@ export interface NewestReleaseProduct {
   launchDate?: string;
   latestBidTime?: string | null;
   hasBid?: boolean;
+  totalBid?: number;
 }
 
 /**
@@ -150,6 +153,8 @@ export function toTrendingProduct(product: Product): TrendingProduct {
     starsCount: product.starsCount,
     latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
     hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
+    mostRecentBid: product.mostRecentBid,
+    launchDate: product.launchDate,
   };
 }
 
@@ -174,6 +179,7 @@ export function toNewestReleaseProduct(product: Product): NewestReleaseProduct {
     launchDate: product.launchDate,
     latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
     hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
+    totalBid: product.totalBid ?? product.totalPaid ?? 0,
   };
 }
 

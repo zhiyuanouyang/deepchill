@@ -89,9 +89,36 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
     }
   };
 
-  const paidBidAmount = product.totalBid ?? (product as Product).totalPaid ?? 0;
+  const totalBidAmount = product.totalBid ?? (product as Product).totalPaid ?? 0;
+  const recentBidAmount =
+    product.mostRecentBid?.bidPrice ??
+    (product as Product).mostRecentBid?.bidPrice ??
+    0;
   const clickCount = product.totalClicks ?? (product as Product).clicks ?? 0;
   const displayTags = product.categoryTags ?? (product as Product).tags ?? [];
+
+  const rawDate =
+    product.latestBidTime ||
+    product.mostRecentBid?.bidTime ||
+    (product as Product).paidAt ||
+    product.launchDate;
+
+  const [now, setNow] = React.useState<number>(() => Date.now());
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const relativeTime = React.useMemo(() => {
+    return formatRelativeTime(rawDate, now);
+  }, [rawDate, now]);
+
+  const exactDateTime = React.useMemo(() => {
+    return formatExactDateTime(rawDate);
+  }, [rawDate]);
 
   const rankBadgeStyle = (r: number) => {
     if (r === 1)
@@ -114,13 +141,12 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
         {/* Top 3 left accent indicator */}
         {rank <= 3 && (
           <div
-            className={`absolute left-0 top-0 bottom-0 w-1 ${
-              rank === 1
-                ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
-                : rank === 2
+            className={`absolute left-0 top-0 bottom-0 w-1 ${rank === 1
+              ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600'
+              : rank === 2
                 ? 'bg-gradient-to-b from-slate-300 via-slate-400 to-slate-500'
                 : 'bg-gradient-to-b from-amber-600 via-amber-700 to-amber-800'
-            }`}
+              }`}
           />
         )}
 
@@ -194,16 +220,6 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
               {/* Right Side Metrics Bar */}
               <div className="flex items-center gap-1.5 shrink-0 text-xs">
-                {paidBidAmount > 0 && (
-                  <span
-                    title={`Featured Total Bid: $${paidBidAmount}`}
-                    className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[11px]"
-                  >
-                    <DollarSign className="w-3 h-3 text-amber-600" />
-                    <span>{paidBidAmount} Bid</span>
-                  </span>
-                )}
-
                 {/* Outbound User Clicks Metric */}
                 <span
                   title={`${clickCount.toLocaleString()} user clicks through to website`}
@@ -215,6 +231,26 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   </span>
                   <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">clicks</span>
                 </span>
+
+                {/* Total Bid Amount */}
+                {totalBidAmount > 0 ? (
+                  <span
+                    title={`Total Bid: $${totalBidAmount}${recentBidAmount > 0 ? ` · Latest bid: $${recentBidAmount}` : ''}`}
+                    className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[11px]"
+                  >
+                    <DollarSign className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>{totalBidAmount} Bid</span>
+                  </span>
+                ) : (
+                  <span
+                    title="No active bid ($0)"
+                    className="inline-flex items-center gap-0.5 font-medium text-slate-400 dark:text-slate-500 bg-slate-100/80 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200/50 dark:border-slate-700/60 text-[11px]"
+                  >
+                    <DollarSign className="w-3 h-3 text-slate-400" />
+                    <span>0 Bid</span>
+                  </span>
+                )}
+
 
                 {product.starsCount ? (
                   <span
@@ -326,11 +362,13 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     }
   };
 
-  const paidBidAmount =
-    product.mostRecentBid?.bidPrice ??
+  const recentBidAmount = product.mostRecentBid?.bidPrice ?? 0;
+  const totalBidAmount =
+    product.totalBid ??
     ('totalBid' in product ? (product as { totalBid?: number }).totalBid : undefined) ??
     (product as Product).totalPaid ??
     0;
+  const displayBidAmount = recentBidAmount > 0 ? recentBidAmount : totalBidAmount;
   const clickCount = product.totalClicks ?? (product as Product).clicks ?? 0;
 
   const rankBadgeStyle = (r: number) => {
@@ -344,6 +382,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
   };
 
   const rawDate =
+    product.latestBidTime ||
     product.mostRecentBid?.bidTime ||
     (product as Product).paidAt ||
     product.launchDate;
@@ -448,13 +487,13 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
             <span className="text-slate-200 dark:text-slate-700 select-none">·</span>
 
             {/* Reduced-size Bid Price Badge */}
-            {paidBidAmount > 0 ? (
+            {displayBidAmount > 0 ? (
               <span
-                title={`Featured Total Bid: $${paidBidAmount}`}
+                title={`Recent Bid: $${recentBidAmount > 0 ? recentBidAmount : displayBidAmount}${totalBidAmount > (recentBidAmount > 0 ? recentBidAmount : 0) ? ` · Total Bid: $${totalBidAmount}` : ''}`}
                 className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200/80 dark:border-amber-800/60 text-[9px] shrink-0 leading-none"
               >
                 <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span>{paidBidAmount}</span>
+                <span>{displayBidAmount}</span>
               </span>
             ) : (
               <span
