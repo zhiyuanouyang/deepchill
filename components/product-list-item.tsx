@@ -207,10 +207,12 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                 {/* Outbound User Clicks Metric */}
                 <span
                   title={`${clickCount.toLocaleString()} user clicks through to website`}
-                  className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] bg-indigo-50/90 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50"
+                  className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] bg-indigo-50/90 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 transition-all duration-150"
                 >
                   <MousePointerClick className="w-3.5 h-3.5" />
-                  <span>{clickCount.toLocaleString()}</span>
+                  <span key={clickCount} className="tabular-nums transition-transform inline-block">
+                    {clickCount.toLocaleString()}
+                  </span>
                   <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">clicks</span>
                 </span>
 
@@ -438,7 +440,9 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
               className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium"
             >
               <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400 shrink-0" />
-              <span>{clickCount.toLocaleString()} clicks</span>
+              <span key={clickCount} className="tabular-nums transition-transform inline-block">
+                {clickCount.toLocaleString()} clicks
+              </span>
             </span>
 
             <span className="text-slate-200 dark:text-slate-700 select-none">·</span>

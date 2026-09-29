@@ -1017,54 +1017,15 @@ export function CategoriesView() {
     return () => clearInterval(interval);
   }, []);
 
-  // Hydrate from localStorage (same pattern as DirectoryView)
+  // Clean up legacy products cache if present
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const savedProducts = localStorage.getItem('indie_directory_products');
-        if (savedProducts) {
-          const parsed = JSON.parse(savedProducts);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map((p: Product) => p.id));
-            const missing = INITIAL_PRODUCTS.filter((p) => !existingIds.has(p.id));
-            const hydrated = parsed.map((p: Product) => {
-              const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
-              const totalBid =
-                p.totalBid ?? p.totalPaid ?? fallback?.totalBid ?? fallback?.totalPaid ?? 0;
-              const totalClicks =
-                p.totalClicks ?? p.clicks ?? fallback?.totalClicks ?? fallback?.clicks ?? 0;
-              const domain =
-                p.domain || fallback?.domain || extractDomain(p.websiteUrl || fallback?.websiteUrl);
-              const categoryTags =
-                p.categoryTags || fallback?.categoryTags || [p.category, ...(p.tags || [])];
-              const mostRecentBid =
-                p.mostRecentBid ||
-                fallback?.mostRecentBid || {
-                  bidPrice: totalBid,
-                  bidTime: p.paidAt || fallback?.paidAt || p.launchDate || new Date().toISOString(),
-                };
-
-              return {
-                ...p,
-                domain,
-                totalBid,
-                totalPaid: totalBid,
-                totalClicks,
-                clicks: totalClicks,
-                categoryTags,
-                mostRecentBid,
-              };
-            });
-            setProducts([...hydrated, ...missing]);
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to load stored directory state:', e);
-      } finally {
-        setIsClientReady(true);
-      }
-    }, 0);
-    return () => clearTimeout(timer);
+    try {
+      localStorage.removeItem('indie_directory_products');
+    } catch {
+      // ignore
+    } finally {
+      setIsClientReady(true);
+    }
   }, []);
 
   // Scrollspy to automatically highlight the current category in view
@@ -1123,7 +1084,7 @@ export function CategoriesView() {
     fetchOverview();
   }, [fetchOverview]);
 
-  // Record outbound click
+  // Record outbound click: directly increment on UI without refetching database
   const handleRecordClick = useCallback((productId: string) => {
     setProducts((prods) =>
       prods.map((p) => {
@@ -1133,6 +1094,19 @@ export function CategoriesView() {
         }
         return p;
       })
+    );
+    setDbCategoryData((prev) =>
+      prev
+        ? prev.map((cat) => ({
+            ...cat,
+            primaryTopProjects: cat.primaryTopProjects.map((p) =>
+              p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
+            ),
+            secondaryRecentProjects: cat.secondaryRecentProjects.map((p) =>
+              p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
+            ),
+          }))
+        : prev
     );
     fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
   }, []);

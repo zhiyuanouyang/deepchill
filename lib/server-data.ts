@@ -1,0 +1,164 @@
+import { createClient } from '@/supabase/server';
+import {
+  JoinedProjectRow,
+  mapRowToProduct,
+  mapRowToTrendingProduct,
+  mapRowToNewestProduct,
+} from '@/lib/project-mapper';
+import { Product, TrendingProduct, NewestReleaseProduct, Category } from '@/lib/types';
+
+export async function getTrendingProjects(
+  category?: string,
+  limit = 50
+): Promise<TrendingProduct[]> {
+  try {
+    const supabase = await createClient();
+
+    let query = supabase
+      .from('projects')
+      .select(`
+        id,
+        url,
+        name,
+        tagline,
+        discription,
+        description,
+        icon_url,
+        user_id,
+        category,
+        created_at,
+        updated_at,
+        total_bids ( price ),
+        total_clicks ( count ),
+        bids ( id, price, created_at )
+      `)
+      .order('price', { referencedTable: 'total_bids', ascending: false, nullsFirst: false })
+      .limit(limit);
+
+    if (category && category !== 'All') {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('Error fetching trending projects:', error);
+      return [];
+    }
+
+    return (data as JoinedProjectRow[]).map(mapRowToTrendingProduct);
+  } catch (err) {
+    console.warn('Failed to getTrendingProjects:', err);
+    return [];
+  }
+}
+
+export async function getNewestProjects(
+  category?: string,
+  limit = 50
+): Promise<NewestReleaseProduct[]> {
+  try {
+    const supabase = await createClient();
+
+    let query = supabase
+      .from('projects')
+      .select(`
+        id,
+        url,
+        name,
+        tagline,
+        discription,
+        description,
+        icon_url,
+        user_id,
+        category,
+        created_at,
+        updated_at,
+        total_bids ( price ),
+        total_clicks ( count ),
+        bids ( id, price, created_at )
+      `)
+      .order('created_at', { referencedTable: 'bids', ascending: false, nullsFirst: false })
+      .limit(limit);
+
+    if (category && category !== 'All') {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('Error fetching newest projects:', error);
+      return [];
+    }
+
+    return (data as JoinedProjectRow[]).map(mapRowToNewestProduct);
+  } catch (err) {
+    console.warn('Failed to getNewestProjects:', err);
+    return [];
+  }
+}
+
+export async function getAllProjects(
+  category?: string,
+  limit = 100
+): Promise<Product[]> {
+  try {
+    const supabase = await createClient();
+
+    let query = supabase
+      .from('projects')
+      .select(`
+        id,
+        url,
+        name,
+        tagline,
+        discription,
+        description,
+        icon_url,
+        user_id,
+        category,
+        created_at,
+        updated_at,
+        total_bids ( price ),
+        total_clicks ( count ),
+        bids ( id, price, created_at )
+      `)
+      .order('price', { referencedTable: 'total_bids', ascending: false, nullsFirst: false })
+      .limit(limit);
+
+    if (category && category !== 'All') {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.warn('Error fetching all projects:', error);
+      return [];
+    }
+
+    return (data as JoinedProjectRow[]).map(mapRowToProduct);
+  } catch (err) {
+    console.warn('Failed to getAllProjects:', err);
+    return [];
+  }
+}
+
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const supabase = await createClient();
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('id, display_name, descriptions, count, created_at, updated_at')
+      .order('count', { ascending: false })
+      .order('display_name', { ascending: true });
+
+    if (error || !categories) {
+      console.warn('Error fetching categories:', error);
+      return [];
+    }
+
+    return categories as Category[];
+  } catch (err) {
+    console.warn('Failed to getCategories:', err);
+    return [];
+  }
+}

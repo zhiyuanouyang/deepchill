@@ -65,14 +65,32 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 const PRIMARY_PAGE_SIZE = 6;
 const SIDE_PAGE_SIZE = 6;
 
-export function DirectoryView() {
+export interface DirectoryViewProps {
+  initialTrendingProducts?: TrendingProduct[];
+  initialNewestProducts?: NewestReleaseProduct[];
+  initialProducts?: Product[];
+  initialCategories?: Category[];
+}
+
+export function DirectoryView({
+  initialTrendingProducts,
+  initialNewestProducts,
+  initialProducts,
+  initialCategories,
+}: DirectoryViewProps = {}) {
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(() =>
+    initialProducts && initialProducts.length > 0 ? initialProducts : INITIAL_PRODUCTS
+  );
   const [upvotedIds, setUpvotedIds] = useState<Set<string>>(new Set());
   const [isClientReady, setIsClientReady] = useState(false);
-  const [dbCategories, setDbCategories] = useState<Category[]>([]);
-  const [dbTrendingProducts, setDbTrendingProducts] = useState<TrendingProduct[] | null>(null);
-  const [dbNewestProducts, setDbNewestProducts] = useState<NewestReleaseProduct[] | null>(null);
+  const [dbCategories, setDbCategories] = useState<Category[]>(() => initialCategories || []);
+  const [dbTrendingProducts, setDbTrendingProducts] = useState<TrendingProduct[] | null>(
+    () => (initialTrendingProducts && initialTrendingProducts.length > 0 ? initialTrendingProducts : null)
+  );
+  const [dbNewestProducts, setDbNewestProducts] = useState<NewestReleaseProduct[] | null>(
+    () => (initialNewestProducts && initialNewestProducts.length > 0 ? initialNewestProducts : null)
+  );
 
   // Search & Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,12 +165,22 @@ export function DirectoryView() {
     }
   }, []);
 
+  const hasInitialSsrData = React.useRef(Boolean(initialTrendingProducts && initialTrendingProducts.length > 0));
+
   useEffect(() => {
-    fetchCategories();
-    fetchAllProducts();
+    if (!hasInitialSsrData.current) {
+      fetchCategories();
+      fetchAllProducts();
+    }
   }, [fetchCategories, fetchAllProducts]);
 
   useEffect(() => {
+    // If SSR data already provided the 'All' category lists, skip the redundant initial mount fetch
+    if (hasInitialSsrData.current && selectedCategory === 'All') {
+      hasInitialSsrData.current = false;
+      return;
+    }
+    hasInitialSsrData.current = false;
     fetchTrending(selectedCategory);
     fetchNewest(selectedCategory);
   }, [selectedCategory, fetchTrending, fetchNewest]);
@@ -215,93 +243,24 @@ export function DirectoryView() {
     setSidePage(1);
   };
 
-  // Hydrate from localStorage once client mounts
+  // Hydrate user-specific state (upvotes) from localStorage once client mounts
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const savedProducts = localStorage.getItem('indie_directory_products');
-        if (savedProducts) {
-          const parsed = JSON.parse(savedProducts);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map((p: Product) => p.id));
-            const missing = INITIAL_PRODUCTS.filter((p) => !existingIds.has(p.id));
-
-            // Ensure any saved product gets proper defaults for ground-truth schema
-            const hydrated = parsed.map((p: Product) => {
-              const fallback = INITIAL_PRODUCTS.find((init) => init.id === p.id);
-              // If seed product has legacy pre-Sept-17 test timestamp, refresh to realistic real-time seed timestamp
-              const hasLegacySeedDate =
-                fallback &&
-                p.paidAt &&
-                new Date(p.paidAt).getTime() < new Date('2026-09-17T00:00:00.000Z').getTime();
-
-              const paidAt =
-                (hasLegacySeedDate ? fallback?.paidAt : (p.paidAt ?? fallback?.paidAt)) ??
-                p.launchDate ??
-                new Date().toISOString();
-
-              const totalBid =
-                p.totalBid ?? p.totalPaid ?? fallback?.totalBid ?? fallback?.totalPaid ?? 0;
-              const totalClicks =
-                p.totalClicks ?? p.clicks ?? fallback?.totalClicks ?? fallback?.clicks ?? 0;
-              const domain =
-                p.domain ||
-                fallback?.domain ||
-                extractDomain(p.websiteUrl || fallback?.websiteUrl);
-              const categoryTags =
-                p.categoryTags ||
-                fallback?.categoryTags || [p.category, ...(p.tags || [])];
-
-              const mostRecentBid =
-                (hasLegacySeedDate ? fallback?.mostRecentBid : p.mostRecentBid) ||
-                fallback?.mostRecentBid || {
-                  bidPrice: totalBid,
-                  bidTime: paidAt,
-                };
-
-              return {
-                ...p,
-                domain,
-                totalBid,
-                totalPaid: totalBid,
-                mostRecentBid,
-                paidAt: mostRecentBid.bidTime,
-                totalClicks,
-                clicks: totalClicks,
-                categoryTags,
-              };
-            });
-
-            setProducts([...hydrated, ...missing]);
-          }
-        }
-
-        const savedUpvotes = localStorage.getItem('indie_upvoted_ids');
-        if (savedUpvotes) {
-          const parsedVotes = JSON.parse(savedUpvotes);
-          if (Array.isArray(parsedVotes)) {
-            setUpvotedIds(new Set(parsedVotes));
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to load stored directory state:', e);
-      } finally {
-        setIsClientReady(true);
-      }
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Save products to localStorage on updates
-  useEffect(() => {
-    if (!isClientReady) return;
     try {
-      localStorage.setItem('indie_directory_products', JSON.stringify(products));
+      const savedUpvotes = localStorage.getItem('indie_upvoted_ids');
+      if (savedUpvotes) {
+        const parsedVotes = JSON.parse(savedUpvotes);
+        if (Array.isArray(parsedVotes)) {
+          setUpvotedIds(new Set(parsedVotes));
+        }
+      }
+      // Clean up legacy mock cache if present so it doesn't pollute storage
+      localStorage.removeItem('indie_directory_products');
     } catch (e) {
-      console.warn('Failed to save products:', e);
+      console.warn('Failed to load stored directory upvotes:', e);
+    } finally {
+      setIsClientReady(true);
     }
-  }, [products, isClientReady]);
+  }, []);
 
   // Save upvotes to localStorage on updates
   useEffect(() => {
@@ -313,10 +272,9 @@ export function DirectoryView() {
     }
   }, [upvotedIds, isClientReady]);
 
-
-
-  // Record outbound click on product
+  // Record outbound click on product: directly increment on UI without refetching database
   const handleRecordClick = (productId: string) => {
+    // 1. Directly increment in base products state
     setProducts((prods) =>
       prods.map((p) => {
         if (p.id === productId) {
@@ -330,7 +288,40 @@ export function DirectoryView() {
         return p;
       })
     );
-    // Persist click in Supabase
+
+    // 2. Directly increment in dbTrendingProducts state
+    setDbTrendingProducts((prev) =>
+      prev
+        ? prev.map((p) => {
+            if (p.id === productId) {
+              const updatedClicks = (p.totalClicks ?? 0) + 1;
+              return {
+                ...p,
+                totalClicks: updatedClicks,
+              };
+            }
+            return p;
+          })
+        : prev
+    );
+
+    // 3. Directly increment in dbNewestProducts state
+    setDbNewestProducts((prev) =>
+      prev
+        ? prev.map((p) => {
+            if (p.id === productId) {
+              const updatedClicks = (p.totalClicks ?? 0) + 1;
+              return {
+                ...p,
+                totalClicks: updatedClicks,
+              };
+            }
+            return p;
+          })
+        : prev
+    );
+
+    // 4. Persist click count to Supabase in the background (no refetch needed)
     fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
   };
 
