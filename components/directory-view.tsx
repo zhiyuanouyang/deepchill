@@ -63,19 +63,23 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   'Developer Utilities': Wrench,
 };
 
-const PRIMARY_PAGE_SIZE = 6;
-const SIDE_PAGE_SIZE = 6;
+const PRIMARY_PAGE_SIZE = 10;
+const SIDE_PAGE_SIZE = 15;
 
 export interface DirectoryViewProps {
   initialTrendingProducts?: TrendingProduct[];
+  initialTrendingTotal?: number;
   initialNewestProducts?: NewestReleaseProduct[];
+  initialNewestTotal?: number;
   initialProducts?: Product[];
   initialCategories?: Category[];
 }
 
 export function DirectoryView({
   initialTrendingProducts,
+  initialTrendingTotal,
   initialNewestProducts,
+  initialNewestTotal,
   initialProducts,
   initialCategories,
 }: DirectoryViewProps = {}) {
@@ -91,6 +95,12 @@ export function DirectoryView({
   );
   const [dbNewestProducts, setDbNewestProducts] = useState<NewestReleaseProduct[] | null>(
     () => (initialNewestProducts && initialNewestProducts.length > 0 ? initialNewestProducts : null)
+  );
+  const [trendingTotal, setTrendingTotal] = useState<number>(
+    () => initialTrendingTotal ?? (initialTrendingProducts?.length ?? 0)
+  );
+  const [newestTotal, setNewestTotal] = useState<number>(
+    () => initialNewestTotal ?? (initialNewestProducts?.length ?? 0)
   );
 
   // Bid Modal state
@@ -119,17 +129,26 @@ export function DirectoryView({
     }
   }, []);
 
-  // Fetch trending products (sorted by total_bids.price join with products table desc)
-  const fetchTrending = useCallback(async (cat: 'All' | ProductCategory) => {
+  // Fetch trending products from Supabase with offset & limit pagination
+  const fetchTrending = useCallback(async (cat: 'All' | ProductCategory, page = 1) => {
     try {
-      const url = cat && cat !== 'All'
-        ? `/api/projects/trending?category=${encodeURIComponent(cat)}`
-        : '/api/projects/trending';
-      const res = await fetch(url);
+      const offset = (page - 1) * PRIMARY_PAGE_SIZE;
+      const params = new URLSearchParams({
+        limit: String(PRIMARY_PAGE_SIZE),
+        offset: String(offset),
+        page: String(page),
+      });
+      if (cat && cat !== 'All') {
+        params.set('category', cat);
+      }
+      const res = await fetch(`/api/projects/trending?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.products) {
           setDbTrendingProducts(data.products);
+        }
+        if (typeof data.total === 'number') {
+          setTrendingTotal(data.total);
         }
       }
     } catch (e) {
@@ -137,17 +156,26 @@ export function DirectoryView({
     }
   }, []);
 
-  // Fetch newest releases (sorted by bids.created_at join with products table desc)
-  const fetchNewest = useCallback(async (cat: 'All' | ProductCategory) => {
+  // Fetch newest releases from Supabase with offset & limit pagination
+  const fetchNewest = useCallback(async (cat: 'All' | ProductCategory, page = 1) => {
     try {
-      const url = cat && cat !== 'All'
-        ? `/api/projects/newest?category=${encodeURIComponent(cat)}`
-        : '/api/projects/newest';
-      const res = await fetch(url);
+      const offset = (page - 1) * SIDE_PAGE_SIZE;
+      const params = new URLSearchParams({
+        limit: String(SIDE_PAGE_SIZE),
+        offset: String(offset),
+        page: String(page),
+      });
+      if (cat && cat !== 'All') {
+        params.set('category', cat);
+      }
+      const res = await fetch(`/api/projects/newest?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.products) {
           setDbNewestProducts(data.products);
+        }
+        if (typeof data.total === 'number') {
+          setNewestTotal(data.total);
         }
       }
     } catch (e) {
@@ -170,25 +198,37 @@ export function DirectoryView({
     }
   }, []);
 
-  const hasInitialSsrData = React.useRef(Boolean(initialTrendingProducts && initialTrendingProducts.length > 0));
+  // Pagination states
+  const [primaryPage, setPrimaryPage] = useState(1);
+  const [sidePage, setSidePage] = useState(1);
+
+  const hasInitialTrendingSsr = React.useRef(Boolean(initialTrendingProducts && initialTrendingProducts.length > 0));
+  const hasInitialNewestSsr = React.useRef(Boolean(initialNewestProducts && initialNewestProducts.length > 0));
 
   useEffect(() => {
-    if (!hasInitialSsrData.current) {
+    if (!hasInitialTrendingSsr.current && !hasInitialNewestSsr.current) {
       fetchCategories();
       fetchAllProducts();
     }
   }, [fetchCategories, fetchAllProducts]);
 
   useEffect(() => {
-    // If SSR data already provided the 'All' category lists, skip the redundant initial mount fetch
-    if (hasInitialSsrData.current && selectedCategory === 'All') {
-      hasInitialSsrData.current = false;
+    if (hasInitialTrendingSsr.current && selectedCategory === 'All' && primaryPage === 1) {
+      hasInitialTrendingSsr.current = false;
       return;
     }
-    hasInitialSsrData.current = false;
-    fetchTrending(selectedCategory);
-    fetchNewest(selectedCategory);
-  }, [selectedCategory, fetchTrending, fetchNewest]);
+    hasInitialTrendingSsr.current = false;
+    fetchTrending(selectedCategory, primaryPage);
+  }, [selectedCategory, primaryPage, fetchTrending]);
+
+  useEffect(() => {
+    if (hasInitialNewestSsr.current && selectedCategory === 'All' && sidePage === 1) {
+      hasInitialNewestSsr.current = false;
+      return;
+    }
+    hasInitialNewestSsr.current = false;
+    fetchNewest(selectedCategory, sidePage);
+  }, [selectedCategory, sidePage, fetchNewest]);
 
   // Initialize category from URL search params (e.g. /?category=DevTools)
   useEffect(() => {
@@ -203,10 +243,6 @@ export function DirectoryView({
       }
     }
   }, [searchParams]);
-
-  // Pagination states
-  const [primaryPage, setPrimaryPage] = useState(1);
-  const [sidePage, setSidePage] = useState(1);
 
   // Discovery Mode: 'keyword' | 'ai'
   const [activeMode, setActiveMode] = useState<'keyword' | 'ai'>('keyword');
@@ -335,8 +371,10 @@ export function DirectoryView({
     setProducts((prev) => [newProduct, ...prev]);
     // Refresh categories and project lists to reflect incremented category count
     fetchCategories();
-    fetchTrending(selectedCategory);
-    fetchNewest(selectedCategory);
+    setPrimaryPage(1);
+    setSidePage(1);
+    fetchTrending(selectedCategory, 1);
+    fetchNewest(selectedCategory, 1);
   };
 
   // Open Bid Modal
@@ -424,11 +462,11 @@ export function DirectoryView({
       });
 
       // 4. Background refresh to stay in full sync with DB triggers
-      fetchTrending(selectedCategory);
-      fetchNewest(selectedCategory);
+      fetchTrending(selectedCategory, primaryPage);
+      fetchNewest(selectedCategory, sidePage);
       fetchCategories();
     },
-    [fetchCategories, fetchNewest, fetchTrending, selectedCategory]
+    [fetchCategories, fetchNewest, fetchTrending, primaryPage, sidePage, selectedCategory]
   );
 
   // Base filtered products (common filter for category, pricing, tags, search)
@@ -472,77 +510,58 @@ export function DirectoryView({
     });
   }, [products, selectedCategory, activeTag, searchQuery, activeMode, aiFilterIds]);
 
+  const isClientFiltering = Boolean(
+    (activeMode === 'keyword' && searchQuery.trim()) ||
+    activeTag ||
+    (activeMode === 'ai' && aiFilterIds !== null)
+  );
+
+  const clientFilteredTrending = useMemo(() => {
+    return baseFilteredProducts.map(toTrendingProduct);
+  }, [baseFilteredProducts]);
+
+  const clientFilteredNewest = useMemo(() => {
+    return baseFilteredProducts.map(toNewestReleaseProduct);
+  }, [baseFilteredProducts]);
+
   // 1. Trending List: Fetched directly ordered from Supabase (trending_projects view)
   const trendingProducts: TrendingProduct[] = useMemo(() => {
-    const list = dbTrendingProducts && dbTrendingProducts.length > 0
-      ? dbTrendingProducts
-      : baseFilteredProducts.map(toTrendingProduct);
-
-    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
-      return list.filter((p) => {
-        if (activeMode === 'ai' && aiFilterIds !== null) {
-          if (!aiFilterIds.some((id) => id.toLowerCase() === p.id.toLowerCase())) return false;
-        }
-        if (activeTag && !(p.categoryTags || []).some((t) => t.toLowerCase() === activeTag.toLowerCase())) {
-          return false;
-        }
-        if (activeMode === 'keyword' && searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          return (
-            p.name.toLowerCase().includes(q) ||
-            p.domain?.toLowerCase().includes(q) ||
-            p.tagline?.toLowerCase().includes(q) ||
-            p.description.toLowerCase().includes(q) ||
-            (p.categoryTags || []).some((t) => t.toLowerCase().includes(q)) ||
-            p.makerName.toLowerCase().includes(q)
-          );
-        }
-        return true;
-      });
+    if (isClientFiltering) {
+      return clientFilteredTrending;
     }
-
-    return list;
-  }, [dbTrendingProducts, baseFilteredProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
+    return dbTrendingProducts ?? baseFilteredProducts.slice(0, PRIMARY_PAGE_SIZE).map(toTrendingProduct);
+  }, [isClientFiltering, clientFilteredTrending, dbTrendingProducts, baseFilteredProducts]);
 
   // 2. Newest List: Fetched directly ordered from Supabase (newest_projects view)
   const newestProducts: NewestReleaseProduct[] = useMemo(() => {
-    const list = dbNewestProducts && dbNewestProducts.length > 0
-      ? dbNewestProducts
-      : baseFilteredProducts.map(toNewestReleaseProduct);
-
-    if (searchQuery.trim() || activeTag || (activeMode === 'ai' && aiFilterIds !== null)) {
-      return list.filter((p) => {
-        if (activeMode === 'ai' && aiFilterIds !== null) {
-          if (!aiFilterIds.some((id) => id.toLowerCase() === p.id.toLowerCase())) return false;
-        }
-        if (activeMode === 'keyword' && searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          return (
-            p.name.toLowerCase().includes(q) ||
-            p.domain?.toLowerCase().includes(q) ||
-            p.tagline?.toLowerCase().includes(q) ||
-            p.description.toLowerCase().includes(q)
-          );
-        }
-        return true;
-      });
+    if (isClientFiltering) {
+      return clientFilteredNewest;
     }
+    return dbNewestProducts ?? baseFilteredProducts.slice(0, SIDE_PAGE_SIZE).map(toNewestReleaseProduct);
+  }, [isClientFiltering, clientFilteredNewest, dbNewestProducts, baseFilteredProducts]);
 
-    return list;
-  }, [dbNewestProducts, baseFilteredProducts, searchQuery, activeTag, activeMode, aiFilterIds]);
-
-  // Paginated slices
-  const totalTrendingPages = Math.max(1, Math.ceil(trendingProducts.length / PRIMARY_PAGE_SIZE));
+  // Paginated items
   const paginatedTrending = useMemo(() => {
-    const start = (primaryPage - 1) * PRIMARY_PAGE_SIZE;
-    return trendingProducts.slice(start, start + PRIMARY_PAGE_SIZE);
-  }, [trendingProducts, primaryPage]);
+    if (isClientFiltering) {
+      const start = (primaryPage - 1) * PRIMARY_PAGE_SIZE;
+      return trendingProducts.slice(start, start + PRIMARY_PAGE_SIZE);
+    }
+    return trendingProducts;
+  }, [isClientFiltering, trendingProducts, primaryPage]);
 
-  const totalNewestPages = Math.max(1, Math.ceil(newestProducts.length / SIDE_PAGE_SIZE));
   const paginatedNewest = useMemo(() => {
-    const start = (sidePage - 1) * SIDE_PAGE_SIZE;
-    return newestProducts.slice(start, start + SIDE_PAGE_SIZE);
-  }, [newestProducts, sidePage]);
+    if (isClientFiltering) {
+      const start = (sidePage - 1) * SIDE_PAGE_SIZE;
+      return newestProducts.slice(start, start + SIDE_PAGE_SIZE);
+    }
+    return newestProducts;
+  }, [isClientFiltering, newestProducts, sidePage]);
+
+  const totalTrendingCount = isClientFiltering ? trendingProducts.length : trendingTotal;
+  const totalTrendingPages = Math.max(1, Math.ceil(totalTrendingCount / PRIMARY_PAGE_SIZE));
+
+  const totalNewestCount = isClientFiltering ? newestProducts.length : newestTotal;
+  const totalNewestPages = Math.max(1, Math.ceil(totalNewestCount / SIDE_PAGE_SIZE));
 
   const openSourceCount = useMemo(() => {
     return products.filter((p) => p.pricing === 'Open Source').length;
@@ -836,7 +855,7 @@ export function DirectoryView({
               <PaginationControls
                 currentPage={primaryPage}
                 totalPages={totalTrendingPages}
-                totalItems={trendingProducts.length}
+                totalItems={totalTrendingCount}
                 pageSize={PRIMARY_PAGE_SIZE}
                 onPageChange={setPrimaryPage}
               />
@@ -873,7 +892,7 @@ export function DirectoryView({
               <PaginationControls
                 currentPage={sidePage}
                 totalPages={totalNewestPages}
-                totalItems={newestProducts.length}
+                totalItems={totalNewestCount}
                 pageSize={SIDE_PAGE_SIZE}
                 onPageChange={setSidePage}
                 compact

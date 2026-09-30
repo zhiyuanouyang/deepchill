@@ -491,10 +491,19 @@ const PrimaryCategoryRow: React.FC<{
               </div>
             </div>
 
-            {/* Tagline / Description snippet */}
-            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 leading-relaxed mt-0.5">
-              {project.tagline || project.description}
-            </p>
+            {/* Tagline & Description snippet */}
+            <div className="mt-1 space-y-0.5">
+              {project.tagline ? (
+                <p className="text-xs font-medium text-slate-800 dark:text-slate-200 line-clamp-1 leading-snug">
+                  {project.tagline}
+                </p>
+              ) : null}
+              {project.description ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {project.description}
+                </p>
+              ) : null}
+            </div>
 
             {/* Domain URL indicator & Add Bid Trigger */}
             <div className="mt-1.5 flex items-center justify-between gap-1 text-[10px]">

@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const [initialTrending, initialNewest, initialProducts, initialCategories] = await Promise.all([
-    getTrendingProjects(),
-    getNewestProjects(),
+    getTrendingProjects(undefined, 10, 0),
+    getNewestProjects(undefined, 15, 0),
     getAllProjects(),
     getCategories(),
   ]);
@@ -20,8 +20,10 @@ export default async function Home() {
   return (
     <Suspense>
       <DirectoryView
-        initialTrendingProducts={initialTrending}
-        initialNewestProducts={initialNewest}
+        initialTrendingProducts={initialTrending.products}
+        initialTrendingTotal={initialTrending.total}
+        initialNewestProducts={initialNewest.products}
+        initialNewestTotal={initialNewest.total}
         initialProducts={initialProducts}
         initialCategories={initialCategories}
       />

@@ -9,59 +9,69 @@ import { Product, TrendingProduct, NewestReleaseProduct, Category } from '@/lib/
 
 export async function getTrendingProjects(
   category?: string,
-  limit = 50
-): Promise<TrendingProduct[]> {
+  limit = 10,
+  offset = 0
+): Promise<{ products: TrendingProduct[]; total: number }> {
   try {
     const supabase = await createClient();
 
     let query = supabase
       .from('trending_projects')
-      .select('*')
-      .limit(limit);
+      .select('*', { count: 'exact' });
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
     }
 
-    const { data, error } = await query;
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
     if (error || !data) {
       console.warn('Error fetching trending projects:', error);
-      return [];
+      return { products: [], total: 0 };
     }
 
-    return (data as JoinedProjectRow[]).map(mapRowToTrendingProduct);
+    return {
+      products: (data as JoinedProjectRow[]).map(mapRowToTrendingProduct),
+      total: count ?? data.length,
+    };
   } catch (err) {
     console.warn('Failed to getTrendingProjects:', err);
-    return [];
+    return { products: [], total: 0 };
   }
 }
 
 export async function getNewestProjects(
   category?: string,
-  limit = 50
-): Promise<NewestReleaseProduct[]> {
+  limit = 15,
+  offset = 0
+): Promise<{ products: NewestReleaseProduct[]; total: number }> {
   try {
     const supabase = await createClient();
 
     let query = supabase
       .from('newest_projects')
-      .select('*')
-      .limit(limit);
+      .select('*', { count: 'exact' });
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
     }
 
-    const { data, error } = await query;
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
     if (error || !data) {
       console.warn('Error fetching newest projects:', error);
-      return [];
+      return { products: [], total: 0 };
     }
 
-    return (data as JoinedProjectRow[]).map(mapRowToNewestProduct);
+    return {
+      products: (data as JoinedProjectRow[]).map(mapRowToNewestProduct),
+      total: count ?? data.length,
+    };
   } catch (err) {
     console.warn('Failed to getNewestProjects:', err);
-    return [];
+    return { products: [], total: 0 };
   }
 }
 
