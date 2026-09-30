@@ -107,6 +107,11 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
     product.launchDate;
 
   const [now, setNow] = React.useState<number>(() => Date.now());
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [product.logoUrl]);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -170,7 +175,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
             {/* Squircle App Logo */}
             <div className="relative w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-xs mt-1 sm:mt-1.5 transition-transform duration-200 group-hover:scale-[1.02]">
-              {product.logoUrl ? (
+              {product.logoUrl && !imgError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={product.logoUrl}
@@ -178,14 +183,13 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   className="w-full h-full object-cover"
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
+                  onError={() => setImgError(true)}
                 />
-              ) : null}
-              <span className="font-bold text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl select-none">
-                {product.name.charAt(0)}
-              </span>
+              ) : (
+                <span className="font-bold text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl select-none">
+                  {product.name ? product.name.charAt(0).toUpperCase() : '?'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -402,6 +406,11 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
     (product as Product).paidAt ||
     product.launchDate;
   const [now, setNow] = React.useState<number>(() => Date.now());
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [product.logoUrl]);
 
   React.useEffect(() => {
     // Tick every 30 seconds to keep real-time relative times like "just now", "2 mins ago" freshly updated
@@ -442,7 +451,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
 
             {/* Smaller Squircle Icon */}
             <div className="relative w-5 h-5 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
-              {product.logoUrl ? (
+              {product.logoUrl && !imgError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={product.logoUrl}
@@ -450,14 +459,13 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
                   className="w-full h-full object-cover"
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
+                  onError={() => setImgError(true)}
                 />
-              ) : null}
-              <span className="font-bold text-slate-600 dark:text-slate-300 text-[10px] select-none">
-                {product.name.charAt(0)}
-              </span>
+              ) : (
+                <span className="font-bold text-slate-600 dark:text-slate-300 text-[10px] select-none">
+                  {product.name ? product.name.charAt(0).toUpperCase() : '?'}
+                </span>
+              )}
             </div>
 
             {/* Product Name */}

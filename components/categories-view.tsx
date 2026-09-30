@@ -375,6 +375,11 @@ const PrimaryCategoryRow: React.FC<{
   const paidBidAmount = project.totalBid ?? 0;
   const clickCount = project.totalClicks ?? 0;
   const domain = project.domain || extractDomain(project.websiteUrl);
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [project.logoUrl]);
 
   const handleClick = () => {
     onRecordClick(project.id);
@@ -419,7 +424,7 @@ const PrimaryCategoryRow: React.FC<{
 
             {/* Squircle App Logo */}
             <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 ring-1 ring-black/[0.06] dark:ring-white/[0.08] shadow-2xs mt-1 transition-transform duration-200 group-hover:scale-[1.02]">
-              {project.logoUrl ? (
+              {project.logoUrl && !imgError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={project.logoUrl}
@@ -427,14 +432,13 @@ const PrimaryCategoryRow: React.FC<{
                   className="w-full h-full object-cover"
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
+                  onError={() => setImgError(true)}
                 />
-              ) : null}
-              <span className="font-bold text-indigo-600 dark:text-indigo-400 text-base sm:text-lg select-none">
-                {project.name.charAt(0)}
-              </span>
+              ) : (
+                <span className="font-bold text-indigo-600 dark:text-indigo-400 text-base sm:text-lg select-none">
+                  {project.name ? project.name.charAt(0).toUpperCase() : '?'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -527,6 +531,12 @@ const SecondaryCategoryRow: React.FC<{
   onRecordClick: (id: string) => void;
   onOpenBid?: (product: NewestReleaseProduct) => void;
 }> = ({ product, rank, now, onRecordClick, onOpenBid }) => {
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [product.logoUrl]);
+
   const handleClick = () => {
     onRecordClick(product.id);
     if (typeof window !== 'undefined' && projectWebsiteUrl(product)) {
@@ -569,7 +579,7 @@ const SecondaryCategoryRow: React.FC<{
 
           {/* Mini Squircle Logo */}
           <div className="relative w-5 h-5 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center shrink-0">
-            {product.logoUrl ? (
+            {product.logoUrl && !imgError ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={product.logoUrl}
@@ -577,14 +587,13 @@ const SecondaryCategoryRow: React.FC<{
                 className="w-full h-full object-cover"
                 loading="lazy"
                 referrerPolicy="no-referrer"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = 'none';
-                }}
+                onError={() => setImgError(true)}
               />
-            ) : null}
-            <span className="font-bold text-slate-600 dark:text-slate-300 text-[9px] select-none">
-              {product.name.charAt(0)}
-            </span>
+            ) : (
+              <span className="font-bold text-slate-600 dark:text-slate-300 text-[9px] select-none">
+                {product.name ? product.name.charAt(0).toUpperCase() : '?'}
+              </span>
+            )}
           </div>
 
           {/* Product Name */}

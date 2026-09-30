@@ -55,6 +55,11 @@ export const BidModal: React.FC<BidModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [successNewTotal, setSuccessNewTotal] = useState<number>(0);
+  const [logoError, setLogoError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [project?.logoUrl]);
 
   // Compute current total bid for the project
   const currentTotal = useMemo(() => {
@@ -223,21 +228,20 @@ export const BidModal: React.FC<BidModalProps> = ({
               <div className="flex items-start gap-3.5 pr-8">
                 {/* Project Logo Squircle */}
                 <div className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-white/[0.08] flex items-center justify-center shrink-0 shadow-xs">
-                  {project.logoUrl ? (
+                  {project.logoUrl && !logoError ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={project.logoUrl}
                       alt={project.name}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = 'none';
-                      }}
+                      onError={() => setLogoError(true)}
                     />
-                  ) : null}
-                  <span className="font-extrabold text-indigo-600 dark:text-indigo-400 text-xl select-none">
-                    {project.name.charAt(0)}
-                  </span>
+                  ) : (
+                    <span className="font-extrabold text-indigo-600 dark:text-indigo-400 text-xl select-none">
+                      {project.name ? project.name.charAt(0).toUpperCase() : '?'}
+                    </span>
+                  )}
                 </div>
 
                 <div className="min-w-0 flex-1">

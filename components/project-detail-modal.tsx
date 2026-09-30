@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   X,
@@ -33,6 +33,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 }) => {
   const [badgeFormat, setBadgeFormat] = useState<'markdown' | 'html'>('markdown');
   const [copied, setCopied] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [product?.logoUrl]);
 
   if (!product) return null;
 
@@ -66,21 +71,20 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-50 to-slate-100 dark:from-slate-800 dark:to-indigo-950/60 border border-white dark:border-slate-700/60 shadow-inner flex items-center justify-center shrink-0">
-                {product.logoUrl ? (
+                {product.logoUrl && !logoError ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={product.logoUrl}
                     alt={`${product.name} logo`}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLElement).style.display = 'none';
-                    }}
+                    onError={() => setLogoError(true)}
                   />
-                ) : null}
-                <span className="font-extrabold text-indigo-700 dark:text-indigo-400 text-xl select-none">
-                  {product.name.charAt(0)}
-                </span>
+                ) : (
+                  <span className="font-extrabold text-indigo-700 dark:text-indigo-400 text-xl select-none">
+                    {product.name ? product.name.charAt(0).toUpperCase() : '?'}
+                  </span>
+                )}
               </div>
 
               <div>

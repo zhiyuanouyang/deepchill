@@ -22,6 +22,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onUpvote,
   isUpvoted = false,
 }) => {
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [product.logoUrl]);
   const handleUpvoteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onUpvote(product.id);
@@ -60,7 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="flex items-start gap-3.5">
             {/* Logo or initial placeholder */}
             <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-indigo-50 border border-white shadow-inner flex items-center justify-center shrink-0">
-              {product.logoUrl ? (
+              {product.logoUrl && !imgError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={product.logoUrl}
@@ -68,15 +73,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   className="w-full h-full object-cover"
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    // Fallback to text initials if image fails
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
+                  onError={() => setImgError(true)}
                 />
-              ) : null}
-              <span className="font-extrabold text-indigo-700 text-lg select-none">
-                {product.name.charAt(0)}
-              </span>
+              ) : (
+                <span className="font-extrabold text-indigo-700 text-lg select-none">
+                  {product.name ? product.name.charAt(0).toUpperCase() : '?'}
+                </span>
+              )}
             </div>
 
             <div>
