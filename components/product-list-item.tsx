@@ -74,6 +74,7 @@ interface PrimaryProductListItemProps {
   onRecordClick: (productId: string) => void;
   onUpvote?: (productId: string) => void;
   isUpvoted?: boolean;
+  onOpenBid?: (product: TrendingProduct | Product) => void;
 }
 
 export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
@@ -81,6 +82,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
   rank,
   onSelectTag,
   onRecordClick,
+  onOpenBid,
 }) => {
   const handleCardClick = () => {
     onRecordClick(product.id);
@@ -232,24 +234,30 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">clicks</span>
                 </span>
 
-                {/* Total Bid Amount */}
-                {totalBidAmount > 0 ? (
-                  <span
-                    title={`Total Bid: $${totalBidAmount}${recentBidAmount > 0 ? ` · Latest bid: $${recentBidAmount}` : ''}`}
-                    className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200/80 dark:border-amber-800/60 text-[11px]"
-                  >
-                    <DollarSign className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                    <span>{totalBidAmount} Bid</span>
+                {/* Total Bid Amount (Interactive Action) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBid?.(product);
+                  }}
+                  title={
+                    totalBidAmount > 0
+                      ? `Total Bid: $${totalBidAmount}${recentBidAmount > 0 ? ` · Latest bid: $${recentBidAmount}` : ''} — Click to add a new bid!`
+                      : 'No active bid ($0) — Click to be the first backer!'
+                  }
+                  className={`group/bid inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md border text-[11px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
+                    totalBidAmount > 0
+                      ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/60 dark:border-slate-700/60 hover:border-amber-300/60'
+                  }`}
+                >
+                  <DollarSign className="w-3 h-3 text-amber-600 dark:text-amber-400 group-hover/bid:rotate-12 transition-transform" />
+                  <span>{totalBidAmount} Bid</span>
+                  <span className="text-[10px] font-black text-amber-800 dark:text-amber-200 bg-amber-200/80 dark:bg-amber-800/80 px-1 py-0 rounded group-hover/bid:bg-amber-300 dark:group-hover:bg-amber-700 transition-colors ml-0.5">
+                    +
                   </span>
-                ) : (
-                  <span
-                    title="No active bid ($0)"
-                    className="inline-flex items-center gap-0.5 font-medium text-slate-400 dark:text-slate-500 bg-slate-100/80 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200/50 dark:border-slate-700/60 text-[11px]"
-                  >
-                    <DollarSign className="w-3 h-3 text-slate-400" />
-                    <span>0 Bid</span>
-                  </span>
-                )}
+                </button>
 
 
                 {product.starsCount ? (
@@ -320,10 +328,25 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                 )}
               </div>
 
-              {/* Trailing Visit Link CTA */}
-              <div className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
-                <span>Visit site</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+              {/* Action Buttons: Add Bid CTA & Trailing Visit Link */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBid?.(product);
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-800 dark:text-amber-200 bg-gradient-to-r from-amber-400/20 via-amber-300/25 to-yellow-400/20 hover:from-amber-400/35 hover:to-yellow-400/35 dark:from-amber-500/20 dark:to-yellow-500/20 border border-amber-300/70 dark:border-amber-700/60 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer active:scale-95"
+                  title={`Place a bid to boost ${product.name}`}
+                >
+                  <DollarSign className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  <span>Bid</span>
+                </button>
+
+                <div className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
+                  <span>Visit site</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </div>
               </div>
             </div>
           </div>
@@ -348,12 +371,14 @@ interface SideProductListItemProps {
   onRecordClick: (productId: string) => void;
   onUpvote?: (productId: string) => void;
   isUpvoted?: boolean;
+  onOpenBid?: (product: NewestReleaseProduct | Product) => void;
 }
 
 export const SideProductListItem: React.FC<SideProductListItemProps> = ({
   product,
   rank,
   onRecordClick,
+  onOpenBid,
 }) => {
   const handleCardClick = () => {
     onRecordClick(product.id);
@@ -486,24 +511,26 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
 
             <span className="text-slate-200 dark:text-slate-700 select-none">·</span>
 
-            {/* Reduced-size Bid Price Badge */}
-            {displayBidAmount > 0 ? (
-              <span
-                title={`Recent Bid: $${recentBidAmount > 0 ? recentBidAmount : displayBidAmount}${totalBidAmount > (recentBidAmount > 0 ? recentBidAmount : 0) ? ` · Total Bid: $${totalBidAmount}` : ''}`}
-                className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200/80 dark:border-amber-800/60 text-[9px] shrink-0 leading-none"
-              >
-                <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span>{displayBidAmount}</span>
+            {/* Interactive Bid Price Button & Quick Bid CTA */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenBid?.(product);
+              }}
+              title={`Bid: $${displayBidAmount}${totalBidAmount > displayBidAmount ? ` · Total: $${totalBidAmount}` : ''} — Click to add a new bid!`}
+              className={`group/sidebid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[9px] shrink-0 leading-none transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
+                displayBidAmount > 0
+                  ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
+              }`}
+            >
+              <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/sidebid:rotate-12 transition-transform" />
+              <span>{displayBidAmount}</span>
+              <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/sidebid:opacity-100 ml-0.5">
+                +
               </span>
-            ) : (
-              <span
-                title="No active bid ($0)"
-                className="inline-flex items-center gap-0.5 font-medium text-slate-400 dark:text-slate-500 bg-slate-100/80 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/60 text-[9px] shrink-0 leading-none"
-              >
-                <DollarSign className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                <span>0</span>
-              </span>
-            )}
+            </button>
           </div>
         </div>
       </div>

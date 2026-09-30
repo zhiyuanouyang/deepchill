@@ -37,6 +37,7 @@ import { PaginationControls } from '@/components/pagination-controls';
 import { CompoundSearchBar } from '@/components/compound-search-bar';
 import { SubmitModal } from '@/components/submit-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
+import { BidModal } from '@/components/bid-modal';
 
 const CATEGORIES: ('All' | ProductCategory)[] = [
   'All',
@@ -91,6 +92,10 @@ export function DirectoryView({
   const [dbNewestProducts, setDbNewestProducts] = useState<NewestReleaseProduct[] | null>(
     () => (initialNewestProducts && initialNewestProducts.length > 0 ? initialNewestProducts : null)
   );
+
+  // Bid Modal state
+  const [bidProject, setBidProject] = useState<TrendingProduct | NewestReleaseProduct | Product | null>(null);
+  const [isBidModalOpen, setIsBidModalOpen] = useState(false);
 
   // Search & Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -333,6 +338,98 @@ export function DirectoryView({
     fetchTrending(selectedCategory);
     fetchNewest(selectedCategory);
   };
+
+  // Open Bid Modal
+  const handleOpenBidModal = useCallback(
+    (targetProduct: TrendingProduct | NewestReleaseProduct | Product) => {
+      setBidProject(targetProduct);
+      setIsBidModalOpen(true);
+    },
+    []
+  );
+
+  // Handle successful bid placement: immediately update total_bids across base and derived lists
+  const handleBidSuccess = useCallback(
+    (projectId: string, addedAmount: number, newTotalBids: number, updatedAt: string) => {
+      // 1. Immediately update base products state
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id === projectId) {
+            const updatedTotal = newTotalBids ?? ((p.totalBid ?? p.totalPaid ?? 0) + addedAmount);
+            return {
+              ...p,
+              totalBid: updatedTotal,
+              totalPaid: updatedTotal,
+              latestBidTime: updatedAt,
+              mostRecentBid: {
+                bidPrice: addedAmount,
+                bidTime: updatedAt,
+                hasBid: true,
+              },
+              hasBid: true,
+            };
+          }
+          return p;
+        })
+      );
+
+      // 2. Immediately update trending list and sort by total bids descending
+      setDbTrendingProducts((prev) => {
+        if (!prev) return prev;
+        const updated = prev.map((p) => {
+          if (p.id === projectId) {
+            const updatedTotal = newTotalBids ?? ((p.totalBid ?? 0) + addedAmount);
+            return {
+              ...p,
+              totalBid: updatedTotal,
+              latestBidTime: updatedAt,
+              hasBid: true,
+              mostRecentBid: {
+                bidPrice: addedAmount,
+                bidTime: updatedAt,
+                hasBid: true,
+              },
+            };
+          }
+          return p;
+        });
+        return [...updated].sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0));
+      });
+
+      // 3. Immediately update newest releases list with new bid info
+      setDbNewestProducts((prev) => {
+        if (!prev) return prev;
+        const updated = prev.map((p) => {
+          if (p.id === projectId) {
+            const updatedTotal = newTotalBids ?? ((p.totalBid ?? 0) + addedAmount);
+            return {
+              ...p,
+              totalBid: updatedTotal,
+              latestBidTime: updatedAt,
+              hasBid: true,
+              mostRecentBid: {
+                bidPrice: addedAmount,
+                bidTime: updatedAt,
+                hasBid: true,
+              },
+            };
+          }
+          return p;
+        });
+        return [...updated].sort((a, b) => {
+          const timeA = new Date(a.latestBidTime || a.mostRecentBid?.bidTime || a.launchDate || 0).getTime();
+          const timeB = new Date(b.latestBidTime || b.mostRecentBid?.bidTime || b.launchDate || 0).getTime();
+          return timeB - timeA;
+        });
+      });
+
+      // 4. Background refresh to stay in full sync with DB triggers
+      fetchTrending(selectedCategory);
+      fetchNewest(selectedCategory);
+      fetchCategories();
+    },
+    [fetchCategories, fetchNewest, fetchTrending, selectedCategory]
+  );
 
   // Base filtered products (common filter for category, pricing, tags, search)
   const baseFilteredProducts = useMemo(() => {
@@ -730,6 +827,7 @@ export function DirectoryView({
                     rank={(primaryPage - 1) * PRIMARY_PAGE_SIZE + idx + 1}
                     onSelectTag={(tag) => setActiveTag(tag)}
                     onRecordClick={handleRecordClick}
+                    onOpenBid={handleOpenBidModal}
                   />
                 ))}
               </div>
@@ -766,6 +864,7 @@ export function DirectoryView({
                     product={product}
                     rank={(sidePage - 1) * SIDE_PAGE_SIZE + idx + 1}
                     onRecordClick={handleRecordClick}
+                    onOpenBid={handleOpenBidModal}
                   />
                 ))}
               </div>
@@ -894,6 +993,13 @@ export function DirectoryView({
         isOpen={isSeoGuideOpen}
         onClose={() => setIsSeoGuideOpen(false)}
         onOpenSubmit={() => setIsSubmitOpen(true)}
+      />
+
+      <BidModal
+        isOpen={isBidModalOpen}
+        onClose={() => setIsBidModalOpen(false)}
+        project={bidProject}
+        onBidSuccess={handleBidSuccess}
       />
     </div>
   );

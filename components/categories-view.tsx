@@ -36,6 +36,7 @@ import { CATEGORY_DESCRIPTIONS } from '@/data/category-descriptions';
 import { Navbar } from '@/components/navbar';
 import { SubmitModal } from '@/components/submit-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
+import { BidModal } from '@/components/bid-modal';
 
 /* ─── Constants ─────────────────────────────────────────────────────────────── */
 
@@ -369,7 +370,8 @@ const PrimaryCategoryRow: React.FC<{
   project: TrendingProduct;
   rank: number;
   onRecordClick: (id: string) => void;
-}> = ({ project, rank, onRecordClick }) => {
+  onOpenBid?: (project: TrendingProduct) => void;
+}> = ({ project, rank, onRecordClick, onOpenBid }) => {
   const paidBidAmount = project.totalBid ?? 0;
   const clickCount = project.totalClicks ?? 0;
   const domain = project.domain || extractDomain(project.websiteUrl);
@@ -459,15 +461,26 @@ const PrimaryCategoryRow: React.FC<{
 
               {/* Total Bid & Clicks Counters */}
               <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-medium">
-                {paidBidAmount > 0 && (
-                  <span
-                    className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200/80 dark:border-amber-800/60 text-[10px] shrink-0"
-                    title={`Total Bid: $${paidBidAmount}`}
-                  >
-                    <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>{paidBidAmount}</span>
+                {/* Interactive Total Bid Action Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBid?.(project);
+                  }}
+                  title={`Total Bid: $${paidBidAmount} — Click to add a new bid!`}
+                  className={`group/catbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[10px] shrink-0 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
+                    paidBidAmount > 0
+                      ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
+                  }`}
+                >
+                  <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/catbid:rotate-12 transition-transform" />
+                  <span>{paidBidAmount}</span>
+                  <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/catbid:opacity-100 ml-0.5">
+                    +
                   </span>
-                )}
+                </button>
 
                 <span
                   className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 text-[10px]"
@@ -484,11 +497,23 @@ const PrimaryCategoryRow: React.FC<{
               {project.tagline || project.description}
             </p>
 
-            {/* Domain URL indicator */}
-            <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
-              <span className="truncate group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
+            {/* Domain URL indicator & Add Bid Trigger */}
+            <div className="mt-1.5 flex items-center justify-between gap-1 text-[10px]">
+              <span className="truncate text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
                 {domain}
               </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenBid?.(project);
+                }}
+                className="inline-flex items-center gap-0.5 font-bold text-[10px] text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 bg-amber-50/80 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 px-1.5 py-0.5 rounded-md border border-amber-200/70 dark:border-amber-800/50 transition-all cursor-pointer active:scale-95"
+                title={`Place a bid to boost ${project.name}`}
+              >
+                <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                <span>Bid</span>
+              </button>
             </div>
           </div>
         </div>
@@ -504,7 +529,8 @@ const SecondaryCategoryRow: React.FC<{
   rank: number;
   now: number;
   onRecordClick: (id: string) => void;
-}> = ({ product, rank, now, onRecordClick }) => {
+  onOpenBid?: (product: NewestReleaseProduct) => void;
+}> = ({ product, rank, now, onRecordClick, onOpenBid }) => {
   const handleClick = () => {
     onRecordClick(product.id);
     if (typeof window !== 'undefined' && projectWebsiteUrl(product)) {
@@ -592,16 +618,24 @@ const SecondaryCategoryRow: React.FC<{
             <span>{clickCount}</span>
           </span>
 
-          {/* Small Bid Price Badge */}
-          {bidPrice > 0 && (
-            <span
-              title={`Recent Bid: $${bidPrice}`}
-              className="inline-flex items-center gap-0.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1 py-0.5 rounded text-[9px] shrink-0 border border-amber-200/70 dark:border-amber-800/50"
-            >
-              <DollarSign className="w-2.5 h-2.5 text-amber-500 shrink-0" />
-              <span>{bidPrice}</span>
-            </span>
-          )}
+          {/* Small Bid Price Badge -> Interactive Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenBid?.(product);
+            }}
+            title={`Bid: $${bidPrice} — Click to add a new bid!`}
+            className={`group/secbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 border transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
+              bidPrice > 0
+                ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/70 dark:border-amber-800/50 hover:border-amber-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
+            }`}
+          >
+            <DollarSign className="w-2.5 h-2.5 text-amber-500 group-hover/secbid:rotate-12 transition-transform shrink-0" />
+            <span>{bidPrice}</span>
+            <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/secbid:opacity-100 ml-0.5">+</span>
+          </button>
         </div>
       </div>
     </article>
@@ -804,7 +838,8 @@ const CategorySection: React.FC<{
   now: number;
   onRecordClick: (id: string) => void;
   onOpenSubmit: (category?: ProductCategory) => void;
-}> = ({ category, index, now, onRecordClick, onOpenSubmit }) => {
+  onOpenBid?: (project: TrendingProduct | NewestReleaseProduct | Product) => void;
+}> = ({ category, index, now, onRecordClick, onOpenSubmit, onOpenBid }) => {
   const IconComponent = CATEGORY_ICONS[category.name] || Layers;
   const theme = CATEGORY_THEMES[category.name] || {
     bg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
@@ -875,6 +910,7 @@ const CategorySection: React.FC<{
                   project={project}
                   rank={i + 1}
                   onRecordClick={onRecordClick}
+                  onOpenBid={onOpenBid}
                 />
               ))}
 
@@ -923,6 +959,7 @@ const CategorySection: React.FC<{
                 rank={i + 1}
                 now={now}
                 onRecordClick={onRecordClick}
+                onOpenBid={onOpenBid}
               />
             ))}
 
@@ -1012,6 +1049,18 @@ export function CategoriesView() {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [now, setNow] = useState<number>(() => Date.now());
 
+  // Bid Modal state
+  const [bidProject, setBidProject] = useState<TrendingProduct | NewestReleaseProduct | Product | null>(null);
+  const [isBidModalOpen, setIsBidModalOpen] = useState(false);
+
+  const handleOpenBidModal = useCallback(
+    (project: TrendingProduct | NewestReleaseProduct | Product) => {
+      setBidProject(project);
+      setIsBidModalOpen(true);
+    },
+    []
+  );
+
   const handleOpenSubmit = useCallback((cat?: ProductCategory) => {
     setSubmitCategory(cat);
     setIsSubmitOpen(true);
@@ -1097,6 +1146,99 @@ export function CategoriesView() {
     setProducts((prev) => [newProduct, ...prev]);
     fetchOverview();
   }, [fetchOverview]);
+
+  // Handle successful bid placement: update UI state across categories immediately
+  const handleBidSuccess = useCallback(
+    (projectId: string, addedAmount: number, newTotalBids: number, updatedAt: string) => {
+      // 1. Update in local products list
+      setProducts((prods) =>
+        prods.map((p) => {
+          if (p.id === projectId) {
+            const updatedTotal = newTotalBids ?? ((p.totalBid ?? p.totalPaid ?? 0) + addedAmount);
+            return {
+              ...p,
+              totalBid: updatedTotal,
+              totalPaid: updatedTotal,
+              latestBidTime: updatedAt,
+              mostRecentBid: {
+                bidPrice: addedAmount,
+                bidTime: updatedAt,
+                hasBid: true,
+              },
+              hasBid: true,
+            };
+          }
+          return p;
+        })
+      );
+
+      // 2. Update category data directly
+      setDbCategoryData((prev) =>
+        prev
+          ? prev.map((cat) => {
+              const inPrimary = cat.primaryTopProjects.some((p) => p.id === projectId);
+              const inSecondary = cat.secondaryRecentProjects.some((p) => p.id === projectId);
+              if (!inPrimary && !inSecondary) return cat;
+
+              const updatedPrimary = cat.primaryTopProjects.map((p) => {
+                if (p.id === projectId) {
+                  return {
+                    ...p,
+                    totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
+                    latestBidTime: updatedAt,
+                    hasBid: true,
+                    mostRecentBid: {
+                      bidPrice: addedAmount,
+                      bidTime: updatedAt,
+                      hasBid: true,
+                    },
+                  };
+                }
+                return p;
+              });
+
+              const updatedSecondary = cat.secondaryRecentProjects.map((p) => {
+                if (p.id === projectId) {
+                  return {
+                    ...p,
+                    totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
+                    latestBidTime: updatedAt,
+                    hasBid: true,
+                    mostRecentBid: {
+                      bidPrice: addedAmount,
+                      bidTime: updatedAt,
+                      hasBid: true,
+                    },
+                  };
+                }
+                return p;
+              });
+
+              // Re-sort primary by totalBid desc
+              updatedPrimary.sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0));
+
+              // Re-sort secondary by bidTime desc
+              updatedSecondary.sort((a, b) => {
+                const timeA = new Date(a.mostRecentBid?.bidTime || a.launchDate || 0).getTime();
+                const timeB = new Date(b.mostRecentBid?.bidTime || b.launchDate || 0).getTime();
+                return timeB - timeA;
+              });
+
+              return {
+                ...cat,
+                primaryTopProjects: updatedPrimary,
+                secondaryRecentProjects: updatedSecondary,
+                updatedAt: updatedAt,
+              };
+            })
+          : prev
+      );
+
+      // 3. Background fetch overview to stay in sync with remote DB triggers
+      fetchOverview();
+    },
+    [fetchOverview]
+  );
 
   // Build category data with primary top 3 and secondary bottom 3 (sorted by updated_at timestamp descending)
   const categoryData = useMemo(() => {
@@ -1193,6 +1335,7 @@ export function CategoriesView() {
                 now={now}
                 onRecordClick={handleRecordClick}
                 onOpenSubmit={handleOpenSubmit}
+                onOpenBid={handleOpenBidModal}
               />
             ))}
           </div>
@@ -1243,6 +1386,13 @@ export function CategoriesView() {
         isOpen={isSeoGuideOpen}
         onClose={() => setIsSeoGuideOpen(false)}
         onOpenSubmit={() => handleOpenSubmit(undefined)}
+      />
+
+      <BidModal
+        isOpen={isBidModalOpen}
+        onClose={() => setIsBidModalOpen(false)}
+        project={bidProject}
+        onBidSuccess={handleBidSuccess}
       />
     </div>
   );
