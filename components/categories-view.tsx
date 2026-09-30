@@ -469,11 +469,10 @@ const PrimaryCategoryRow: React.FC<{
                     onOpenBid?.(project);
                   }}
                   title={`Total Bid: $${paidBidAmount} — Click to add a new bid!`}
-                  className={`group/catbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[10px] shrink-0 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
-                    paidBidAmount > 0
-                      ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
-                  }`}
+                  className={`group/catbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[10px] shrink-0 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${paidBidAmount > 0
+                    ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
+                    }`}
                 >
                   <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/catbid:rotate-12 transition-transform" />
                   <span>{paidBidAmount}</span>
@@ -502,18 +501,6 @@ const PrimaryCategoryRow: React.FC<{
               <span className="truncate text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
                 {domain}
               </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenBid?.(project);
-                }}
-                className="inline-flex items-center gap-0.5 font-bold text-[10px] text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 bg-amber-50/80 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 px-1.5 py-0.5 rounded-md border border-amber-200/70 dark:border-amber-800/50 transition-all cursor-pointer active:scale-95"
-                title={`Place a bid to boost ${project.name}`}
-              >
-                <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
-                <span>Bid</span>
-              </button>
             </div>
           </div>
         </div>
@@ -626,11 +613,10 @@ const SecondaryCategoryRow: React.FC<{
               onOpenBid?.(product);
             }}
             title={`Bid: $${bidPrice} — Click to add a new bid!`}
-            className={`group/secbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 border transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${
-              bidPrice > 0
-                ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/70 dark:border-amber-800/50 hover:border-amber-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
-            }`}
+            className={`group/secbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 border transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${bidPrice > 0
+              ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/70 dark:border-amber-800/50 hover:border-amber-400'
+              : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
+              }`}
           >
             <DollarSign className="w-2.5 h-2.5 text-amber-500 group-hover/secbid:rotate-12 transition-transform shrink-0" />
             <span>{bidPrice}</span>
@@ -1128,17 +1114,17 @@ export function CategoriesView() {
     setDbCategoryData((prev) =>
       prev
         ? prev.map((cat) => ({
-            ...cat,
-            primaryTopProjects: cat.primaryTopProjects.map((p) =>
-              p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
-            ),
-            secondaryRecentProjects: cat.secondaryRecentProjects.map((p) =>
-              p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
-            ),
-          }))
+          ...cat,
+          primaryTopProjects: cat.primaryTopProjects.map((p) =>
+            p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
+          ),
+          secondaryRecentProjects: cat.secondaryRecentProjects.map((p) =>
+            p.id === productId ? { ...p, totalClicks: (p.totalClicks ?? 0) + 1 } : p
+          ),
+        }))
         : prev
     );
-    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => {});
+    fetch(`/api/projects/${productId}/clicks`, { method: 'POST' }).catch(() => { });
   }, []);
 
   // Add new submitted project
@@ -1176,61 +1162,61 @@ export function CategoriesView() {
       setDbCategoryData((prev) =>
         prev
           ? prev.map((cat) => {
-              const inPrimary = cat.primaryTopProjects.some((p) => p.id === projectId);
-              const inSecondary = cat.secondaryRecentProjects.some((p) => p.id === projectId);
-              if (!inPrimary && !inSecondary) return cat;
+            const inPrimary = cat.primaryTopProjects.some((p) => p.id === projectId);
+            const inSecondary = cat.secondaryRecentProjects.some((p) => p.id === projectId);
+            if (!inPrimary && !inSecondary) return cat;
 
-              const updatedPrimary = cat.primaryTopProjects.map((p) => {
-                if (p.id === projectId) {
-                  return {
-                    ...p,
-                    totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
-                    latestBidTime: updatedAt,
+            const updatedPrimary = cat.primaryTopProjects.map((p) => {
+              if (p.id === projectId) {
+                return {
+                  ...p,
+                  totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
+                  latestBidTime: updatedAt,
+                  hasBid: true,
+                  mostRecentBid: {
+                    bidPrice: addedAmount,
+                    bidTime: updatedAt,
                     hasBid: true,
-                    mostRecentBid: {
-                      bidPrice: addedAmount,
-                      bidTime: updatedAt,
-                      hasBid: true,
-                    },
-                  };
-                }
-                return p;
-              });
+                  },
+                };
+              }
+              return p;
+            });
 
-              const updatedSecondary = cat.secondaryRecentProjects.map((p) => {
-                if (p.id === projectId) {
-                  return {
-                    ...p,
-                    totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
-                    latestBidTime: updatedAt,
+            const updatedSecondary = cat.secondaryRecentProjects.map((p) => {
+              if (p.id === projectId) {
+                return {
+                  ...p,
+                  totalBid: newTotalBids ?? ((p.totalBid ?? 0) + addedAmount),
+                  latestBidTime: updatedAt,
+                  hasBid: true,
+                  mostRecentBid: {
+                    bidPrice: addedAmount,
+                    bidTime: updatedAt,
                     hasBid: true,
-                    mostRecentBid: {
-                      bidPrice: addedAmount,
-                      bidTime: updatedAt,
-                      hasBid: true,
-                    },
-                  };
-                }
-                return p;
-              });
+                  },
+                };
+              }
+              return p;
+            });
 
-              // Re-sort primary by totalBid desc
-              updatedPrimary.sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0));
+            // Re-sort primary by totalBid desc
+            updatedPrimary.sort((a, b) => (b.totalBid ?? 0) - (a.totalBid ?? 0));
 
-              // Re-sort secondary by bidTime desc
-              updatedSecondary.sort((a, b) => {
-                const timeA = new Date(a.mostRecentBid?.bidTime || a.launchDate || 0).getTime();
-                const timeB = new Date(b.mostRecentBid?.bidTime || b.launchDate || 0).getTime();
-                return timeB - timeA;
-              });
+            // Re-sort secondary by bidTime desc
+            updatedSecondary.sort((a, b) => {
+              const timeA = new Date(a.mostRecentBid?.bidTime || a.launchDate || 0).getTime();
+              const timeB = new Date(b.mostRecentBid?.bidTime || b.launchDate || 0).getTime();
+              return timeB - timeA;
+            });
 
-              return {
-                ...cat,
-                primaryTopProjects: updatedPrimary,
-                secondaryRecentProjects: updatedSecondary,
-                updatedAt: updatedAt,
-              };
-            })
+            return {
+              ...cat,
+              primaryTopProjects: updatedPrimary,
+              secondaryRecentProjects: updatedSecondary,
+              updatedAt: updatedAt,
+            };
+          })
           : prev
       );
 
