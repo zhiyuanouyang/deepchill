@@ -39,12 +39,104 @@ function extractMetaTag(html: string, propertyName: string): string {
   return '';
 }
 
+function extractJsonLd(html: string): { name: string; description: string; tagline: string } {
+  let name = '';
+  let description = '';
+  let tagline = '';
+
+  const regex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+
+  while ((match = regex.exec(html)) !== null) {
+    const raw = match[1].trim();
+    if (!raw) continue;
+
+    try {
+      const parsed = JSON.parse(raw);
+      const items: any[] = [];
+
+      const collectItems = (obj: any) => {
+        if (!obj || typeof obj !== 'object') return;
+        if (Array.isArray(obj)) {
+          obj.forEach(collectItems);
+          return;
+        }
+        items.push(obj);
+        if (obj['@graph'] && Array.isArray(obj['@graph'])) {
+          obj['@graph'].forEach(collectItems);
+        }
+        if (obj.mainEntity) {
+          collectItems(obj.mainEntity);
+        }
+      };
+
+      collectItems(parsed);
+
+      // Prioritize primary types: WebSite, SoftwareApplication, WebApplication, Product, Organization
+      const typeRank = (type: any): number => {
+        if (typeof type !== 'string') return 0;
+        const lower = type.toLowerCase();
+        if (
+          lower.includes('website') ||
+          lower.includes('softwareapplication') ||
+          lower.includes('webapplication') ||
+          lower.includes('product')
+        )
+          return 3;
+        if (lower.includes('organization') || lower.includes('corporation')) return 2;
+        return 1;
+      };
+
+      items.sort((a, b) => typeRank(b['@type']) - typeRank(a['@type']));
+
+      for (const item of items) {
+        if (!name && typeof item.name === 'string' && item.name.trim()) {
+          name = decodeHtmlEntities(item.name.trim());
+        }
+        if (!description && typeof item.description === 'string' && item.description.trim()) {
+          description = decodeHtmlEntities(item.description.trim());
+        }
+        if (!tagline && typeof item.slogan === 'string' && item.slogan.trim()) {
+          tagline = decodeHtmlEntities(item.slogan.trim());
+        } else if (!tagline && typeof item.headline === 'string' && item.headline.trim()) {
+          tagline = decodeHtmlEntities(item.headline.trim());
+        }
+      }
+    } catch {
+      // Ignore invalid or unparseable JSON
+    }
+  }
+
+  return { name, description, tagline };
+}
+
+function extractH1(html: string): string {
+  const match = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  if (!match || !match[1]) return '';
+
+  const clean = match[1]
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const decoded = decodeHtmlEntities(clean);
+  if (decoded.length > 100) {
+    const sentenceEnd = decoded.search(/[.!?](\s|$)/);
+    if (sentenceEnd > 10 && sentenceEnd <= 100) {
+      return decoded.slice(0, sentenceEnd + 1).trim();
+    }
+    return decoded.slice(0, 97).trim() + '...';
+  }
+
+  return decoded;
+}
+
 /**
  * Lightweight metadata extraction:
- * - Fetches ONLY the first chunk of the webpage (up to 16KB)
- * - Streams and aborts immediately when </head> is found
- * - Extracts og:site_name for product name, og:title for tagline, and og:description for description
- * - If any cannot be extracted, leaves them blank rather than guessing
+ * - Fetches initial chunk of the webpage (up to 48KB or until </h1> is reached)
+ * - Extracts JSON-LD as source of truth for name and description (higher priority than OG metadata)
+ * - Falls back to og:site_name and og:description if JSON-LD is missing
+ * - For tagline, considers the page's <h1> hero tag alongside og:title and JSON-LD slogan/headline
  */
 async function getLightweightMetadata(domain: string, targetUrl?: string | null) {
   const defaultIcon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -74,23 +166,47 @@ async function getLightweightMetadata(domain: string, targetUrl?: string | null)
       const decoder = new TextDecoder();
       let html = '';
       let bytesRead = 0;
-      const maxBytes = 16384; // 16KB max
+      const maxBytes = 49152; // 48KB max - enough to capture <head>, JSON-LD, and hero <h1> in <body>
 
       while (bytesRead < maxBytes) {
         const { done, value } = await reader.read();
         if (done) break;
         bytesRead += value.length;
         html += decoder.decode(value, { stream: true });
-        if (html.toLowerCase().includes('</head>')) {
+        if (html.toLowerCase().includes('</h1>')) {
           controller.abort();
           break;
         }
       }
 
-      // Extract specific Open Graph tags as requested
-      name = extractMetaTag(html, 'og:site_name');
-      tagline = extractMetaTag(html, 'og:title');
-      description = extractMetaTag(html, 'og:description');
+      // 1. JSON-LD extraction (source of truth for name & description)
+      const jsonLd = extractJsonLd(html);
+
+      // 2. Open Graph tags extraction
+      const ogSiteName = extractMetaTag(html, 'og:site_name');
+      const ogTitle = extractMetaTag(html, 'og:title');
+      const ogDescription = extractMetaTag(html, 'og:description');
+
+      // 3. Name: JSON-LD takes higher priority than OG metadata
+      name = jsonLd.name || ogSiteName;
+
+      // 4. Description: JSON-LD takes higher priority than OG metadata
+      description = jsonLd.description || ogDescription;
+
+      // 5. Tagline: Consider h1 tag of the domain page alongside og:title and JSON-LD slogan/headline
+      const h1Tag = extractH1(html);
+
+      if (h1Tag && (!name || h1Tag.toLowerCase() !== name.toLowerCase())) {
+        tagline = h1Tag;
+      } else if (ogTitle && (!name || ogTitle.toLowerCase() !== name.toLowerCase())) {
+        tagline = ogTitle;
+      } else if (jsonLd.tagline) {
+        tagline = jsonLd.tagline;
+      } else if (h1Tag) {
+        tagline = h1Tag;
+      } else if (ogTitle) {
+        tagline = ogTitle;
+      }
     }
   } catch {
     // If fetching fails or times out, leave fields blank
