@@ -152,7 +152,9 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/projects/check-domain?domain=${encodeURIComponent(domainToCheck)}`
+          `/api/projects/check-domain?domain=${encodeURIComponent(
+            domainToCheck
+          )}&url=${encodeURIComponent(trimmed)}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -181,6 +183,33 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 }
                 return next;
               });
+
+              // Pre-fill basic information ONLY if extracted and user hasn't typed custom fields yet
+              if (data.suggested) {
+                if (data.suggested.name && !name.trim()) {
+                  setName(data.suggested.name);
+                }
+                if (data.suggested.tagline && !tagline.trim()) {
+                  setTagline(data.suggested.tagline);
+                }
+                if (data.suggested.description && !description.trim()) {
+                  setDescription(data.suggested.description);
+                }
+                if (data.suggested.iconUrl && !iconUrl.trim()) {
+                  setIconUrl(data.suggested.iconUrl);
+                  setIconError(false);
+                }
+
+                const hasAnyPopulated = Boolean(
+                  data.suggested.name ||
+                    data.suggested.tagline ||
+                    data.suggested.description
+                );
+                if (hasAnyPopulated) {
+                  setIsExpanded(true);
+                  setAiSuccessMessage(`✨ Metadata detected for ${domainToCheck}`);
+                }
+              }
             }
           }
         }
@@ -374,7 +403,9 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     if (!domainCheckResult || domainCheckResult.domain !== urlValidation.domain) {
       try {
         const checkRes = await fetch(
-          `/api/projects/check-domain?domain=${encodeURIComponent(urlValidation.domain)}`
+          `/api/projects/check-domain?domain=${encodeURIComponent(
+            urlValidation.domain
+          )}&url=${encodeURIComponent(websiteUrl.trim())}`
         );
         if (checkRes.ok) {
           const checkData = await checkRes.json();
@@ -391,6 +422,20 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               }.`,
             }));
             return;
+          } else if (checkData.suggested) {
+            if (checkData.suggested.name && !name.trim()) {
+              setName(checkData.suggested.name);
+            }
+            if (checkData.suggested.tagline && !tagline.trim()) {
+              setTagline(checkData.suggested.tagline);
+            }
+            if (checkData.suggested.description && !description.trim()) {
+              setDescription(checkData.suggested.description);
+            }
+            if (checkData.suggested.iconUrl && !iconUrl.trim()) {
+              setIconUrl(checkData.suggested.iconUrl);
+              setIconError(false);
+            }
           }
         }
       } catch (checkErr) {
