@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     if (q && q.trim()) {
       query = query.or(
-        `name.ilike.%${q.trim()}%,tagline.ilike.%${q.trim()}%,discription.ilike.%${q.trim()}%,url.ilike.%${q.trim()}%`
+        `name.ilike.%${q.trim()}%,tagline.ilike.%${q.trim()}%,description.ilike.%${q.trim()}%,url.ilike.%${q.trim()}%`
       );
     }
 
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
         name: name.trim(),
         url: websiteUrl.trim(),
         tagline: tagline.trim(),
-        discription: description.trim(),
+        description: description.trim(),
         icon_url: logoUrl ? logoUrl.trim() : null,
         category,
         user_id: user?.id || null,
@@ -125,7 +125,6 @@ export async function POST(request: Request) {
         url,
         name,
         tagline,
-        discription,
         description,
         icon_url,
         user_id,

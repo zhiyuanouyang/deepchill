@@ -44,7 +44,6 @@ export async function GET() {
         url,
         name,
         tagline,
-        discription,
         description,
         icon_url,
         user_id,

@@ -226,8 +226,7 @@ export interface Project {
   url: string;
   name: string;
   tagline: string | null;
-  discription: string | null;
-  description?: string | null;
+  description: string | null;
   icon_url: string | null;
   user_id: string | null;
   category: string | null;

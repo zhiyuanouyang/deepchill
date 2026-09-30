@@ -5,7 +5,7 @@
 -- Tables:
 --   1. categories   (id, display_name, descriptions)
 --   2. profiles     (id, uid, display_name, email)
---   3. projects     (id, url, name, tagline, discription, icon_url, user_id, category)
+--   3. projects     (id, url, name, tagline, description, icon_url, user_id, category)
 --   4. bids         (id, project_id, price, created_at)
 --   5. total_clicks (project_id, count)
 --   6. total_bids   (project_id, price)
@@ -124,8 +124,7 @@ create table if not exists public.projects (
   url text not null,
   name text not null,
   tagline text,
-  discription text,
-  description text generated always as (discription) stored,
+  description text,
   icon_url text,
   user_id uuid references auth.users(id) on delete set null,
   category text,
@@ -384,7 +383,6 @@ select
   p.url,
   p.name,
   p.tagline,
-  p.discription,
   p.description,
   p.icon_url,
   p.user_id,
@@ -417,7 +415,6 @@ select
   p.url,
   p.name,
   p.tagline,
-  p.discription,
   p.description,
   p.icon_url,
   p.user_id,

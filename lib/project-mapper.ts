@@ -13,7 +13,6 @@ export interface JoinedProjectRow {
   url: string;
   name: string;
   tagline: string | null;
-  discription: string | null;
   description?: string | null;
   icon_url: string | null;
   user_id: string | null;
@@ -88,7 +87,7 @@ export function mapRowToProduct(row: JoinedProjectRow): Product {
   const mostRecentBid = extractMostRecentBid(row);
   const domain = extractDomain(row.url || '');
   const category = (row.category || 'DevTools') as ProductCategory;
-  const desc = row.description || row.discription || '';
+  const desc = row.description || '';
   const latestBidTime = row.latest_bid_time || (mostRecentBid.hasBid ? mostRecentBid.bidTime : null);
 
   return {
