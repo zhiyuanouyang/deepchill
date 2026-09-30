@@ -2,19 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Type } from '@google/genai';
 import { getAiClient } from '@/lib/gemini';
 import { ProductCategory } from '@/lib/types';
+import { createClient } from '@/supabase/server';
 
 export const dynamic = 'force-dynamic';
-
-const VALID_CATEGORIES: ProductCategory[] = [
-  'DevTools',
-  'AI & Machine Learning',
-  'Productivity',
-  'Design & Creative',
-  'Open Source Infrastructure',
-  'SaaS & Analytics',
-  'Security & Privacy',
-  'Developer Utilities',
-];
 
 function cleanHtmlText(html: string): string {
   return html
@@ -64,7 +54,7 @@ function extractFavicon(html: string, baseUrl: string): string | null {
   return null;
 }
 
-function guessCategory(text: string): ProductCategory {
+function guessCategory(text: string): string {
   const lower = text.toLowerCase();
   if (/\b(ai|llm|gpt|ml)\b/i.test(lower) || lower.includes('machine learning') || lower.includes('artificial intelligence')) {
     return 'AI & Machine Learning';
@@ -87,7 +77,7 @@ function guessCategory(text: string): ProductCategory {
   if (lower.includes('utility') || lower.includes('converter') || lower.includes('generator') || lower.includes('formatter')) {
     return 'Developer Utilities';
   }
-  return 'DevTools';
+  return 'Other';
 }
 
 function cleanProjectName(rawTitle: string, domain: string): string {
@@ -178,6 +168,23 @@ export async function POST(req: NextRequest) {
     // AI Generation with Gemini
     const ai = getAiClient();
 
+    // Query existing categories from database table
+    let dbCategoryNames: string[] = [];
+    try {
+      const supabase = await createClient();
+      const { data: dbCategories } = await supabase
+        .from('categories')
+        .select('display_name')
+        .order('display_name', { ascending: true });
+      if (dbCategories && dbCategories.length > 0) {
+        dbCategoryNames = dbCategories.map((c) => c.display_name);
+      }
+    } catch (dbErr) {
+      console.warn('Could not query categories table:', dbErr);
+    }
+    const availableCategories: string[] =
+      dbCategoryNames.length > 0 ? dbCategoryNames : ['Other'];
+
     if (!ai) {
       // Fallback heuristics when AI is not configured
       const fallbackName = cleanProjectName(scrapedTitle, domain);
@@ -185,7 +192,10 @@ export async function POST(req: NextRequest) {
         ? scrapedDesc.slice(0, 75).trim()
         : `${fallbackName} — High performance software for modern developers`;
       const fallbackDesc = scrapedDesc || `${fallbackName} provides a modern suite of features built for developers and creators.`;
-      const fallbackCat = guessCategory(`${scrapedTitle} ${scrapedDesc} ${domain}`);
+      const guessed = guessCategory(`${scrapedTitle} ${scrapedDesc} ${domain}`);
+      const fallbackCat = availableCategories.includes(guessed)
+        ? guessed
+        : (availableCategories.includes('Other') ? 'Other' : availableCategories[0] || 'Other');
 
       return NextResponse.json({
         success: true,
@@ -214,15 +224,8 @@ Your task:
 1. "name": The clean, official brand or project name (e.g. "Supabase", "Linear", "Tailwind CSS", "Resend"). Keep it concise.
 2. "tagline": A crisp, punchy 1-sentence value proposition under 75 characters (e.g. "The open-source Firebase alternative with Postgres"). Do not use exclamation marks or hype words.
 3. "description": A clear, informative 2-3 sentence overview describing what it does, key developer features, and who it is for.
-4. "category": You MUST choose exactly ONE from this list:
-   - "DevTools"
-   - "AI & Machine Learning"
-   - "Productivity"
-   - "Design & Creative"
-   - "Open Source Infrastructure"
-   - "SaaS & Analytics"
-   - "Security & Privacy"
-   - "Developer Utilities"
+4. "category": You MUST choose exactly ONE from this list of directory categories:
+${availableCategories.map((c) => `   - "${c}"`).join('\n')}
 5. "iconUrl": Suggested icon/logo image URL. If you know a stable logo URL for this project or see a valid one, provide it; otherwise return "${chosenIcon}".`;
 
     try {
@@ -240,7 +243,7 @@ Your task:
               description: { type: Type.STRING },
               category: {
                 type: Type.STRING,
-                enum: VALID_CATEGORIES,
+                enum: availableCategories,
               },
               iconUrl: { type: Type.STRING },
             },
@@ -260,9 +263,12 @@ Your task:
         parsed.description?.trim() ||
         scrapedDesc ||
         `${finalName} is an innovative tool built to streamline development workflows.`;
-      const finalCategory: ProductCategory = VALID_CATEGORIES.includes(parsed.category)
+      const guessed = guessCategory(`${finalName} ${finalTagline} ${domain}`);
+      const finalCategory = availableCategories.includes(parsed.category)
         ? parsed.category
-        : guessCategory(`${finalName} ${finalTagline} ${domain}`);
+        : (availableCategories.includes(guessed)
+          ? guessed
+          : (availableCategories.includes('Other') ? 'Other' : availableCategories[0] || 'Other'));
       const finalIcon = parsed.iconUrl && parsed.iconUrl.startsWith('http') ? parsed.iconUrl : chosenIcon;
 
       return NextResponse.json({

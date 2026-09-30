@@ -1006,6 +1006,8 @@ export function DirectoryView({
         isOpen={isSubmitOpen}
         onClose={() => setIsSubmitOpen(false)}
         onSubmitProduct={handleAddProduct}
+        categories={dbCategories}
+        defaultCategory={selectedCategory !== 'All' ? selectedCategory : undefined}
       />
 
       <SeoGuideModal

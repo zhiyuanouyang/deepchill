@@ -19,36 +19,31 @@ import { Product, ProductCategory } from '@/lib/types';
 import { extractDomain } from '@/lib/utils';
 import { useAuth } from '@/components/auth/auth-provider';
 import { ProjectBidCard } from '@/components/project-bid-card';
+import { CategoryCombobox } from '@/components/category-combobox';
 
 interface SubmitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitProduct: (product: Product) => void;
-  defaultCategory?: ProductCategory;
+  defaultCategory?: ProductCategory | string;
+  categories?: Array<{ id?: string; display_name: string }> | string[];
 }
-
-const CATEGORIES: ProductCategory[] = [
-  'DevTools',
-  'AI & Machine Learning',
-  'Productivity',
-  'Design & Creative',
-  'Open Source Infrastructure',
-  'SaaS & Analytics',
-  'Security & Privacy',
-  'Developer Utilities',
-];
 
 export const SubmitModal: React.FC<SubmitModalProps> = ({
   isOpen,
   onClose,
   onSubmitProduct,
   defaultCategory,
+  categories: categoriesProp,
 }) => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [name, setName] = useState('');
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ProductCategory>(defaultCategory || 'DevTools');
+  const [category, setCategory] = useState<string>(
+    defaultCategory && defaultCategory !== 'All' ? defaultCategory : 'Other'
+  );
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [iconUrl, setIconUrl] = useState('');
   const [biddingAmount, setBiddingAmount] = useState<number>(0);
 
@@ -64,16 +59,65 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
   const { profile, displayName } = useAuth();
 
+  // Fetch categories from categories table or use passed prop
   useEffect(() => {
-    if (isOpen) {
-      if (defaultCategory) {
-        setCategory(defaultCategory);
+    let isMounted = true;
+
+    async function loadCategories() {
+      // 1. If categories prop was provided, use it
+      if (categoriesProp && categoriesProp.length > 0) {
+        const names = categoriesProp.map((c) =>
+          typeof c === 'string' ? c : c.display_name
+        );
+        if (isMounted) {
+          setCategoryOptions(names);
+          const fallback = names.includes('Other') ? 'Other' : names[0] || 'Other';
+          const target = defaultCategory && defaultCategory !== 'All' && names.includes(defaultCategory)
+            ? defaultCategory
+            : fallback;
+          setCategory((prev) => (prev && names.includes(prev) ? prev : target));
+        }
+        return;
       }
+
+      // 2. Otherwise fetch live from categories table
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.categories && Array.isArray(data.categories)) {
+            const names = data.categories.map((c: { display_name: string }) => c.display_name);
+            if (isMounted && names.length > 0) {
+              setCategoryOptions(names);
+              const fallback = names.includes('Other') ? 'Other' : names[0] || 'Other';
+              const target = defaultCategory && defaultCategory !== 'All' && names.includes(defaultCategory)
+                ? defaultCategory
+                : fallback;
+              setCategory((prev) => (prev && names.includes(prev) ? prev : target));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load categories from table:', err);
+      }
+    }
+
+    if (isOpen) {
+      loadCategories();
       setIsExpanded(false);
       setErrors({});
       setAiSuccessMessage(null);
+      if (defaultCategory && defaultCategory !== 'All') {
+        setCategory(defaultCategory);
+      } else {
+        setCategory('Other');
+      }
     }
-  }, [isOpen, defaultCategory]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, categoriesProp, defaultCategory]);
 
   const cleanDomain = useMemo(() => extractDomain(websiteUrl), [websiteUrl]);
 
@@ -113,9 +157,11 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
       if (metadata.name) setName(metadata.name);
       if (metadata.tagline) setTagline(metadata.tagline);
-      if (metadata.description) setDescription(metadata.description);
-      if (metadata.category && CATEGORIES.includes(metadata.category)) {
+      if (metadata.category) {
         setCategory(metadata.category);
+        setCategoryOptions((prev) =>
+          prev.includes(metadata.category) ? prev : [metadata.category, ...prev]
+        );
       }
       if (metadata.iconUrl) {
         setIconUrl(metadata.iconUrl);
@@ -200,7 +246,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       tagline: tagline.trim(),
       description: description.trim(),
       websiteUrl: websiteUrl.trim(),
-      category,
+      category: category as ProductCategory,
       pricing: 'Free',
       tags: [category, 'Indie'],
       categoryTags: [category, 'Indie'],
@@ -422,18 +468,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                       Category
                     </label>
-                    <select
-                      id="select-category"
+                    <CategoryCombobox
                       value={category}
-                      onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                      className="w-full liquid-glass-input rounded-xl px-3 py-2 text-xs sm:text-sm outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium cursor-pointer"
-                    >
-                      {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setCategory}
+                      options={categoryOptions}
+                      placeholder="Search or pick category..."
+                    />
                   </div>
                 </div>
 
