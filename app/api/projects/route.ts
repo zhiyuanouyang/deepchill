@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       description,
       category = 'DevTools',
       logoUrl,
+      icon_url,
       biddingAmount = 50,
     } = body;
 
@@ -65,6 +66,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const effectiveIcon = (icon_url || logoUrl || '').trim() || null;
 
     const supabase = await createClient();
 
@@ -81,7 +84,7 @@ export async function POST(request: Request) {
         url: websiteUrl.trim(),
         tagline: tagline.trim(),
         description: description.trim(),
-        icon_url: logoUrl ? logoUrl.trim() : null,
+        icon_url: effectiveIcon,
         category,
         user_id: user?.id || null,
       })
