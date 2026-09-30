@@ -14,6 +14,7 @@ import {
   CornerDownLeft,
 } from 'lucide-react';
 import { Product, AiAskResponse } from '@/lib/types';
+import { CategoryBadge } from '@/components/category-badge';
 
 interface CompoundSearchBarProps {
   mode: 'keyword' | 'ai';
@@ -384,21 +385,18 @@ export const CompoundSearchBar: React.FC<CompoundSearchBarProps> = ({
                     className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer group shadow-2xs hover:shadow-md flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                           {p.name}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 border border-slate-200/60 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold">
-                          {p.pricing}
-                        </span>
+                        <CategoryBadge category={p.category} size="xs" />
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">
                         {p.tagline}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-slate-100 dark:border-slate-700/60">
-                      <span>{p.category}</span>
+                    <div className="flex items-center justify-end text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-slate-100 dark:border-slate-700/60">
                       <span className="text-indigo-600 dark:text-indigo-400 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
                         Inspect <ArrowRight className="w-3 h-3" />
                       </span>

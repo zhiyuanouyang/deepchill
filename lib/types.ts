@@ -100,6 +100,7 @@ export interface NewestReleaseProduct {
   latestBidTime?: string | null;
   hasBid?: boolean;
   totalBid?: number;
+  category?: ProductCategory;
 }
 
 /**

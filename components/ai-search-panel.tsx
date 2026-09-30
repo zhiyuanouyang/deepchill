@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { Product, AiAskResponse } from '@/lib/types';
+import { CategoryBadge } from '@/components/category-badge';
 
 interface AiSearchPanelProps {
   products: Product[];
@@ -234,21 +235,18 @@ export const AiSearchPanel: React.FC<AiSearchPanelProps> = ({
                     className="p-3.5 rounded-xl bg-slate-50 hover:bg-white border border-slate-200/80 hover:border-indigo-300 transition-all cursor-pointer group shadow-sm flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <span className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                           {p.name}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 font-semibold">
-                          {p.pricing}
-                        </span>
+                        <CategoryBadge category={p.category} size="xs" />
                       </div>
                       <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2">
                         {p.tagline}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium pt-2 border-t border-slate-200/60">
-                      <span>{p.category}</span>
+                    <div className="flex items-center justify-end text-[11px] text-slate-500 font-medium pt-2 border-t border-slate-200/60">
                       <span className="text-indigo-600 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
                         Inspect <ArrowRight className="w-3 h-3" />
                       </span>

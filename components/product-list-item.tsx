@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Product, TrendingProduct, NewestReleaseProduct } from '@/lib/types';
 import { formatRelativeTime, formatExactDateTime } from '@/lib/utils';
+import { CategoryBadge } from '@/components/category-badge';
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * RankHatIcon — Crown for Top 3, Stylish Hat for Rank 4+
@@ -61,7 +62,7 @@ const RankHatIcon: React.FC<{ rank: number; className?: string }> = ({
  * PrimaryProductListItem — Trending Projects (Hero / Primary Showcase)
  * Rich Apple-inspired card exposing:
  * - Stacked Rank Hat/Crown badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Grey Hat) above icon
- * - Bigger 56px squircle logo, verified DoFollow SEO badge, pricing model, category
+ * - Bigger 56px squircle logo, verified DoFollow SEO badge, SaaS category mini-chip
  * - Multi-proof metrics: Paid Bid, Clicks, Stars
  * - Tagline & rich description snippet
  * - Interactive tech stack / tags (clickable) & maker attribution
@@ -211,13 +212,16 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   </span>
                 )}
 
-                <span className="text-[10px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md shrink-0 border border-slate-200/60 dark:border-slate-700/60">
-                  {product.pricing}
-                </span>
-
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
-                  {product.category}
-                </span>
+                {product.category && (
+                  <CategoryBadge
+                    category={product.category}
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectTag(product.category);
+                    }}
+                  />
+                )}
               </div>
 
               {/* Right Side Metrics Bar */}
@@ -474,6 +478,10 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
             <h4 className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate min-w-0">
               {product.name}
             </h4>
+
+            {product.category && (
+              <CategoryBadge category={product.category} size="xs" className="shrink-0" />
+            )}
           </div>
         </div>
 

@@ -161,5 +161,6 @@ export function mapRowToNewestProduct(row: JoinedProjectRow): NewestReleaseProdu
     latestBidTime: product.latestBidTime,
     hasBid: product.hasBid,
     totalBid: product.totalBid,
+    category: product.category,
   };
 }

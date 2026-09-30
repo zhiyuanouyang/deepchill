@@ -5,6 +5,7 @@ import { ExternalLink, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GithubIcon } from './icons';
 import { Product } from '@/lib/types';
+import { CategoryBadge } from '@/components/category-badge';
 
 interface ProductCardProps {
   product: Product;
@@ -43,20 +44,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  const getPricingBadge = (pricing: Product['pricing']) => {
-    switch (pricing) {
-      case 'Open Source':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
-      case 'Free':
-        return 'bg-cyan-50 text-cyan-700 border-cyan-200/80';
-      case 'Freemium':
-        return 'bg-violet-50 text-violet-700 border-violet-200/80';
-      case 'Paid':
-        return 'bg-amber-50 text-amber-700 border-amber-200/80';
-      default:
-        return 'bg-slate-50 text-slate-700 border-slate-200/80';
-    }
-  };
+
 
   return (
     <article
@@ -108,17 +96,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </div>
 
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${getPricingBadge(
-                    product.pricing
-                  )}`}
-                >
-                  {product.pricing}
-                </span>
-                <span className="text-slate-400 text-xs">•</span>
-                <span className="text-[11px] font-medium text-slate-500">
-                  {product.category}
-                </span>
+                <CategoryBadge category={product.category} size="sm" />
               </div>
             </div>
           </div>
