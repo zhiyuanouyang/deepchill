@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/supabase/server';
 import { JoinedProjectRow, mapRowToProduct } from '@/lib/project-mapper';
+import { extractDomain, validateWebsiteUrl } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
     const {
       name,
       websiteUrl,
+      url,
       tagline,
       description,
       category = 'DevTools',
@@ -60,39 +62,109 @@ export async function POST(request: Request) {
       biddingAmount = 50,
     } = body;
 
-    if (!name || !websiteUrl || !tagline || !description) {
+    const rawUrl = (websiteUrl || url || '').trim();
+
+    if (!name || !rawUrl || !tagline || !description) {
       return NextResponse.json(
         { error: 'Name, websiteUrl, tagline, and description are required.' },
         { status: 400 }
       );
     }
 
+    // Syntax validation for input website URL
+    const urlValidation = validateWebsiteUrl(rawUrl);
+    if (!urlValidation.isValid || !urlValidation.domain) {
+      return NextResponse.json(
+        { error: urlValidation.error || 'Please enter a valid website link format.' },
+        { status: 400 }
+      );
+    }
+
+    const derivedDomain = urlValidation.domain;
     const effectiveIcon = (icon_url || logoUrl || '').trim() || null;
 
     const supabase = await createClient();
+
+    // Check if domain already exists in projects table
+    let domainExists = false;
+    let existingProjectName = '';
+
+    const { data: projectByDomain, error: domainColError } = await supabase
+      .from('projects')
+      .select('id, name, domain')
+      .ilike('domain', derivedDomain)
+      .limit(1)
+      .maybeSingle();
+
+    if (!domainColError && projectByDomain) {
+      domainExists = true;
+      existingProjectName = projectByDomain.name;
+    } else {
+      // Fallback: check all projects by extracting domain from url
+      const { data: allProjects, error: fetchErr } = await supabase
+        .from('projects')
+        .select('id, name, url');
+
+      if (!fetchErr && allProjects) {
+        const found = allProjects.find((p) => extractDomain(p.url) === derivedDomain);
+        if (found) {
+          domainExists = true;
+          existingProjectName = found.name;
+        }
+      }
+    }
+
+    if (domainExists) {
+      return NextResponse.json(
+        {
+          error: `Domain "${derivedDomain}" has already been submitted${
+            existingProjectName ? ` (${existingProjectName})` : ''
+          }.`,
+        },
+        { status: 409 }
+      );
+    }
 
     // Check if user is authenticated to associate user_id
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // 1. Insert into projects table (core columns only)
-    const { data: newProject, error: insertError } = await supabase
+    // 1. Insert into projects table with derived domain
+    const projectInsertPayload: Record<string, unknown> = {
+      name: name.trim(),
+      url: rawUrl,
+      domain: derivedDomain,
+      tagline: tagline.trim(),
+      description: description.trim(),
+      icon_url: effectiveIcon,
+      category,
+      user_id: user?.id || null,
+    };
+
+    let { data: newProject, error: insertError } = await supabase
       .from('projects')
-      .insert({
-        name: name.trim(),
-        url: websiteUrl.trim(),
-        tagline: tagline.trim(),
-        description: description.trim(),
-        icon_url: effectiveIcon,
-        category,
-        user_id: user?.id || null,
-      })
+      .insert(projectInsertPayload)
       .select()
       .single();
 
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 400 });
+    // Fallback if domain column is not yet present on remote DB
+    if (insertError && insertError.code === '42703') {
+      delete projectInsertPayload.domain;
+      const retryResult = await supabase
+        .from('projects')
+        .insert(projectInsertPayload)
+        .select()
+        .single();
+      newProject = retryResult.data;
+      insertError = retryResult.error;
+    }
+
+    if (insertError || !newProject) {
+      return NextResponse.json(
+        { error: insertError?.message || 'Failed to create project' },
+        { status: 400 }
+      );
     }
 
     const projectId = newProject.id;
@@ -120,12 +192,14 @@ export async function POST(request: Request) {
       console.warn('RPC increment_category_count notice:', rpcErr);
     }
 
-    // 4. Fetch the full joined record to return
-    const { data: fullProject } = await supabase
+    // 4. Fetch the full joined record to return (try with domain first, fallback if column missing)
+    let fullProjectData: JoinedProjectRow | null = null;
+    const { data: fullWithDomain, error: fullError } = await supabase
       .from('projects')
       .select(`
         id,
         url,
+        domain,
         name,
         tagline,
         description,
@@ -141,7 +215,40 @@ export async function POST(request: Request) {
       .eq('id', projectId)
       .single();
 
-    const product = fullProject ? mapRowToProduct(fullProject as JoinedProjectRow) : newProject;
+    if (!fullError && fullWithDomain) {
+      fullProjectData = fullWithDomain as unknown as JoinedProjectRow;
+    } else {
+      // Fallback without domain in select if column not yet added
+      const { data: fullWithoutDomain } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          url,
+          name,
+          tagline,
+          description,
+          icon_url,
+          user_id,
+          category,
+          created_at,
+          updated_at,
+          total_bids ( price ),
+          total_clicks ( count ),
+          bids ( id, price, created_at )
+        `)
+        .eq('id', projectId)
+        .single();
+      if (fullWithoutDomain) {
+        fullProjectData = {
+          ...fullWithoutDomain,
+          domain: derivedDomain,
+        } as unknown as JoinedProjectRow;
+      }
+    }
+
+    const product = fullProjectData
+      ? mapRowToProduct(fullProjectData)
+      : { ...newProject, domain: derivedDomain };
 
     return NextResponse.json({
       success: true,

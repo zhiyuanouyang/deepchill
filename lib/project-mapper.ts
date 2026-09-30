@@ -17,6 +17,7 @@ export interface JoinedProjectRow {
   icon_url: string | null;
   user_id: string | null;
   category: string | null;
+  domain?: string | null;
   created_at: string;
   updated_at: string;
   // Nested join fields (from direct table joins)
@@ -85,7 +86,7 @@ export function mapRowToProduct(row: JoinedProjectRow): Product {
   const totalBid = extractTotalBid(row);
   const totalClicks = extractTotalClicks(row);
   const mostRecentBid = extractMostRecentBid(row);
-  const domain = extractDomain(row.url || '');
+  const domain = (row.domain && row.domain.trim()) || extractDomain(row.url || '');
   const category = (row.category || 'DevTools') as ProductCategory;
   const desc = row.description || '';
   const latestBidTime = row.latest_bid_time || (mostRecentBid.hasBid ? mostRecentBid.bidTime : null);

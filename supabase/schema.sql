@@ -5,7 +5,7 @@
 -- Tables:
 --   1. categories   (id, display_name, descriptions)
 --   2. profiles     (id, uid, display_name, email)
---   3. projects     (id, url, name, tagline, description, icon_url, user_id, category)
+--   3. projects     (id, url, domain, name, tagline, description, icon_url, user_id, category)
 --   4. bids         (id, project_id, price, created_at)
 --   5. total_clicks (project_id, count)
 --   6. total_bids   (project_id, price)
@@ -122,6 +122,7 @@ create trigger on_auth_user_created
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
   url text not null,
+  domain text,
   name text not null,
   tagline text,
   description text,
@@ -131,6 +132,9 @@ create table if not exists public.projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create index if not exists idx_projects_domain
+  on public.projects (domain);
 
 create index if not exists idx_projects_user_id
   on public.projects (user_id);
@@ -373,6 +377,40 @@ create trigger set_total_bids_updated_at
   before update on public.total_bids
   for each row execute function public.set_updated_at();
 
+-- Automatically derive projects.domain from url if omitted
+create or replace function public.derive_project_domain()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.url is not null and (new.domain is null or new.domain = '') then
+    new.domain := lower(
+      regexp_replace(
+        regexp_replace(
+          split_part(
+            split_part(
+              regexp_replace(new.url, '^https?://', '', 'i'),
+              '/', 1
+            ),
+            '?', 1
+          ),
+          '^www\.', '', 'i'
+        ),
+        ':[0-9]+$', ''
+      )
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_projects_derive_domain on public.projects;
+create trigger trg_projects_derive_domain
+  before insert or update of url on public.projects
+  for each row execute function public.derive_project_domain();
+
 -- =============================================================================
 -- DIRECT ORDERED VIEWS (Supabase Data API Access)
 -- =============================================================================
@@ -381,6 +419,7 @@ create or replace view public.trending_projects as
 select
   p.id,
   p.url,
+  p.domain,
   p.name,
   p.tagline,
   p.description,
@@ -413,6 +452,7 @@ create or replace view public.newest_projects as
 select
   p.id,
   p.url,
+  p.domain,
   p.name,
   p.tagline,
   p.description,

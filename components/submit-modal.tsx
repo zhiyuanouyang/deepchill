@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Product, ProductCategory } from '@/lib/types';
-import { extractDomain } from '@/lib/utils';
+import { extractDomain, validateWebsiteUrl } from '@/lib/utils';
 import { useAuth } from '@/components/auth/auth-provider';
 import { ProjectBidCard } from '@/components/project-bid-card';
 import { CategoryCombobox } from '@/components/category-combobox';
@@ -54,6 +54,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuccessMessage, setAiSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingDomain, setIsCheckingDomain] = useState(false);
+  const [domainCheckResult, setDomainCheckResult] = useState<{
+    domain: string;
+    exists: boolean;
+    projectName?: string;
+  } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [iconError, setIconError] = useState(false);
 
@@ -107,6 +113,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       setIsExpanded(false);
       setErrors({});
       setAiSuccessMessage(null);
+      setDomainCheckResult(null);
+      setIsCheckingDomain(false);
       if (defaultCategory && defaultCategory !== 'All') {
         setCategory(defaultCategory);
       } else {
@@ -121,6 +129,76 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
   const cleanDomain = useMemo(() => extractDomain(websiteUrl), [websiteUrl]);
 
+  // Debounced domain availability check
+  useEffect(() => {
+    const trimmed = websiteUrl.trim();
+    if (!trimmed) {
+      setDomainCheckResult(null);
+      setIsCheckingDomain(false);
+      return;
+    }
+
+    const validation = validateWebsiteUrl(trimmed);
+    if (!validation.isValid || !validation.domain) {
+      setDomainCheckResult(null);
+      setIsCheckingDomain(false);
+      return;
+    }
+
+    const domainToCheck = validation.domain;
+    let isCurrent = true;
+    setIsCheckingDomain(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/projects/check-domain?domain=${encodeURIComponent(domainToCheck)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (isCurrent) {
+            if (data.exists) {
+              setDomainCheckResult({
+                domain: domainToCheck,
+                exists: true,
+                projectName: data.project?.name,
+              });
+              setErrors((prev) => ({
+                ...prev,
+                websiteUrl: `Domain "${domainToCheck}" has already been submitted${
+                  data.project?.name ? ` (${data.project.name})` : ''
+                }.`,
+              }));
+            } else {
+              setDomainCheckResult({ domain: domainToCheck, exists: false });
+              setErrors((prev) => {
+                const next = { ...prev };
+                if (
+                  next.websiteUrl &&
+                  next.websiteUrl.includes('already been submitted')
+                ) {
+                  delete next.websiteUrl;
+                }
+                return next;
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Domain availability check notice:', err);
+      } finally {
+        if (isCurrent) {
+          setIsCheckingDomain(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      isCurrent = false;
+      clearTimeout(timer);
+    };
+  }, [websiteUrl]);
+
   const effectiveIconUrl = useMemo(() => {
     if (iconUrl.trim()) return iconUrl.trim();
     if (cleanDomain) {
@@ -129,16 +207,62 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     return '';
   }, [iconUrl, cleanDomain]);
 
+  const handleWebsiteUrlChange = (val: string) => {
+    setWebsiteUrl(val);
+    setAiSuccessMessage(null);
+
+    const trimmed = val.trim();
+    if (!trimmed) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.websiteUrl;
+        return next;
+      });
+      setDomainCheckResult(null);
+      setIsCheckingDomain(false);
+      return;
+    }
+
+    const validation = validateWebsiteUrl(trimmed);
+    if (!validation.isValid) {
+      setErrors((prev) => ({
+        ...prev,
+        websiteUrl: validation.error || 'Please enter a valid website link',
+      }));
+      setDomainCheckResult(null);
+      setIsCheckingDomain(false);
+    } else {
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (
+          next.websiteUrl &&
+          !next.websiteUrl.includes('already been submitted')
+        ) {
+          delete next.websiteUrl;
+        }
+        return next;
+      });
+    }
+  };
+
   // AI Autofill from project URL
   const handleAiAutoFill = async () => {
-    if (!websiteUrl.trim()) {
-      setErrors({ websiteUrl: 'Please enter a project URL first' });
+    const urlValidation = validateWebsiteUrl(websiteUrl);
+    if (!urlValidation.isValid) {
+      setErrors((prev) => ({
+        ...prev,
+        websiteUrl: urlValidation.error || 'Please enter a valid website link first',
+      }));
       return;
     }
 
     setAiLoading(true);
     setAiSuccessMessage(null);
-    setErrors({});
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.websiteUrl;
+      return next;
+    });
 
     try {
       const res = await fetch('/api/ai/extract-metadata', {
@@ -199,11 +323,18 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!websiteUrl.trim()) {
-      newErrors.websiteUrl = 'URL is required';
-    } else if (!/^https?:\/\//i.test(websiteUrl)) {
-      newErrors.websiteUrl = 'Must start with http:// or https://';
+    const urlValidation = validateWebsiteUrl(websiteUrl);
+    if (!urlValidation.isValid) {
+      newErrors.websiteUrl = urlValidation.error || 'Please enter a valid website link';
+    } else if (
+      domainCheckResult?.exists &&
+      domainCheckResult.domain === urlValidation.domain
+    ) {
+      newErrors.websiteUrl = `Domain "${urlValidation.domain}" has already been submitted${
+        domainCheckResult.projectName ? ` (${domainCheckResult.projectName})` : ''
+      }.`;
     }
+
     if (!name.trim()) newErrors.name = 'Name is required';
     if (!tagline.trim()) newErrors.tagline = 'Tagline is required';
     if (!description.trim()) newErrors.description = 'Description is required';
@@ -214,6 +345,58 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. Syntax validation of website URL
+    const urlValidation = validateWebsiteUrl(websiteUrl);
+    if (!urlValidation.isValid || !urlValidation.domain) {
+      setErrors((prev) => ({
+        ...prev,
+        websiteUrl: urlValidation.error || 'Please enter a valid website link',
+      }));
+      return;
+    }
+
+    // 2. Check if domain already exists
+    if (
+      domainCheckResult?.exists &&
+      domainCheckResult.domain === urlValidation.domain
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        websiteUrl: `Domain "${urlValidation.domain}" has already been submitted${
+          domainCheckResult.projectName ? ` (${domainCheckResult.projectName})` : ''
+        }.`,
+      }));
+      return;
+    }
+
+    // Direct pre-flight check if domain check hasn't finished or was not run for current domain
+    if (!domainCheckResult || domainCheckResult.domain !== urlValidation.domain) {
+      try {
+        const checkRes = await fetch(
+          `/api/projects/check-domain?domain=${encodeURIComponent(urlValidation.domain)}`
+        );
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          if (checkData.exists) {
+            setDomainCheckResult({
+              domain: urlValidation.domain,
+              exists: true,
+              projectName: checkData.project?.name,
+            });
+            setErrors((prev) => ({
+              ...prev,
+              websiteUrl: `Domain "${urlValidation.domain}" has already been submitted${
+                checkData.project?.name ? ` (${checkData.project.name})` : ''
+              }.`,
+            }));
+            return;
+          }
+        }
+      } catch (checkErr) {
+        console.warn('Pre-flight domain check notice:', checkErr);
+      }
+    }
 
     // If details are folded and user hasn't filled name yet, trigger AI auto-fill first
     if (!name.trim() || !tagline.trim() || !description.trim()) {
@@ -241,7 +424,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '') || 'project',
-      domain: cleanDomain || 'project.com',
+      domain: cleanDomain || urlValidation.domain,
       name: name.trim(),
       tagline: tagline.trim(),
       description: description.trim(),
@@ -286,18 +469,33 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.product) {
-          newProduct = {
-            ...newProduct,
-            ...data.product,
-            id: data.product.id || newProduct.id,
-          };
-        }
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors((prev) => ({
+          ...prev,
+          websiteUrl: data.error || 'Failed to submit project. Please try again.',
+        }));
+        setIsSubmitting(false);
+        return;
       }
-    } catch (err) {
-      console.warn('Backend submission notice:', err);
+
+      if (data.product) {
+        newProduct = {
+          ...newProduct,
+          ...data.product,
+          id: data.product.id || newProduct.id,
+        };
+      }
+    } catch (err: unknown) {
+      console.error('Backend submission error:', err);
+      setErrors((prev) => ({
+        ...prev,
+        websiteUrl:
+          err instanceof Error ? err.message : 'Failed to submit project. Please try again.',
+      }));
+      setIsSubmitting(false);
+      return;
     } finally {
       setIsSubmitting(false);
     }
@@ -325,6 +523,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     setIsExpanded(false);
     setErrors({});
     setAiSuccessMessage(null);
+    setDomainCheckResult(null);
+    setIsCheckingDomain(false);
     onClose();
   };
 
@@ -371,7 +571,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                     id="input-website-url"
                     type="url"
                     value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    onChange={(e) => handleWebsiteUrlChange(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -389,7 +589,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   type="button"
                   id="btn-ai-autofill"
                   onClick={handleAiAutoFill}
-                  disabled={aiLoading}
+                  disabled={aiLoading || Boolean(errors.websiteUrl)}
                   className="liquid-btn-primary px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
                 >
                   {aiLoading ? (
@@ -406,12 +606,22 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 </button>
               </div>
 
-              {errors.websiteUrl && (
-                <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-1.5 flex items-center gap-1">
+              {errors.websiteUrl ? (
+                <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.websiteUrl}</span>
                 </p>
-              )}
+              ) : isCheckingDomain ? (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">
+                  <Loader2 className="w-3 h-3 animate-spin shrink-0 text-indigo-500" />
+                  <span>Checking domain availability...</span>
+                </p>
+              ) : domainCheckResult && !domainCheckResult.exists && cleanDomain ? (
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                  <span>Domain &quot;{cleanDomain}&quot; is available</span>
+                </p>
+              ) : null}
 
               {aiSuccessMessage && !aiLoading && (
                 <div className="mt-2 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5 animate-in fade-in duration-200">
@@ -585,7 +795,16 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               <button
                 type="submit"
                 id="btn-submit-project-final"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting ||
+                  isCheckingDomain ||
+                  Boolean(errors.websiteUrl) ||
+                  Boolean(
+                    domainCheckResult?.exists &&
+                      cleanDomain &&
+                      domainCheckResult.domain === cleanDomain
+                  )
+                }
                 className="liquid-btn-primary px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               >
                 {isSubmitting ? (
