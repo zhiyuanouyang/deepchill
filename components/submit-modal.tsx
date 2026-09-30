@@ -11,7 +11,6 @@ import {
   ChevronUp,
   CheckCircle2,
   Plus,
-  RefreshCw,
   AlertCircle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -115,6 +114,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       setAiSuccessMessage(null);
       setDomainCheckResult(null);
       setIsCheckingDomain(false);
+      setIconError(false);
       if (defaultCategory && defaultCategory !== 'All') {
         setCategory(defaultCategory);
       } else {
@@ -184,21 +184,13 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 return next;
               });
 
-              // Pre-fill basic information ONLY if extracted and user hasn't typed custom fields yet
+              // Override metadata with the newly verified domain's suggested data
               if (data.suggested) {
-                if (data.suggested.name && !name.trim()) {
-                  setName(data.suggested.name);
-                }
-                if (data.suggested.tagline && !tagline.trim()) {
-                  setTagline(data.suggested.tagline);
-                }
-                if (data.suggested.description && !description.trim()) {
-                  setDescription(data.suggested.description);
-                }
-                if (data.suggested.iconUrl && !iconUrl.trim()) {
-                  setIconUrl(data.suggested.iconUrl);
-                  setIconError(false);
-                }
+                setName(data.suggested.name || '');
+                setTagline(data.suggested.tagline || '');
+                setDescription(data.suggested.description || '');
+                setIconUrl(data.suggested.iconUrl || '');
+                setIconError(false);
 
                 const hasAnyPopulated = Boolean(
                   data.suggested.name ||
@@ -208,6 +200,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 if (hasAnyPopulated) {
                   setIsExpanded(true);
                   setAiSuccessMessage(`✨ Metadata detected for ${domainToCheck}`);
+                } else {
+                  setAiSuccessMessage(null);
                 }
               }
             }
@@ -236,9 +230,22 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     return '';
   }, [iconUrl, cleanDomain]);
 
+  const isDomainVerified = Boolean(
+    cleanDomain &&
+      domainCheckResult &&
+      !domainCheckResult.exists &&
+      domainCheckResult.domain === cleanDomain &&
+      !errors.websiteUrl
+  );
+
   const handleWebsiteUrlChange = (val: string) => {
+    const newDomain = extractDomain(val);
+    if (newDomain !== cleanDomain) {
+      setIconUrl('');
+    }
     setWebsiteUrl(val);
     setAiSuccessMessage(null);
+    setIconError(false);
 
     const trimmed = val.trim();
     if (!trimmed) {
@@ -333,13 +340,11 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         const guessedName =
           cleanDomain.split('.')[0].charAt(0).toUpperCase() +
           cleanDomain.split('.')[0].slice(1);
-        if (!name) setName(guessedName);
-        if (!tagline) setTagline(`${guessedName} — Built for modern developers`);
-        if (!description) setDescription(`${guessedName} provides tools for developers and creators.`);
-        if (!iconUrl) {
-          setIconUrl(`https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`);
-          setIconError(false);
-        }
+        setName(guessedName);
+        setTagline(`${guessedName} — Built for modern developers`);
+        setDescription(`${guessedName} provides tools for developers and creators.`);
+        setIconUrl(`https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`);
+        setIconError(false);
         setIsExpanded(true);
         setAiSuccessMessage(`Populated metadata for ${cleanDomain}`);
       } else {
@@ -423,19 +428,11 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             }));
             return;
           } else if (checkData.suggested) {
-            if (checkData.suggested.name && !name.trim()) {
-              setName(checkData.suggested.name);
-            }
-            if (checkData.suggested.tagline && !tagline.trim()) {
-              setTagline(checkData.suggested.tagline);
-            }
-            if (checkData.suggested.description && !description.trim()) {
-              setDescription(checkData.suggested.description);
-            }
-            if (checkData.suggested.iconUrl && !iconUrl.trim()) {
-              setIconUrl(checkData.suggested.iconUrl);
-              setIconError(false);
-            }
+            setName(checkData.suggested.name || '');
+            setTagline(checkData.suggested.tagline || '');
+            setDescription(checkData.suggested.description || '');
+            setIconUrl(checkData.suggested.iconUrl || '');
+            setIconError(false);
           }
         }
       } catch (checkErr) {
@@ -570,6 +567,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     setAiSuccessMessage(null);
     setDomainCheckResult(null);
     setIsCheckingDomain(false);
+    setIconError(false);
     onClose();
   };
 
@@ -611,7 +609,18 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             <div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="relative flex-1">
-                  <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  {isDomainVerified && effectiveIconUrl && !iconError ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={effectiveIconUrl}
+                      alt="Website icon"
+                      className="w-4 h-4 rounded-sm object-contain absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
+                      referrerPolicy="no-referrer"
+                      onError={() => setIconError(true)}
+                    />
+                  ) : (
+                    <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none transition-opacity duration-200" />
+                  )}
                   <input
                     id="input-website-url"
                     type="url"
@@ -773,49 +782,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   )}
                 </div>
 
-                {/* Logo Thumbnail & URL */}
-                <div className="flex items-center gap-2 pt-0.5">
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
-                    {effectiveIconUrl && !iconError ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={effectiveIconUrl}
-                        alt="Logo"
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                        onError={() => setIconError(true)}
-                      />
-                    ) : (
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                        {name ? name.charAt(0).toUpperCase() : '⚡'}
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    id="input-logo-url"
-                    type="url"
-                    value={iconUrl}
-                    onChange={(e) => {
-                      setIconUrl(e.target.value);
-                      setIconError(false);
-                    }}
-                    placeholder="Icon / Logo URL (optional)"
-                    className="flex-1 liquid-glass-input rounded-xl px-3 py-1.5 text-xs outline-none font-medium text-slate-600 dark:text-slate-300"
-                  />
-                  {cleanDomain && iconUrl && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIconUrl('');
-                        setIconError(false);
-                      }}
-                      title="Reset to domain favicon"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
               </div>
             )}
 
