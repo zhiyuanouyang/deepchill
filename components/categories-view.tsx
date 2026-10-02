@@ -1237,6 +1237,13 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
     return products.length;
   }, [categoryData, products]);
 
+  // Filter out categories with no projects so their category leaderboard cards are hidden from UI
+  const visibleCategoryData = useMemo(() => {
+    return categoryData.filter(
+      (cat) => (cat.projectCount ?? 0) > 0 || (cat.primaryTopProjects?.length ?? 0) > 0
+    );
+  }, [categoryData]);
+
   // Scrollspy to automatically highlight the current category in view
   useEffect(() => {
     const handleScroll = () => {
@@ -1245,7 +1252,7 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
       let currentSlug: string | null = null;
       let closestDistance = Infinity;
 
-      for (const cat of categoryData) {
+      for (const cat of visibleCategoryData) {
         const slug = categorySlug(cat.name);
         const el = document.getElementById(`category-${slug}`);
         if (el) {
@@ -1272,7 +1279,7 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [categoryData]);
+  }, [visibleCategoryData]);
 
   // Smooth scroll to category section
   const handleJumpTo = useCallback((slug: string) => {
@@ -1296,11 +1303,11 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
 
       <main className="max-w-7xl mx-auto px-2.5 sm:px-6">
         {/* Editorial Hero Section */}
-        <CategoriesHero totalProducts={totalProductsCount} categoryCount={categoryData.length} />
+        <CategoriesHero totalProducts={totalProductsCount} categoryCount={visibleCategoryData.length} />
 
         {/* Modern Sticky Category Selector */}
         <CategoryIndexBar
-          categories={categoryData}
+          categories={visibleCategoryData}
           activeSlug={activeSlug}
           onJumpTo={handleJumpTo}
         />
@@ -1312,9 +1319,29 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
               <CategorySkeleton key={i} />
             ))}
           </div>
+        ) : visibleCategoryData.length === 0 ? (
+          <div className="text-center py-16 px-4 rounded-3xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-xl">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-4">
+              <Layers className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
+              No categories with projects yet
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
+              Be the first maker to submit a project and inaugurate our category directory.
+            </p>
+            <button
+              type="button"
+              onClick={() => handleOpenSubmit(undefined)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Submit a Project</span>
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            {categoryData.map((cat, i) => (
+            {visibleCategoryData.map((cat, i) => (
               <CategorySection
                 key={cat.name}
                 category={cat}
