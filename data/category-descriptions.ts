@@ -1,6 +1,6 @@
 import { ProductCategory } from '@/lib/types';
 
-export const CATEGORY_DESCRIPTIONS: Record<ProductCategory, string> = {
+export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   'DevTools':
     'Developer tools, CLI utilities, and engineering infrastructure that accelerate the build-ship-iterate cycle.',
   'AI & Machine Learning':
@@ -17,4 +17,6 @@ export const CATEGORY_DESCRIPTIONS: Record<ProductCategory, string> = {
     'Password managers, encryption tools, privacy-first software, and security infrastructure.',
   'Developer Utilities':
     'Email APIs, notification services, monitoring, and utility libraries for developers.',
+  'Jobs & Careers':
+    'Developer job boards, talent marketplaces, remote tech opportunities, and hiring platforms.',
 };

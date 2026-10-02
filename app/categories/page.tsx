@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { CategoriesView } from '@/components/categories-view';
 
+import { getCategoryOverview } from '@/lib/server-data';
+
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Categories — Deepchill Directory',
   description:
@@ -19,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CategoriesPage() {
-  return <CategoriesView />;
+export default async function CategoriesPage() {
+  const initialCategories = await getCategoryOverview();
+  return <CategoriesView initialCategories={initialCategories} />;
 }
+

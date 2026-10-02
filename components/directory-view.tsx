@@ -19,6 +19,7 @@ import {
   Palette,
   BarChart3,
   Wrench,
+  Briefcase,
 } from 'lucide-react';
 import {
   Product,
@@ -61,6 +62,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   'SaaS & Analytics': BarChart3,
   'Security & Privacy': ShieldCheck,
   'Developer Utilities': Wrench,
+  'Jobs & Careers': Briefcase,
 };
 
 const PRIMARY_PAGE_SIZE = 10;
@@ -230,19 +232,24 @@ export function DirectoryView({
     fetchNewest(selectedCategory, sidePage);
   }, [selectedCategory, sidePage, fetchNewest]);
 
-  // Initialize category from URL search params (e.g. /?category=DevTools)
+  // Initialize category from URL search params (e.g. /?category=DevTools or /?category=Jobs%20%26%20Careers)
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam) {
       const decoded = decodeURIComponent(categoryParam);
-      const matched = CATEGORIES.find(
-        (c) => c !== 'All' && c.toLowerCase() === decoded.toLowerCase()
-      );
+      const matched =
+        dbCategories.find((c) => c.display_name.toLowerCase() === decoded.toLowerCase())
+          ?.display_name ||
+        CATEGORIES.find((c) => c !== 'All' && c.toLowerCase() === decoded.toLowerCase());
       if (matched && matched !== 'All') {
-        setSelectedCategory(matched);
+        setSelectedCategory(matched as ProductCategory);
+      } else if (decoded && decoded !== 'All') {
+        setSelectedCategory(decoded as ProductCategory);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, dbCategories]);
+
+
 
   // Discovery Mode: 'keyword' | 'ai'
   const [activeMode, setActiveMode] = useState<'keyword' | 'ai'>('keyword');
@@ -613,7 +620,7 @@ export function DirectoryView({
     const seen = new Set<string>();
 
     for (const cat of sortedDb) {
-      if (cat.display_name && defaultCategories.includes(cat.display_name as ProductCategory)) {
+      if (cat.display_name && !seen.has(cat.display_name)) {
         orderedNames.push(cat.display_name as ProductCategory);
         seen.add(cat.display_name);
       }
@@ -623,6 +630,7 @@ export function DirectoryView({
     for (const cat of defaultCategories) {
       if (!seen.has(cat)) {
         orderedNames.push(cat);
+        seen.add(cat);
       }
     }
 

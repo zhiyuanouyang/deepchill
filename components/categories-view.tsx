@@ -21,6 +21,7 @@ import {
   Flame,
   Sparkles,
   Plus,
+  Briefcase,
 } from 'lucide-react';
 import {
   Product,
@@ -51,7 +52,7 @@ const CATEGORIES: ProductCategory[] = [
   'Developer Utilities',
 ];
 
-const CATEGORY_ICONS: Record<ProductCategory, React.ElementType> = {
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
   DevTools: Terminal,
   'Open Source Infrastructure': Server,
   'AI & Machine Learning': Bot,
@@ -60,10 +61,11 @@ const CATEGORY_ICONS: Record<ProductCategory, React.ElementType> = {
   'SaaS & Analytics': BarChart3,
   'Security & Privacy': ShieldCheck,
   'Developer Utilities': Wrench,
+  'Jobs & Careers': Briefcase,
 };
 
 const CATEGORY_THEMES: Record<
-  ProductCategory,
+  string,
   { bg: string; text: string; ring: string; border: string }
 > = {
   DevTools: {
@@ -114,11 +116,18 @@ const CATEGORY_THEMES: Record<
     ring: 'ring-orange-500/20',
     border: 'border-orange-200/60 dark:border-orange-800/40',
   },
+  'Jobs & Careers': {
+    bg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+    text: 'text-cyan-600 dark:text-cyan-400',
+    ring: 'ring-cyan-500/20',
+    border: 'border-cyan-200/60 dark:border-cyan-800/40',
+  },
 };
 
 /* ─── Types ─────────────────────────────────────────────────────────────────── */
 
-interface CategoryData {
+export interface CategoryData {
+  id?: string;
   name: ProductCategory;
   description: string;
   projectCount: number;
@@ -126,6 +135,11 @@ interface CategoryData {
   secondaryRecentProjects: NewestReleaseProduct[];
   updatedAt?: string;
 }
+
+export interface CategoriesViewProps {
+  initialCategories?: CategoryData[];
+}
+
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 
@@ -465,6 +479,14 @@ const PrimaryCategoryRow: React.FC<{
 
               {/* Total Bid & Clicks Counters */}
               <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-medium">
+                <span
+                  className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 text-[10px]"
+                  title={`${clickCount.toLocaleString()} clicks`}
+                >
+                  <MousePointerClick className="w-2.5 h-2.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                  <span>{clickCount.toLocaleString()}</span>
+                </span>
+
                 {/* Interactive Total Bid Action Button */}
                 <button
                   type="button"
@@ -484,14 +506,6 @@ const PrimaryCategoryRow: React.FC<{
                     +
                   </span>
                 </button>
-
-                <span
-                  className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 text-[10px]"
-                  title={`${clickCount.toLocaleString()} clicks`}
-                >
-                  <MousePointerClick className="w-2.5 h-2.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                  <span>{clickCount.toLocaleString()}</span>
-                </span>
               </div>
             </div>
 
@@ -1044,7 +1058,7 @@ const CategorySkeleton: React.FC = () => (
 
 /* ─── Main Component ────────────────────────────────────────────────────────── */
 
-export function CategoriesView() {
+export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
@@ -1089,7 +1103,9 @@ export function CategoriesView() {
     }
   }, []);
 
-  const [dbCategoryData, setDbCategoryData] = useState<CategoryData[] | null>(null);
+  const [dbCategoryData, setDbCategoryData] = useState<CategoryData[] | null>(
+    () => (initialCategories && initialCategories.length > 0 ? initialCategories : null)
+  );
 
   const fetchOverview = useCallback(async () => {
     try {
@@ -1113,6 +1129,7 @@ export function CategoriesView() {
       console.warn('Failed to load category overview from API:', e);
     }
   }, []);
+
 
   useEffect(() => {
     fetchOverview();
@@ -1248,10 +1265,7 @@ export function CategoriesView() {
   const categoryData = useMemo(() => {
     let list: CategoryData[];
     if (dbCategoryData && dbCategoryData.length > 0) {
-      // Return API categories matching the app's CATEGORIES list or all with projects
-      const existingNames = new Set(CATEGORIES as string[]);
-      const appCategories = dbCategoryData.filter((c) => existingNames.has(c.name));
-      list = appCategories.length > 0 ? appCategories : dbCategoryData;
+      list = dbCategoryData;
     } else {
       list = buildCategoryData(products);
     }
@@ -1262,6 +1276,14 @@ export function CategoriesView() {
       return timeB - timeA;
     });
   }, [dbCategoryData, products]);
+
+  const totalProductsCount = useMemo(() => {
+    if (categoryData.length > 0) {
+      const sum = categoryData.reduce((acc, c) => acc + (c.projectCount || 0), 0);
+      if (sum > 0) return sum;
+    }
+    return products.length;
+  }, [categoryData, products]);
 
   // Scrollspy to automatically highlight the current category in view
   useEffect(() => {
@@ -1307,13 +1329,13 @@ export function CategoriesView() {
       {/* Navigation */}
       <Navbar
         onOpenSubmit={() => handleOpenSubmit(undefined)}
-        totalProducts={products.length}
+        totalProducts={totalProductsCount}
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
 
       <main className="max-w-7xl mx-auto px-2.5 sm:px-6">
         {/* Editorial Hero Section */}
-        <CategoriesHero totalProducts={products.length} categoryCount={categoryData.length} />
+        <CategoriesHero totalProducts={totalProductsCount} categoryCount={categoryData.length} />
 
         {/* Modern Sticky Category Selector */}
         <CategoryIndex
@@ -1384,6 +1406,7 @@ export function CategoriesView() {
         }}
         onSubmitProduct={handleAddProduct}
         defaultCategory={submitCategory}
+        categories={categoryData.map((c) => ({ display_name: c.name }))}
       />
 
       <SeoGuideModal
@@ -1391,6 +1414,7 @@ export function CategoriesView() {
         onClose={() => setIsSeoGuideOpen(false)}
         onOpenSubmit={() => handleOpenSubmit(undefined)}
       />
+
 
       <BidModal
         isOpen={isBidModalOpen}

@@ -6,7 +6,18 @@ export type ProductCategory =
   | 'Open Source Infrastructure'
   | 'SaaS & Analytics'
   | 'Security & Privacy'
-  | 'Developer Utilities';
+  | 'Developer Utilities'
+  | (string & {});
+
+export interface CategoryCardOverview {
+  id: string;
+  name: ProductCategory;
+  description: string;
+  projectCount: number;
+  primaryTopProjects: TrendingProduct[];
+  secondaryRecentProjects: NewestReleaseProduct[];
+  updatedAt?: string;
+}
 
 export type PricingModel = 'Free' | 'Freemium' | 'Open Source' | 'Paid';
 
