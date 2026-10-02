@@ -6,7 +6,6 @@ import {
   X,
   ExternalLink,
   ArrowUpRight,
-  ShieldCheck,
   Copy,
   Check,
   Calendar,
@@ -15,6 +14,7 @@ import {
 import { GithubIcon } from './icons';
 import { Product } from '@/lib/types';
 import { CategoryBadge } from '@/components/category-badge';
+import { VerifiedBadge } from '@/components/verification/verified-badge';
 
 interface ProjectDetailModalProps {
   product: Product | null;
@@ -93,11 +93,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     {product.name}
                   </Dialog.Title>
                   <CategoryBadge category={product.category} size="md" />
-                  {product.dofollowApproved && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Direct DoFollow
-                    </span>
-                  )}
+                  <VerifiedBadge project={product} size="sm" />
                   {product.totalPaid !== undefined && (
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/60">
                       🔥 ${product.totalPaid} Bid

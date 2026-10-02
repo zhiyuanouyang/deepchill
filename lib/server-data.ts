@@ -14,6 +14,18 @@ import {
   CategoryCardOverview,
 } from '@/lib/types';
 
+async function getVerifiedProjectIds(supabase: any): Promise<Set<string>> {
+  try {
+    const { data, error } = await supabase
+      .from('ownerships')
+      .select('project_id');
+    if (error || !data) return new Set();
+    return new Set(data.map((r: { project_id: string }) => r.project_id));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function getTrendingProjects(
   category?: string,
   limit = 10,
@@ -21,6 +33,7 @@ export async function getTrendingProjects(
 ): Promise<{ products: TrendingProduct[]; total: number }> {
   try {
     const supabase = await createClient();
+    const verifiedSet = await getVerifiedProjectIds(supabase);
 
     let query = supabase
       .from('trending_projects')
@@ -39,7 +52,7 @@ export async function getTrendingProjects(
     }
 
     return {
-      products: (data as JoinedProjectRow[]).map(mapRowToTrendingProduct),
+      products: (data as JoinedProjectRow[]).map((r) => mapRowToTrendingProduct(r, verifiedSet)),
       total: count ?? data.length,
     };
   } catch (err) {
@@ -55,6 +68,7 @@ export async function getNewestProjects(
 ): Promise<{ products: NewestReleaseProduct[]; total: number }> {
   try {
     const supabase = await createClient();
+    const verifiedSet = await getVerifiedProjectIds(supabase);
 
     let query = supabase
       .from('newest_projects')
@@ -73,7 +87,7 @@ export async function getNewestProjects(
     }
 
     return {
-      products: (data as JoinedProjectRow[]).map(mapRowToNewestProduct),
+      products: (data as JoinedProjectRow[]).map((r) => mapRowToNewestProduct(r, verifiedSet)),
       total: count ?? data.length,
     };
   } catch (err) {
@@ -88,6 +102,7 @@ export async function getAllProjects(
 ): Promise<Product[]> {
   try {
     const supabase = await createClient();
+    const verifiedSet = await getVerifiedProjectIds(supabase);
 
     let query = supabase
       .from('trending_projects')
@@ -104,7 +119,7 @@ export async function getAllProjects(
       return [];
     }
 
-    return (data as JoinedProjectRow[]).map(mapRowToProduct);
+    return (data as JoinedProjectRow[]).map((r) => mapRowToProduct(r, verifiedSet));
   } catch (err) {
     console.warn('Failed to getAllProjects:', err);
     return [];
@@ -136,6 +151,7 @@ export async function getCategories(): Promise<Category[]> {
 export async function getCategoryOverview(): Promise<CategoryCardOverview[]> {
   try {
     const supabase = await createClient();
+    const verifiedSet = await getVerifiedProjectIds(supabase);
 
     // 1. Fetch all categories ordered by updated_at descending
     const { data: categories, error: catError } = await supabase
@@ -190,7 +206,7 @@ export async function getCategoryOverview(): Promise<CategoryCardOverview[]> {
 
       // Top 3 by total bid price
       const sortedByBid: TrendingProduct[] = [...catProjects]
-        .map((p) => mapRowToTrendingProduct(p))
+        .map((p) => mapRowToTrendingProduct(p, verifiedSet))
         .sort((a, b) => {
           if (b.totalBid !== a.totalBid) return b.totalBid - a.totalBid;
           if (b.totalClicks !== a.totalClicks) return b.totalClicks - a.totalClicks;
@@ -200,7 +216,7 @@ export async function getCategoryOverview(): Promise<CategoryCardOverview[]> {
 
       // Top 3 by most recent bid
       const sortedByRecent: NewestReleaseProduct[] = [...catProjects]
-        .map((p) => mapRowToNewestProduct(p))
+        .map((p) => mapRowToNewestProduct(p, verifiedSet))
         .sort((a, b) => {
           const aTime = new Date(a.mostRecentBid?.bidTime || a.launchDate || '').getTime();
           const bTime = new Date(b.mostRecentBid?.bidTime || b.launchDate || '').getTime();

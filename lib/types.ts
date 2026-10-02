@@ -60,6 +60,8 @@ export interface Product {
   badgeCode?: string;
   starsCount?: number;
   dofollowApproved?: boolean;
+  isVerified?: boolean;
+  verifiedAt?: string;
 
   // Backward-compatibility aliases
   totalPaid?: number;
@@ -86,6 +88,8 @@ export interface TrendingProduct {
   makerName: string;
   makerHandle?: string;
   dofollowApproved?: boolean;
+  isVerified?: boolean;
+  verifiedAt?: string;
   starsCount?: number;
   latestBidTime?: string | null;
   hasBid?: boolean;
@@ -112,6 +116,8 @@ export interface NewestReleaseProduct {
   hasBid?: boolean;
   totalBid?: number;
   category?: ProductCategory;
+  isVerified?: boolean;
+  verifiedAt?: string;
 }
 
 /**
@@ -162,6 +168,8 @@ export function toTrendingProduct(product: Product): TrendingProduct {
     makerName: product.makerName,
     makerHandle: product.makerHandle,
     dofollowApproved: product.dofollowApproved,
+    isVerified: product.isVerified,
+    verifiedAt: product.verifiedAt,
     starsCount: product.starsCount,
     latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
     hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
@@ -192,6 +200,9 @@ export function toNewestReleaseProduct(product: Product): NewestReleaseProduct {
     latestBidTime: product.latestBidTime ?? (product.mostRecentBid?.hasBid ? product.mostRecentBid.bidTime : null),
     hasBid: product.hasBid ?? product.mostRecentBid?.hasBid,
     totalBid: product.totalBid ?? product.totalPaid ?? 0,
+    category: product.category,
+    isVerified: product.isVerified,
+    verifiedAt: product.verifiedAt,
   };
 }
 
@@ -263,4 +274,16 @@ export interface TotalBids {
   price: number;
   updated_at: string;
 }
+
+export interface Ownership {
+  id: string;
+  user_id: string;
+  project_id: string;
+  domain: string;
+  verification_token: string | null;
+  verified_at: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 

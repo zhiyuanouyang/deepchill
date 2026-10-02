@@ -4,7 +4,6 @@ import React from 'react';
 import {
   ExternalLink,
   ArrowUpRight,
-  ShieldCheck,
   DollarSign,
   Star,
   MousePointerClick,
@@ -14,6 +13,7 @@ import {
 import { Product, TrendingProduct, NewestReleaseProduct } from '@/lib/types';
 import { formatRelativeTime, formatExactDateTime } from '@/lib/utils';
 import { CategoryBadge } from '@/components/category-badge';
+import { VerifiedBadge } from '@/components/verification/verified-badge';
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * RankHatIcon — Crown for Top 3, Stylish Hat for Rank 4+
@@ -206,15 +206,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </h3>
 
-                {product.dofollowApproved && (
-                  <span
-                    title="Verified Direct DoFollow Backlink"
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/70 dark:border-emerald-800/60 shrink-0"
-                  >
-                    <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                    <span className="hidden sm:inline">DoFollow</span>
-                  </span>
-                )}
+                <VerifiedBadge project={product} size="sm" />
 
                 {product.category && (
                   <CategoryBadge

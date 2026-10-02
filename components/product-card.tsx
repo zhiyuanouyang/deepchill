@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { ExternalLink, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { ExternalLink, ArrowUpRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { GithubIcon } from './icons';
 import { Product } from '@/lib/types';
 import { CategoryBadge } from '@/components/category-badge';
+import { VerifiedBadge } from '@/components/verification/verified-badge';
 
 interface ProductCardProps {
   product: Product;
@@ -100,6 +101,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                 <CategoryBadge category={product.category} size="sm" />
+                <VerifiedBadge project={product} size="xs" />
               </div>
             </div>
           </div>
@@ -164,17 +166,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Maker details */}
         <div className="flex items-center gap-1.5 text-slate-500 font-medium">
           <span className="text-slate-400">by</span>
-          <span className="text-slate-800 font-semibold truncate max-w-[110px]">
+          <span className="text-slate-800 font-semibold truncate max-w-[130px]">
             {product.makerName}
           </span>
-          {product.dofollowApproved && (
-            <span
-              title="Verified High-Value DoFollow SEO Backlink"
-              className="inline-flex items-center text-emerald-600 ml-0.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </span>
-          )}
         </div>
 
         {/* Action Links: Details / Repo / Direct Site */}

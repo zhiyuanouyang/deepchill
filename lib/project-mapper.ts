@@ -29,6 +29,8 @@ export interface JoinedProjectRow {
   total_clicks_count?: number | null;
   latest_bid_time?: string | null;
   latest_bid_price?: number | null;
+  is_verified?: boolean | null;
+  ownerships?: Array<{ id: string; user_id: string; domain: string; verified_at: string }> | null;
 }
 
 export function extractTotalBid(row: JoinedProjectRow): number {
@@ -82,7 +84,7 @@ export function extractMostRecentBid(row: JoinedProjectRow): MostRecentBidInfo {
   };
 }
 
-export function mapRowToProduct(row: JoinedProjectRow): Product {
+export function mapRowToProduct(row: JoinedProjectRow, verifiedSet?: Set<string> | unknown): Product {
   const totalBid = extractTotalBid(row);
   const totalClicks = extractTotalClicks(row);
   const mostRecentBid = extractMostRecentBid(row);
@@ -90,6 +92,12 @@ export function mapRowToProduct(row: JoinedProjectRow): Product {
   const category = (row.category || 'DevTools') as ProductCategory;
   const desc = row.description || '';
   const latestBidTime = row.latest_bid_time || (mostRecentBid.hasBid ? mostRecentBid.bidTime : null);
+  const isSet = verifiedSet instanceof Set;
+  const isVerified = Boolean(
+    (isSet && (verifiedSet as Set<string>).has(row.id)) ||
+    row.is_verified ||
+    (Array.isArray(row.ownerships) && row.ownerships.length > 0)
+  );
 
   return {
     id: row.id,
@@ -114,13 +122,14 @@ export function mapRowToProduct(row: JoinedProjectRow): Product {
     featured: totalBid >= 200,
     launchDate: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
     dofollowApproved: true,
+    isVerified,
     totalPaid: totalBid,
     paidAt: latestBidTime || mostRecentBid.bidTime,
   };
 }
 
-export function mapRowToTrendingProduct(row: JoinedProjectRow): TrendingProduct {
-  const product = mapRowToProduct(row);
+export function mapRowToTrendingProduct(row: JoinedProjectRow, verifiedSet?: Set<string> | unknown): TrendingProduct {
+  const product = mapRowToProduct(row, verifiedSet);
   return {
     id: product.id,
     name: product.name,
@@ -137,6 +146,7 @@ export function mapRowToTrendingProduct(row: JoinedProjectRow): TrendingProduct 
     makerName: product.makerName,
     makerHandle: product.makerHandle,
     dofollowApproved: product.dofollowApproved,
+    isVerified: product.isVerified,
     starsCount: product.starsCount,
     latestBidTime: product.latestBidTime,
     hasBid: product.hasBid,
@@ -145,8 +155,8 @@ export function mapRowToTrendingProduct(row: JoinedProjectRow): TrendingProduct 
   };
 }
 
-export function mapRowToNewestProduct(row: JoinedProjectRow): NewestReleaseProduct {
-  const product = mapRowToProduct(row);
+export function mapRowToNewestProduct(row: JoinedProjectRow, verifiedSet?: Set<string> | unknown): NewestReleaseProduct {
+  const product = mapRowToProduct(row, verifiedSet);
   return {
     id: product.id,
     name: product.name,
@@ -162,5 +172,6 @@ export function mapRowToNewestProduct(row: JoinedProjectRow): NewestReleaseProdu
     hasBid: product.hasBid,
     totalBid: product.totalBid,
     category: product.category,
+    isVerified: product.isVerified,
   };
 }

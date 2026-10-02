@@ -7,7 +7,6 @@ import {
   DollarSign,
   TrendingUp,
   Sparkles,
-  ShieldCheck,
   Loader2,
   CheckCircle2,
   Flame,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Product, TrendingProduct, NewestReleaseProduct } from '@/lib/types';
+import { VerifiedBadge } from '@/components/verification/verified-badge';
 
 export interface BidTargetProject {
   id: string;
@@ -23,10 +23,12 @@ export interface BidTargetProject {
   logoUrl?: string;
   category?: string;
   websiteUrl?: string;
+  domain?: string;
   totalBid?: number;
   totalPaid?: number;
   rank?: number;
   dofollowApproved?: boolean;
+  isVerified?: boolean;
 }
 
 interface BidModalProps {
@@ -250,15 +252,7 @@ export const BidModal: React.FC<BidModalProps> = ({
                       Add Bid for {project.name}
                     </Dialog.Title>
 
-                    {'dofollowApproved' in project && project.dofollowApproved && (
-                      <span
-                        title="Verified DoFollow Project"
-                        className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md border border-emerald-200/70 dark:border-emerald-800/60 shrink-0"
-                      >
-                        <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
-                        <span>DoFollow</span>
-                      </span>
-                    )}
+                    <VerifiedBadge project={project} size="xs" />
                   </div>
 
                   <p id="bid-modal-description" className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
