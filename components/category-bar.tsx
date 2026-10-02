@@ -90,12 +90,17 @@ export function CategoryBar({
   // Smoothly scroll active category chip into view whenever selectedCategory changes
   useEffect(() => {
     const activeEl = itemRefs.current[selectedCategory];
-    if (activeEl && scrollContainerRef.current) {
-      activeEl.scrollIntoView({
-        behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
-      });
+    const container = scrollContainerRef.current;
+    if (activeEl && container) {
+      const containerRect = container.getBoundingClientRect();
+      const elRect = activeEl.getBoundingClientRect();
+      const deltaX = (elRect.left + elRect.width / 2) - (containerRect.left + containerRect.width / 2);
+      if (Math.abs(deltaX) > 4) {
+        container.scrollBy({
+          left: deltaX,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [selectedCategory]);
 

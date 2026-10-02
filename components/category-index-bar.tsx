@@ -93,16 +93,23 @@ export function CategoryIndexBar({
   }, [checkScrollState, visibleCategories]);
 
   // Bidirectional sync: As the user scrolls the page and activeSlug changes,
-  // automatically scroll the sticky category bar to keep the active category chip visible in center
+  // horizontally scroll ONLY the inner category bar track to keep the active category chip visible in center.
+  // Note: Never use activeEl.scrollIntoView() here because inside a sticky header it causes the browser
+  // to vertically scroll the entire page/window back to the top.
   useEffect(() => {
     if (!activeSlug) return;
     const activeEl = itemRefs.current[activeSlug];
-    if (activeEl && scrollContainerRef.current) {
-      activeEl.scrollIntoView({
-        behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
-      });
+    const container = scrollContainerRef.current;
+    if (activeEl && container) {
+      const containerRect = container.getBoundingClientRect();
+      const elRect = activeEl.getBoundingClientRect();
+      const deltaX = (elRect.left + elRect.width / 2) - (containerRect.left + containerRect.width / 2);
+      if (Math.abs(deltaX) > 4) {
+        container.scrollBy({
+          left: deltaX,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [activeSlug]);
 

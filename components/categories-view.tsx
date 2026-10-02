@@ -1240,7 +1240,8 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
   // Scrollspy to automatically highlight the current category in view
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 200;
+      const scrollY = window.scrollY;
+      const scrollPos = scrollY + 220; // offset for sticky navigation header
       let currentSlug: string | null = null;
       let closestDistance = Infinity;
 
@@ -1248,8 +1249,9 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
         const slug = categorySlug(cat.name);
         const el = document.getElementById(`category-${slug}`);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
+          const rect = el.getBoundingClientRect();
+          const top = rect.top + scrollY;
+          const height = rect.height;
           if (scrollPos >= top && scrollPos < top + height) {
             currentSlug = slug;
             break;
