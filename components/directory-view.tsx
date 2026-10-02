@@ -13,13 +13,6 @@ import {
   Tag,
   X,
   Layers,
-  Terminal,
-  Server,
-  Zap,
-  Palette,
-  BarChart3,
-  Wrench,
-  Briefcase,
 } from 'lucide-react';
 import {
   Product,
@@ -39,6 +32,7 @@ import { CompoundSearchBar } from '@/components/compound-search-bar';
 import { SubmitModal } from '@/components/submit-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
 import { BidModal } from '@/components/bid-modal';
+import { CategoryBar } from '@/components/category-bar';
 
 const CATEGORIES: ('All' | ProductCategory)[] = [
   'All',
@@ -51,19 +45,6 @@ const CATEGORIES: ('All' | ProductCategory)[] = [
   'Security & Privacy',
   'Developer Utilities',
 ];
-
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  All: Layers,
-  DevTools: Terminal,
-  'Open Source Infrastructure': Server,
-  'AI & Machine Learning': Bot,
-  Productivity: Zap,
-  'Design & Creative': Palette,
-  'SaaS & Analytics': BarChart3,
-  'Security & Privacy': ShieldCheck,
-  'Developer Utilities': Wrench,
-  'Jobs & Careers': Briefcase,
-};
 
 const PRIMARY_PAGE_SIZE = 10;
 const SIDE_PAGE_SIZE = 15;
@@ -732,46 +713,13 @@ export function DirectoryView({
         {/* Category & Filter Navigation Controls */}
         <section className="mb-6 space-y-3">
           {/* Main Category Bar */}
-          <div className="liquid-glass rounded-2xl p-1.5 sm:p-2 shadow-xs border border-white/80 dark:border-white/10">
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-1 py-0.5 scroll-smooth">
-              {sortedCategoryBarItems.map((cat) => {
-                const isActive = selectedCategory === cat;
-                const IconComponent = CATEGORY_ICONS[cat] || Layers;
-                const count = categoryCounts[cat] ?? 0;
-
-                return (
-                  <button
-                    key={cat}
-                    id={`cat-filter-${cat.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
-                    onClick={() => {
-                      handleCategoryChange(cat);
-                      handleTagChange(null);
-                    }}
-                    className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${isActive
-                      ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
-                      }`}
-                  >
-                    <IconComponent
-                      className={`w-3.5 h-3.5 transition-colors ${isActive
-                        ? 'text-indigo-300 dark:text-indigo-200'
-                        : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                        }`}
-                    />
-                    <span>{cat}</span>
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${isActive
-                        ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
-                        : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                        }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <CategoryBar
+            categories={sortedCategoryBarItems}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleCategoryChange}
+            categoryCounts={categoryCounts}
+            onClearTagFilter={() => handleTagChange(null)}
+          />
 
           {/* Sub-toolbar: Active Tags, Product Counter, and Reset */}
           <div className="flex items-center justify-between gap-3 px-2 flex-wrap text-xs text-slate-500 dark:text-slate-400 font-medium">

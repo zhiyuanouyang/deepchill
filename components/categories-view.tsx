@@ -38,6 +38,7 @@ import { Navbar } from '@/components/navbar';
 import { SubmitModal } from '@/components/submit-modal';
 import { SeoGuideModal } from '@/components/seo-guide-modal';
 import { BidModal } from '@/components/bid-modal';
+import { CategoryIndexBar } from '@/components/category-index-bar';
 
 /* ─── Constants ─────────────────────────────────────────────────────────────── */
 
@@ -327,56 +328,7 @@ const CategoriesHero: React.FC<{ totalProducts: number; categoryCount: number }>
   </section>
 );
 
-/* ─── Vivid Category Selector Bar ─────────────────────────────────────────── */
 
-const CategoryIndex: React.FC<{
-  categories: CategoryData[];
-  activeSlug: string | null;
-  onJumpTo: (slug: string) => void;
-}> = ({ categories, activeSlug, onJumpTo }) => (
-  <nav
-    aria-label="Category quick navigation"
-    className="sticky top-16 sm:top-20 z-30 mb-6 sm:mb-8 categories-entrance"
-  >
-    <div className="liquid-glass rounded-2xl p-1.5 sm:p-2 shadow-xs border border-white/80 dark:border-white/10">
-      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-1 py-0.5 scroll-smooth">
-        {categories.map((cat) => {
-          const slug = categorySlug(cat.name);
-          const isActive = activeSlug === slug;
-          const IconComponent = CATEGORY_ICONS[cat.name] || Layers;
-
-          return (
-            <button
-              key={cat.name}
-              id={`cat-nav-${slug}`}
-              onClick={() => onJumpTo(slug)}
-              className={`group flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${isActive
-                ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm ring-1 ring-slate-900/10 dark:ring-indigo-500/30'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800/80'
-                }`}
-            >
-              <IconComponent
-                className={`w-3.5 h-3.5 transition-colors ${isActive
-                  ? 'text-indigo-300 dark:text-indigo-200'
-                  : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                  }`}
-              />
-              <span>{cat.name}</span>
-              <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${isActive
-                  ? 'bg-slate-800 dark:bg-indigo-700/80 text-slate-300 dark:text-indigo-100'
-                  : 'bg-slate-100/90 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:text-slate-700 dark:group-hover:text-slate-200'
-                  }`}
-              >
-                {cat.projectCount}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  </nav>
-);
 
 /* ─── Primary Item Row (Top 3 by Total Bid) ────────────────────────────────── */
 
@@ -1288,8 +1240,9 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
   // Scrollspy to automatically highlight the current category in view
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 180;
+      const scrollPos = window.scrollY + 200;
       let currentSlug: string | null = null;
+      let closestDistance = Infinity;
 
       for (const cat of categoryData) {
         const slug = categorySlug(cat.name);
@@ -1301,6 +1254,11 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
             currentSlug = slug;
             break;
           }
+          const dist = Math.abs(scrollPos - top);
+          if (dist < closestDistance) {
+            closestDistance = dist;
+            currentSlug = slug;
+          }
         }
       }
 
@@ -1309,6 +1267,7 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
       }
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [categoryData]);
@@ -1338,7 +1297,7 @@ export function CategoriesView({ initialCategories }: CategoriesViewProps = {}) 
         <CategoriesHero totalProducts={totalProductsCount} categoryCount={categoryData.length} />
 
         {/* Modern Sticky Category Selector */}
-        <CategoryIndex
+        <CategoryIndexBar
           categories={categoryData}
           activeSlug={activeSlug}
           onJumpTo={handleJumpTo}
