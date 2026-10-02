@@ -492,18 +492,16 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
           </div>
 
           {/* Right: Outbound Clicks Counter & Reduced-size Bid Price Badge */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <span
               title={`${clickCount.toLocaleString()} user clicks through to website`}
-              className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium"
+              className="inline-flex items-center gap-0.5 h-4 text-indigo-600 dark:text-indigo-400 font-semibold text-[9px] leading-none bg-indigo-50/90 dark:bg-indigo-950/60 px-1 rounded border border-indigo-100 dark:border-indigo-900/50"
             >
-              <MousePointerClick className="w-3 h-3 text-indigo-500 dark:text-indigo-400 shrink-0" />
+              <MousePointerClick className="w-2 h-2 shrink-0" />
               <span key={clickCount} className="tabular-nums transition-transform inline-block">
                 {clickCount.toLocaleString()}
               </span>
             </span>
-
-            <span className="text-slate-200 dark:text-slate-700 select-none">·</span>
 
             {/* Interactive Bid Price Button & Quick Bid CTA */}
             <button
@@ -513,16 +511,14 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
                 onOpenBid?.(product);
               }}
               title={`Bid: $${displayBidAmount}${totalBidAmount > displayBidAmount ? ` · Total: $${totalBidAmount}` : ''} — Click to add a new bid!`}
-              className={`group/sidebid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[9px] shrink-0 leading-none transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${displayBidAmount > 0
+              className={`group/sidebid inline-flex items-center gap-0.5 h-4 font-bold px-1 rounded border text-[9px] shrink-0 leading-none transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${displayBidAmount > 0
                 ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
                 : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
                 }`}
             >
-              <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/sidebid:rotate-12 transition-transform" />
+              <DollarSign className="w-2 h-2 text-amber-600 dark:text-amber-400 group-hover/sidebid:rotate-12 transition-transform shrink-0" />
               <span>{displayBidAmount}</span>
-              <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/sidebid:opacity-100 ml-0.5">
-                +
-              </span>
+              <span className="font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/sidebid:opacity-100 ml-px">+</span>
             </button>
           </div>
         </div>

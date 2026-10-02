@@ -425,10 +425,10 @@ const PrimaryCategoryRow: React.FC<{
               {/* Total Bid & Clicks Counters */}
               <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-medium">
                 <span
-                  className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 text-[10px]"
+                  className="inline-flex items-center gap-1 h-5 text-indigo-600 dark:text-indigo-400 font-semibold text-[10px] leading-none bg-indigo-50/90 dark:bg-indigo-950/60 px-1.5 rounded-md border border-indigo-100 dark:border-indigo-900/50"
                   title={`${clickCount.toLocaleString()} clicks`}
                 >
-                  <MousePointerClick className="w-2.5 h-2.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                  <MousePointerClick className="w-2.5 h-2.5 shrink-0" />
                   <span>{clickCount.toLocaleString()}</span>
                 </span>
 
@@ -440,16 +440,14 @@ const PrimaryCategoryRow: React.FC<{
                     onOpenBid?.(project);
                   }}
                   title={`Total Bid: $${paidBidAmount} — Click to add a new bid!`}
-                  className={`group/catbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded border text-[10px] shrink-0 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${paidBidAmount > 0
+                  className={`group/catbid inline-flex items-center gap-0.5 h-5 font-bold px-1.5 rounded border text-[10px] shrink-0 leading-none transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${paidBidAmount > 0
                     ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
                     : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
                     }`}
                 >
-                  <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/catbid:rotate-12 transition-transform" />
+                  <DollarSign className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 group-hover/catbid:rotate-12 transition-transform shrink-0" />
                   <span>{paidBidAmount}</span>
-                  <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/catbid:opacity-100 ml-0.5">
-                    +
-                  </span>
+                  <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/catbid:opacity-100 ml-0.5">+</span>
                 </button>
               </div>
             </div>
@@ -576,9 +574,9 @@ const SecondaryCategoryRow: React.FC<{
           {/* Outbound Clicks */}
           <span
             title={`${clickCount.toLocaleString()} clicks`}
-            className="hidden sm:inline-flex items-center gap-0.5 text-slate-400 dark:text-slate-500"
+            className="hidden sm:inline-flex items-center gap-0.5 h-4 text-indigo-600 dark:text-indigo-400 font-semibold text-[9px] leading-none bg-indigo-50/90 dark:bg-indigo-950/60 px-1 rounded border border-indigo-100 dark:border-indigo-900/50"
           >
-            <MousePointerClick className="w-2.5 h-2.5 text-indigo-400 shrink-0" />
+            <MousePointerClick className="w-2 h-2 shrink-0" />
             <span>{clickCount}</span>
           </span>
 
@@ -590,14 +588,14 @@ const SecondaryCategoryRow: React.FC<{
               onOpenBid?.(product);
             }}
             title={`Bid: $${bidPrice} — Click to add a new bid!`}
-            className={`group/secbid inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 border transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${bidPrice > 0
+            className={`group/secbid inline-flex items-center gap-0.5 h-4 font-bold px-1 rounded text-[9px] shrink-0 border leading-none transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${bidPrice > 0
               ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/70 dark:border-amber-800/50 hover:border-amber-400'
               : 'text-slate-500 dark:text-slate-400 hover:text-amber-600 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/50 dark:border-slate-700/60'
               }`}
           >
-            <DollarSign className="w-2.5 h-2.5 text-amber-500 group-hover/secbid:rotate-12 transition-transform shrink-0" />
+            <DollarSign className="w-2 h-2 text-amber-500 group-hover/secbid:rotate-12 transition-transform shrink-0" />
             <span>{bidPrice}</span>
-            <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/secbid:opacity-100 ml-0.5">+</span>
+            <span className="font-black text-amber-600 dark:text-amber-400 opacity-70 group-hover/secbid:opacity-100 ml-px">+</span>
           </button>
         </div>
       </div>
