@@ -93,6 +93,8 @@ export interface CategoryBadgeProps {
   category?: ProductCategory | string;
   size?: 'xs' | 'sm' | 'md';
   showIcon?: boolean;
+  showLabel?: boolean;
+  labelClassName?: string;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement | HTMLSpanElement>) => void;
 }
@@ -110,6 +112,8 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
   category,
   size = 'sm',
   showIcon = true,
+  showLabel = true,
+  labelClassName = '',
   className = '',
   onClick,
 }) => {
@@ -145,7 +149,7 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
           aria-hidden="true"
         />
       )}
-      <span className="truncate leading-none">{category}</span>
+      {showLabel && <span className={`truncate leading-none ${labelClassName}`}>{category}</span>}
     </>
   );
 

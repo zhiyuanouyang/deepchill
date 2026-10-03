@@ -15,6 +15,7 @@ export interface VerifiedBadgeProps {
   };
   size?: 'xs' | 'sm' | 'md';
   showLabel?: boolean;
+  labelClassName?: string;
   className?: string;
   onClick?: (e: React.MouseEvent) => void;
 }
@@ -23,6 +24,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
   project,
   size = 'sm',
   showLabel = true,
+  labelClassName = '',
   className = '',
   onClick,
 }) => {
@@ -73,7 +75,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
       >
         <ShieldCheck className={`${sizeConfig.icon} text-emerald-600 dark:text-emerald-400 shrink-0`} />
         {showLabel && (
-          <span className="truncate">
+          <span className={`truncate ${labelClassName}`}>
             <span className="hidden sm:inline">Verified</span>
             <span className="sm:hidden">Verif.</span>
           </span>
@@ -94,7 +96,7 @@ export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({
     >
       <ShieldAlert className={`${sizeConfig.icon} text-amber-500 dark:text-amber-400 shrink-0 group-hover:scale-105 transition-transform`} />
       {showLabel && (
-        <span className="truncate">
+        <span className={`truncate ${labelClassName}`}>
           <span className="hidden sm:inline">Unverified</span>
           <span className="sm:hidden">Verify</span>
         </span>

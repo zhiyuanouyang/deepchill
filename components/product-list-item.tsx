@@ -145,7 +145,7 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
       title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
       className="group relative cursor-pointer"
     >
-      <div className="relative rounded-2xl p-3 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+      <div className="relative rounded-xl sm:rounded-2xl p-2.5 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
         {/* Top 3 left accent indicator */}
         {rank <= 3 && (
           <div
@@ -195,18 +195,16 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
 
           {/* Main Title & Proof Metrics Block */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2">
               {/* Title & Status Badges */}
-              <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0 overflow-hidden">
                 <h3
                   id={`primary-product-title-${product.id}`}
-                  className="text-base font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1 truncate"
+                  className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1 truncate"
                 >
                   <span>{product.name}</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                  <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </h3>
-
-                <VerifiedBadge project={product} size="sm" />
 
                 {product.category && (
                   <CategoryBadge
@@ -218,20 +216,21 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                     }}
                   />
                 )}
+                <VerifiedBadge project={product} size="sm" showLabel={true} labelClassName="hidden sm:inline" />
               </div>
 
               {/* Right Side Metrics Bar */}
-              <div className="flex items-center gap-1.5 shrink-0 text-xs">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 text-xs">
                 {/* Outbound User Clicks Metric */}
                 <span
                   title={`${clickCount.toLocaleString()} user clicks through to website`}
-                  className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] bg-indigo-50/90 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 transition-all duration-150"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold text-[10px] sm:text-[11px] bg-indigo-50/90 dark:bg-indigo-950/60 px-1.5 sm:px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 transition-all duration-150"
                 >
-                  <MousePointerClick className="w-3.5 h-3.5" />
+                  <MousePointerClick className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span key={clickCount} className="tabular-nums transition-transform inline-block">
                     {clickCount.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">clicks</span>
+                  <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium hidden sm:inline">clicks</span>
                 </span>
 
                 {/* Total Bid Amount (Interactive Action) */}
@@ -246,14 +245,14 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                       ? `Total Bid: $${totalBidAmount}${recentBidAmount > 0 ? ` · Latest bid: $${recentBidAmount}` : ''} — Click to add a new bid!`
                       : 'No active bid ($0) — Click to be the first backer!'
                   }
-                  className={`group/bid inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md border text-[11px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${totalBidAmount > 0
+                  className={`group/bid inline-flex items-center gap-0.5 sm:gap-1 font-bold px-1.5 sm:px-2 py-0.5 rounded-md border text-[10px] sm:text-[11px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs select-none ${totalBidAmount > 0
                     ? 'text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100/90 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border-amber-200/80 dark:border-amber-800/60 hover:border-amber-400'
                     : 'text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 bg-slate-100/80 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/40 border-slate-200/60 dark:border-slate-700/60 hover:border-amber-300/60'
                     }`}
                 >
-                  <DollarSign className="w-3 h-3 text-amber-600 dark:text-amber-400 group-hover/bid:rotate-12 transition-transform" />
-                  <span>{totalBidAmount} Bid</span>
-                  <span className="text-[10px] font-black text-amber-800 dark:text-amber-200 bg-amber-200/80 dark:bg-amber-800/80 px-1 py-0 rounded group-hover/bid:bg-amber-300 dark:group-hover:bg-amber-700 transition-colors ml-0.5">
+                  <DollarSign className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 dark:text-amber-400 group-hover/bid:rotate-12 transition-transform" />
+                  <span>{totalBidAmount}<span className="hidden sm:inline"> Bid</span></span>
+                  <span className="text-[9px] sm:text-[10px] font-black text-amber-800 dark:text-amber-200 bg-amber-200/80 dark:bg-amber-800/80 px-0.5 sm:px-1 py-0 rounded group-hover/bid:bg-amber-300 dark:group-hover:bg-amber-700 transition-colors ml-0.5">
                     +
                   </span>
                 </button>
@@ -272,32 +271,15 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
             </div>
 
             {/* Row 2: Description */}
-            <div className="mt-1.5">
-              <p className="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug">
+            <div className="mt-1 sm:mt-1.5">
+              <p className="text-[11px] sm:text-sm font-medium text-slate-800 dark:text-slate-200 sm:line-clamp-2 leading-snug">
                 {product.description}
               </p>
             </div>
 
-            {/* Row 3: Maker Attribution & Interactive Tags */}
-            <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 flex-wrap">
+            {/* Row 3: Interactive Tags — hidden on mobile for cleanliness */}
+            <div className="hidden sm:flex mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3 flex-wrap min-w-0">
-                {/* Maker Name */}
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
-                  <span className="w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 text-[9px] font-bold text-white flex items-center justify-center shrink-0">
-                    {product.makerName.charAt(0)}
-                  </span>
-                  <span>
-                    by{' '}
-                    <strong className="font-semibold text-slate-700 dark:text-slate-300">
-                      {product.makerName}
-                    </strong>
-                  </span>
-                  {product.makerHandle && (
-                    <span className="text-slate-400 dark:text-slate-500 hidden md:inline">
-                      ({product.makerHandle})
-                    </span>
-                  )}
-                </span>
 
                 {/* Interactive Tech Stack / Tags */}
                 {displayTags && displayTags.length > 0 && (
@@ -324,9 +306,9 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
                 )}
               </div>
 
-              {/* Action Buttons: Add Bid CTA & Trailing Visit Link */}
+              {/* Action Buttons: Trailing Visit Link */}
               <div className="flex items-center gap-2 shrink-0">
-                <div className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
+                <div className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
                   <span>Visit site</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </div>
@@ -424,7 +406,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
       title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
       className="group relative cursor-pointer hover:z-10"
     >
-      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-md hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">
+      <div className="relative rounded-xl sm:rounded-2xl p-2 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-md hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">
         {/* Row 1: Smaller Rank & Icon + Product Name (Left) & SEO Button (Right) */}
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -461,30 +443,31 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
             <h4 className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate min-w-0">
               {product.name}
             </h4>
-
             {product.category && (
-              <CategoryBadge category={product.category} size="xs" className="shrink-0" />
+              <CategoryBadge category={product.category} size="xs" showLabel={false} className="shrink-0" />
             )}
+
+            <VerifiedBadge project={product} size="xs" showLabel={false} />
           </div>
         </div>
 
-        {/* Row 2: Description Text (Single line with ellipsis, expands on hover) */}
+        {/* Row 2: Description Text — hidden on mobile sidebar to save vertical space, single line on sm+ */}
         <p
           title={product.description}
-          className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-1.5"
+          className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-1 sm:mt-1.5"
         >
           {product.description}
         </p>
 
-        {/* Row 3: Meta Footer: Timestamp (Left) & Clicks + Reduced Bid Price Badge (Right) */}
-        <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1.5 flex-wrap text-[10px]">
+        {/* Row 3: Meta Footer: Timestamp (Left) & Clicks + Bid (Right) — compact on mobile */}
+        <div className="mt-1.5 sm:mt-2 pt-1 sm:pt-1.5 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1 sm:gap-1.5 flex-wrap text-[9px] sm:text-[10px]">
           {/* Left: Timestamp with Clock icon */}
           <div
             suppressHydrationWarning
             title={`Launch / bid timestamp: ${exactDateTime} (${relativeTime})`}
-            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 shrink-0 select-none text-[10px]"
+            className="flex items-center gap-0.5 sm:gap-1 text-slate-400 dark:text-slate-500 shrink-0 select-none"
           >
-            <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-slate-500 shrink-0" />
             <span suppressHydrationWarning>{relativeTime}</span>
           </div>
 
