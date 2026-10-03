@@ -555,21 +555,21 @@ const SecondaryCategoryRow: React.FC<{
         </div>
 
         {/* Right: Timestamp & Small Bid Price / Clicks */}
-        <div className="flex items-center gap-2 shrink-0 text-[10px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-[10px]">
           {/* Relative Time with Clock */}
           <span
             suppressHydrationWarning
             title={`Bid time: ${exactDateTime}`}
-            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium select-none"
+            className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium min-w-0 select-none"
           >
             <Clock className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span suppressHydrationWarning>{relativeTime}</span>
+            <span suppressHydrationWarning className="truncate">{relativeTime}</span>
           </span>
 
           {/* Outbound Clicks */}
           <span
             title={`${clickCount.toLocaleString()} clicks`}
-            className="hidden sm:inline-flex items-center gap-0.5 h-4 text-indigo-600 dark:text-indigo-400 font-semibold text-[9px] leading-none bg-indigo-50/90 dark:bg-indigo-950/60 px-1 rounded border border-indigo-100 dark:border-indigo-900/50"
+            className="inline-flex items-center gap-0.5 h-4 text-indigo-600 dark:text-indigo-400 font-semibold text-[9px] leading-none bg-indigo-50/90 dark:bg-indigo-950/60 px-1 rounded border border-indigo-100 dark:border-indigo-900/50"
           >
             <MousePointerClick className="w-2 h-2 shrink-0" />
             <span>{clickCount}</span>

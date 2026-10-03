@@ -460,15 +460,15 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
         </p>
 
         {/* Row 3: Meta Footer: Timestamp (Left) & Clicks + Bid (Right) — compact on mobile */}
-        <div className="mt-1.5 sm:mt-2 pt-1 sm:pt-1.5 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1 sm:gap-1.5 flex-wrap text-[9px] sm:text-[10px]">
+        <div className="mt-1.5 sm:mt-2 pt-1 sm:pt-1.5 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1 sm:gap-1.5 text-[9px] sm:text-[10px]">
           {/* Left: Timestamp with Clock icon */}
           <div
             suppressHydrationWarning
             title={`Launch / bid timestamp: ${exactDateTime} (${relativeTime})`}
-            className="flex items-center gap-0.5 sm:gap-1 text-slate-400 dark:text-slate-500 shrink-0 select-none"
+            className="flex items-center gap-0.5 sm:gap-1 text-slate-400 dark:text-slate-500 min-w-0 select-none"
           >
             <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span suppressHydrationWarning>{relativeTime}</span>
+            <span suppressHydrationWarning className="truncate">{relativeTime}</span>
           </div>
 
           {/* Right: Outbound Clicks Counter & Reduced-size Bid Price Badge */}
