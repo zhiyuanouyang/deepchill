@@ -35,7 +35,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   defaultCategory,
   categories: categoriesProp,
 }) => {
-  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [protocol, setProtocol] = useState<'https' | 'http'>('https');
+  const [domainInput, setDomainInput] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string>(
@@ -127,6 +128,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       isMounted = false;
     };
   }, [isOpen, categoriesProp, defaultCategory]);
+
+  // Derive the full URL from protocol + domainInput so all downstream logic stays the same
+  const websiteUrl = useMemo(
+    () => (domainInput.trim() ? `${protocol}://${domainInput.trim()}` : ''),
+    [protocol, domainInput]
+  );
 
   const cleanDomain = useMemo(() => extractDomain(websiteUrl), [websiteUrl]);
 
@@ -268,17 +275,19 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       !errors.websiteUrl
   );
 
-  const handleWebsiteUrlChange = (val: string) => {
-    const newDomain = extractDomain(val);
+  const handleDomainInputChange = (val: string) => {
+    // Strip any protocol the user may paste in (e.g. "https://example.com" → "example.com")
+    const stripped = val.replace(/^https?:\/\//i, '');
+    const newFullUrl = stripped.trim() ? `${protocol}://${stripped.trim()}` : '';
+    const newDomain = extractDomain(newFullUrl);
     if (newDomain !== cleanDomain) {
       setIconUrl('');
     }
-    setWebsiteUrl(val);
+    setDomainInput(stripped);
     setAiSuccessMessage(null);
     setIconError(false);
 
-    const trimmed = val.trim();
-    if (!trimmed) {
+    if (!stripped.trim()) {
       setErrors((prev) => {
         const next = { ...prev };
         delete next.websiteUrl;
@@ -289,7 +298,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       return;
     }
 
-    const validation = validateWebsiteUrl(trimmed);
+    const validation = validateWebsiteUrl(newFullUrl);
     if (!validation.isValid) {
       setErrors((prev) => ({
         ...prev,
@@ -357,8 +366,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         setIconUrl(metadata.iconUrl);
         setIconError(false);
       }
-      if (metadata.url && !websiteUrl.startsWith('http')) {
-        setWebsiteUrl(metadata.url);
+      if (metadata.url && !domainInput.trim()) {
+        // Sync protocol + domain from the metadata URL
+        const metaProto = metadata.url.startsWith('http://') ? 'http' : 'https';
+        const metaDomain = metadata.url.replace(/^https?:\/\//i, '').split('/')[0];
+        setProtocol(metaProto as 'https' | 'http');
+        setDomainInput(metaDomain);
       }
 
       // Automatically pop down & expand the form fields
@@ -581,7 +594,8 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     }
 
     // Reset & close
-    setWebsiteUrl('');
+    setProtocol('https');
+    setDomainInput('');
     setName('');
     setDescription('');
     setIconUrl('');
@@ -632,34 +646,60 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             {/* 1. Clean URL Input + AI Autofill Button */}
             <div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="relative flex-1">
-                  {isDomainVerified && effectiveIconUrl && !iconError ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={effectiveIconUrl}
-                      alt="Website icon"
-                      className="w-4 h-4 rounded-sm object-contain absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-200"
-                      referrerPolicy="no-referrer"
-                      onError={() => setIconError(true)}
-                    />
-                  ) : (
-                    <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none transition-opacity duration-200" />
-                  )}
+                {/* Protocol selector + domain input combined pill */}
+                <div className={`relative flex-1 flex items-center liquid-glass-input rounded-xl overflow-hidden ${
+                  errors.websiteUrl ? 'border-rose-400 dark:border-rose-500' : ''
+                }`}>
+                  {/* Site icon / Globe — far left of pill */}
+                  <div className="flex items-center justify-center w-9 shrink-0 self-stretch bg-slate-50/60 dark:bg-slate-800/40 border-r border-slate-200/70 dark:border-slate-700/60">
+                    {isDomainVerified && effectiveIconUrl && !iconError ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={effectiveIconUrl}
+                        alt="Website icon"
+                        className="w-4 h-4 rounded-sm object-contain transition-opacity duration-200"
+                        referrerPolicy="no-referrer"
+                        onError={() => setIconError(true)}
+                      />
+                    ) : (
+                      <Globe className="w-4 h-4 text-slate-400" />
+                    )}
+                  </div>
+
+                  {/* Protocol toggle button */}
+                  <button
+                    type="button"
+                    id="btn-protocol-toggle"
+                    onClick={() => setProtocol((p) => (p === 'https' ? 'http' : 'https'))}
+                    className="flex items-center gap-1 pl-2.5 pr-2 py-2.5 shrink-0 text-[11px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer select-none border-r border-slate-200/70 dark:border-slate-700/60"
+                    title="Click to toggle between https and http"
+                  >
+                    {protocol === 'https' ? (
+                      <svg className="w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M8 1a4 4 0 0 1 4 4v1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h1V5a4 4 0 0 1 4-4zm0 1.5A2.5 2.5 0 0 0 5.5 5v1h5V5A2.5 2.5 0 0 0 8 2.5zM8 9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                      </svg>
+                    ) : (
+                      <Globe className="w-3 h-3 shrink-0" />
+                    )}
+                    <span>{protocol}://</span>
+                  </button>
+
+                  {/* Domain-only input */}
                   <input
                     id="input-website-url"
-                    type="url"
-                    value={websiteUrl}
-                    onChange={(e) => handleWebsiteUrlChange(e.target.value)}
+                    type="text"
+                    value={domainInput}
+                    onChange={(e) => handleDomainInputChange(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
                         handleAiAutoFill();
                       }
                     }}
-                    placeholder="https://yourproject.com"
-                    className={`w-full liquid-glass-input rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm outline-none font-medium ${
-                      errors.websiteUrl ? 'border-rose-400 dark:border-rose-500' : ''
-                    }`}
+                    placeholder="yourproject.com"
+                    autoComplete="off"
+                    spellCheck={false}
+                    className="flex-1 bg-transparent outline-none font-medium text-xs sm:text-sm py-2.5 pl-2.5 pr-3"
                   />
                 </div>
 
