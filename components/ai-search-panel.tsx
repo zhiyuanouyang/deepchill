@@ -55,7 +55,7 @@ export const AiSearchPanel: React.FC<AiSearchPanelProps> = ({
           products: products.map((p) => ({
             id: p.id,
             name: p.name,
-            tagline: p.tagline,
+            description: p.description,
             category: p.category,
             pricing: p.pricing,
             tags: p.tags,
@@ -242,7 +242,7 @@ export const AiSearchPanel: React.FC<AiSearchPanelProps> = ({
                         <CategoryBadge category={p.category} size="xs" />
                       </div>
                       <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2">
-                        {p.tagline}
+                        {p.description}
                       </p>
                     </div>
 

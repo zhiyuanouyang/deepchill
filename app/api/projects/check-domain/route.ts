@@ -39,10 +39,9 @@ function extractMetaTag(html: string, propertyName: string): string {
   return '';
 }
 
-function extractJsonLd(html: string): { name: string; description: string; tagline: string } {
+function extractJsonLd(html: string): { name: string; description: string } {
   let name = '';
   let description = '';
-  let tagline = '';
 
   const regex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   let match;
@@ -96,18 +95,13 @@ function extractJsonLd(html: string): { name: string; description: string; tagli
         if (!description && typeof item.description === 'string' && item.description.trim()) {
           description = decodeHtmlEntities(item.description.trim());
         }
-        if (!tagline && typeof item.slogan === 'string' && item.slogan.trim()) {
-          tagline = decodeHtmlEntities(item.slogan.trim());
-        } else if (!tagline && typeof item.headline === 'string' && item.headline.trim()) {
-          tagline = decodeHtmlEntities(item.headline.trim());
-        }
       }
     } catch {
       // Ignore invalid or unparseable JSON
     }
   }
 
-  return { name, description, tagline };
+  return { name, description };
 }
 
 function extractH1(html: string): string {
@@ -136,14 +130,12 @@ function extractH1(html: string): string {
  * - Fetches initial chunk of the webpage (up to 48KB or until </h1> is reached)
  * - Extracts JSON-LD as source of truth for name and description (higher priority than OG metadata)
  * - Falls back to og:site_name and og:description if JSON-LD is missing
- * - For tagline, considers the page's <h1> hero tag alongside og:title and JSON-LD slogan/headline
  */
 async function getLightweightMetadata(domain: string, targetUrl?: string | null) {
   const defaultIcon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
   const cleanUrl = targetUrl && /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${domain}`;
 
   let name = '';
-  let tagline = '';
   let description = '';
 
   try {
@@ -184,7 +176,6 @@ async function getLightweightMetadata(domain: string, targetUrl?: string | null)
 
       // 2. Open Graph tags extraction
       const ogSiteName = extractMetaTag(html, 'og:site_name');
-      const ogTitle = extractMetaTag(html, 'og:title');
       const ogDescription = extractMetaTag(html, 'og:description');
 
       // 3. Name: JSON-LD takes higher priority than OG metadata
@@ -192,21 +183,6 @@ async function getLightweightMetadata(domain: string, targetUrl?: string | null)
 
       // 4. Description: JSON-LD takes higher priority than OG metadata
       description = jsonLd.description || ogDescription;
-
-      // 5. Tagline: Consider h1 tag of the domain page alongside og:title and JSON-LD slogan/headline
-      const h1Tag = extractH1(html);
-
-      if (h1Tag && (!name || h1Tag.toLowerCase() !== name.toLowerCase())) {
-        tagline = h1Tag;
-      } else if (ogTitle && (!name || ogTitle.toLowerCase() !== name.toLowerCase())) {
-        tagline = ogTitle;
-      } else if (jsonLd.tagline) {
-        tagline = jsonLd.tagline;
-      } else if (h1Tag) {
-        tagline = h1Tag;
-      } else if (ogTitle) {
-        tagline = ogTitle;
-      }
     }
   } catch {
     // If fetching fails or times out, leave fields blank
@@ -214,7 +190,6 @@ async function getLightweightMetadata(domain: string, targetUrl?: string | null)
 
   return {
     name,
-    tagline,
     description,
     iconUrl: defaultIcon,
   };

@@ -484,13 +484,12 @@ export function DirectoryView({
         const q = searchQuery.toLowerCase();
         const matchName = product.name.toLowerCase().includes(q);
         const matchDomain = product.domain?.toLowerCase().includes(q);
-        const matchTagline = product.tagline?.toLowerCase().includes(q);
         const matchDesc = product.description.toLowerCase().includes(q);
         const matchTags = (product.categoryTags || product.tags || []).some((t) =>
           t.toLowerCase().includes(q)
         );
         const matchMaker = product.makerName.toLowerCase().includes(q);
-        if (!matchName && !matchDomain && !matchTagline && !matchDesc && !matchTags && !matchMaker) {
+        if (!matchName && !matchDomain && !matchDesc && !matchTags && !matchMaker) {
           return false;
         }
       }

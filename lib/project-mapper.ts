@@ -12,7 +12,6 @@ export interface JoinedProjectRow {
   id: string;
   url: string;
   name: string;
-  tagline: string | null;
   description?: string | null;
   icon_url: string | null;
   user_id: string | null;
@@ -103,7 +102,6 @@ export function mapRowToProduct(row: JoinedProjectRow, verifiedSet?: Set<string>
     id: row.id,
     domain,
     name: row.name,
-    tagline: row.tagline || '',
     description: desc,
     websiteUrl: row.url,
     category,
@@ -134,7 +132,6 @@ export function mapRowToTrendingProduct(row: JoinedProjectRow, verifiedSet?: Set
     id: product.id,
     name: product.name,
     domain: product.domain,
-    tagline: product.tagline,
     description: product.description,
     logoUrl: product.logoUrl,
     websiteUrl: product.websiteUrl,
@@ -161,7 +158,6 @@ export function mapRowToNewestProduct(row: JoinedProjectRow, verifiedSet?: Set<s
     id: product.id,
     name: product.name,
     domain: product.domain,
-    tagline: product.tagline,
     description: product.description,
     logoUrl: product.logoUrl,
     websiteUrl: product.websiteUrl,

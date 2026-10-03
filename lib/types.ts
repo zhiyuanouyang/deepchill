@@ -32,7 +32,6 @@ export interface Product {
   domain: string;
   name: string;
   description: string;
-  tagline?: string;
   logoUrl?: string;
   totalBid: number;
   mostRecentBid: MostRecentBidInfo;
@@ -70,13 +69,12 @@ export interface Product {
 
 /**
  * Partial projection for "Trending Projects" UI showcase.
- * In Supabase: SELECT id, name, domain, tagline, description, logo_url, website_url, total_bid, total_clicks, category_tags, category, pricing, maker_name, maker_handle, dofollow_approved, stars_count
+ * In Supabase: SELECT id, name, domain, description, logo_url, website_url, total_bid, total_clicks, category_tags, category, pricing, maker_name, maker_handle, dofollow_approved, stars_count
  */
 export interface TrendingProduct {
   id: string;
   name: string;
   domain: string;
-  tagline?: string;
   description: string;
   logoUrl?: string;
   websiteUrl: string;
@@ -99,13 +97,12 @@ export interface TrendingProduct {
 
 /**
  * Partial projection for "Newest Releases" sidebar UI feed.
- * In Supabase: SELECT id, name, domain, tagline, description, logo_url, website_url, recent_bid_price, recent_bid_time, total_clicks, launch_date
+ * In Supabase: SELECT id, name, domain, description, logo_url, website_url, recent_bid_price, recent_bid_time, total_clicks, launch_date
  */
 export interface NewestReleaseProduct {
   id: string;
   name: string;
   domain: string;
-  tagline?: string;
   description: string;
   logoUrl?: string;
   websiteUrl: string;
@@ -127,7 +124,6 @@ export interface ProductRow {
   id: string;
   domain: string;
   name: string;
-  tagline: string | null;
   description: string;
   logo_url: string | null;
   website_url: string;
@@ -156,7 +152,6 @@ export function toTrendingProduct(product: Product): TrendingProduct {
     id: product.id,
     name: product.name,
     domain: product.domain,
-    tagline: product.tagline,
     description: product.description,
     logoUrl: product.logoUrl,
     websiteUrl: product.websiteUrl,
@@ -186,7 +181,6 @@ export function toNewestReleaseProduct(product: Product): NewestReleaseProduct {
     id: product.id,
     name: product.name,
     domain: product.domain,
-    tagline: product.tagline,
     description: product.description,
     logoUrl: product.logoUrl,
     websiteUrl: product.websiteUrl,
@@ -215,7 +209,6 @@ export interface AiAskResponse {
 }
 
 export interface EnhanceSubmissionResponse {
-  polishedTagline: string;
   suggestedTags: string[];
   seoAdvice: string;
   suggestedFeatures?: string[];
@@ -247,7 +240,6 @@ export interface Project {
   id: string;
   url: string;
   name: string;
-  tagline: string | null;
   description: string | null;
   icon_url: string | null;
   user_id: string | null;

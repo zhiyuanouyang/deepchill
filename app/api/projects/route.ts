@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
     if (q && q.trim()) {
       query = query.or(
-        `name.ilike.%${q.trim()}%,tagline.ilike.%${q.trim()}%,description.ilike.%${q.trim()}%,url.ilike.%${q.trim()}%`
+        `name.ilike.%${q.trim()}%,description.ilike.%${q.trim()}%,url.ilike.%${q.trim()}%`
       );
     }
 
@@ -54,7 +54,6 @@ export async function POST(request: Request) {
       name,
       websiteUrl,
       url,
-      tagline,
       description,
       category = 'DevTools',
       logoUrl,
@@ -64,9 +63,9 @@ export async function POST(request: Request) {
 
     const rawUrl = (websiteUrl || url || '').trim();
 
-    if (!name || !rawUrl || !tagline || !description) {
+    if (!name || !rawUrl || !description) {
       return NextResponse.json(
-        { error: 'Name, websiteUrl, tagline, and description are required.' },
+        { error: 'Name, websiteUrl, and description are required.' },
         { status: 400 }
       );
     }
@@ -135,7 +134,6 @@ export async function POST(request: Request) {
       name: name.trim(),
       url: rawUrl,
       domain: derivedDomain,
-      tagline: tagline.trim(),
       description: description.trim(),
       icon_url: effectiveIcon,
       category,
@@ -201,7 +199,6 @@ export async function POST(request: Request) {
         url,
         domain,
         name,
-        tagline,
         description,
         icon_url,
         user_id,
@@ -225,7 +222,6 @@ export async function POST(request: Request) {
           id,
           url,
           name,
-          tagline,
           description,
           icon_url,
           user_id,

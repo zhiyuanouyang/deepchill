@@ -92,7 +92,7 @@ export const CompoundSearchBar: React.FC<CompoundSearchBarProps> = ({
           products: products.map((p) => ({
             id: p.id,
             name: p.name,
-            tagline: p.tagline,
+            description: p.description,
             category: p.category,
             pricing: p.pricing,
             tags: p.tags,
@@ -392,7 +392,7 @@ export const CompoundSearchBar: React.FC<CompoundSearchBarProps> = ({
                         <CategoryBadge category={p.category} size="xs" />
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">
-                        {p.tagline}
+                        {p.description}
                       </p>
                     </div>
 

@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
     if (!ai) {
       // Graceful fallback if no GEMINI_API_KEY is supplied
       return NextResponse.json({
-        polishedTagline: `${name} — Built for modern developers and indie creators.`,
         suggestedTags: ['Open Source', 'DevTools', 'Indie', 'Productivity'],
         seoAdvice: 'Include clear developer keywords in your README to maximize backlink referral value.',
         suggestedFeatures: [
@@ -33,11 +32,10 @@ Project Name: ${name}
 Project Description: ${description || 'A developer tool or indie product'}
 
 Please create:
-1. A punchy, high-converting 1-sentence tagline (under 75 characters, clean, no hype verbs).
-2. Exactly 4-5 high-relevance technical/category tags (e.g. ['PostgreSQL', 'DevOps', 'TypeScript']).
-3. A brief 1-sentence SEO tip for boosting backlink conversion.
-4. Exactly 3 key feature highlight bullet points (concise, clear value propositions).
-5. A concise target audience description (e.g. "Full-stack developers and SaaS founders").`;
+1. Exactly 4-5 high-relevance technical/category tags (e.g. ['PostgreSQL', 'DevOps', 'TypeScript']).
+2. A brief 1-sentence SEO tip for boosting backlink conversion.
+3. Exactly 3 key feature highlight bullet points (concise, clear value propositions).
+4. A concise target audience description (e.g. "Full-stack developers and SaaS founders").`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
@@ -48,7 +46,6 @@ Please create:
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            polishedTagline: { type: Type.STRING },
             suggestedTags: {
               type: Type.ARRAY,
               items: { type: Type.STRING },
@@ -60,14 +57,13 @@ Please create:
             },
             targetAudience: { type: Type.STRING },
           },
-          required: ['polishedTagline', 'suggestedTags', 'seoAdvice', 'suggestedFeatures', 'targetAudience'],
+          required: ['suggestedTags', 'seoAdvice', 'suggestedFeatures', 'targetAudience'],
         },
       },
     });
 
     const parsed = JSON.parse(response.text?.trim() || '{}');
     return NextResponse.json({
-      polishedTagline: parsed.polishedTagline || `${name} — Built for modern developers and creators.`,
       suggestedTags: Array.isArray(parsed.suggestedTags) ? parsed.suggestedTags : ['DevTools', 'Indie'],
       seoAdvice: parsed.seoAdvice || 'Include clear developer keywords in your project documentation.',
       suggestedFeatures: Array.isArray(parsed.suggestedFeatures)

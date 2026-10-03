@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const directorySummary = (products as Product[]).map((p) => ({
       id: p.id,
       name: p.name,
-      tagline: p.tagline,
+      description: p.description,
       category: p.category,
       pricing: p.pricing,
       tags: p.tags,

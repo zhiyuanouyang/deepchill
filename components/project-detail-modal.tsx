@@ -100,8 +100,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     </span>
                   )}
                 </div>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium mt-1 leading-snug">
-                  {product.tagline}
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-1 leading-snug">
+                  {product.domain}
                 </p>
               </div>
             </div>

@@ -173,7 +173,6 @@ export async function getCategoryOverview(): Promise<CategoryCardOverview[]> {
         id,
         url,
         name,
-        tagline,
         description,
         icon_url,
         user_id,

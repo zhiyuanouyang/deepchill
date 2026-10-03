@@ -409,7 +409,7 @@ const PrimaryCategoryRow: React.FC<{
             </div>
           </div>
 
-          {/* Right Column: Title, Badges, Tagline, Proof Metrics */}
+          {/* Right Column: Title, Badges, Description, Proof Metrics */}
           <div className="flex-1 min-w-0">
             {/* Top row: Name + Verified Badge + Metrics */}
             <div className="flex items-center justify-between gap-1.5 flex-wrap">
@@ -452,15 +452,10 @@ const PrimaryCategoryRow: React.FC<{
               </div>
             </div>
 
-            {/* Tagline & Description snippet */}
-            <div className="mt-1 space-y-0.5">
-              {project.tagline ? (
-                <p className="text-xs font-medium text-slate-800 dark:text-slate-200 line-clamp-1 leading-snug">
-                  {project.tagline}
-                </p>
-              ) : null}
+            {/* Description snippet */}
+            <div className="mt-1">
               {project.description ? (
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                   {project.description}
                 </p>
               ) : null}
@@ -657,7 +652,7 @@ const PrimaryCategoryPlaceholder: React.FC<{
             </div>
           </div>
 
-          {/* Right Column: Title, Badges, Tagline, Call to Action */}
+          {/* Right Column: Title, Badges, Description, Call to Action */}
           <div className="flex-1 min-w-0">
             {/* Top row: Claim Rank + Spot Badge + Quick Action */}
             <div className="flex items-center justify-between gap-1.5 flex-wrap">
@@ -682,7 +677,7 @@ const PrimaryCategoryPlaceholder: React.FC<{
               </div>
             </div>
 
-            {/* Tagline snippet */}
+            {/* Description snippet */}
             <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-1 leading-relaxed mt-0.5">
               Launch in {categoryName} to gain high-authority backlinks &amp; traffic
             </p>

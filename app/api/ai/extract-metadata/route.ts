@@ -188,9 +188,6 @@ export async function POST(req: NextRequest) {
     if (!ai) {
       // Fallback heuristics when AI is not configured
       const fallbackName = cleanProjectName(scrapedTitle, domain);
-      const fallbackTagline = scrapedDesc
-        ? scrapedDesc.slice(0, 75).trim()
-        : `${fallbackName} — High performance software for modern developers`;
       const fallbackDesc = scrapedDesc || `${fallbackName} provides a modern suite of features built for developers and creators.`;
       const guessed = guessCategory(`${scrapedTitle} ${scrapedDesc} ${domain}`);
       const fallbackCat = availableCategories.includes(guessed)
@@ -204,7 +201,6 @@ export async function POST(req: NextRequest) {
           url: cleanUrl,
           domain,
           name: fallbackName,
-          tagline: fallbackTagline,
           description: fallbackDesc,
           category: fallbackCat,
           iconUrl: chosenIcon,
@@ -222,11 +218,10 @@ Page Content Extract: ${bodySnippet || '(none)'}
 
 Your task:
 1. "name": The clean, official brand or project name (e.g. "Supabase", "Linear", "Tailwind CSS", "Resend"). Keep it concise.
-2. "tagline": A crisp, punchy 1-sentence value proposition under 75 characters (e.g. "The open-source Firebase alternative with Postgres"). Do not use exclamation marks or hype words.
-3. "description": A clear, informative 2-3 sentence overview describing what it does, key developer features, and who it is for.
-4. "category": You MUST choose exactly ONE from this list of directory categories:
+2. "description": A clear, informative 2-3 sentence overview describing what it does, key developer features, and who it is for.
+3. "category": You MUST choose exactly ONE from this list of directory categories:
 ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
-5. "iconUrl": Suggested icon/logo image URL. If you know a stable logo URL for this project or see a valid one, provide it; otherwise return "${chosenIcon}".`;
+4. "iconUrl": Suggested icon/logo image URL. If you know a stable logo URL for this project or see a valid one, provide it; otherwise return "${chosenIcon}".`;
 
     try {
       const response = await ai.models.generateContent({
@@ -239,7 +234,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
             type: Type.OBJECT,
             properties: {
               name: { type: Type.STRING },
-              tagline: { type: Type.STRING },
               description: { type: Type.STRING },
               category: {
                 type: Type.STRING,
@@ -247,7 +241,7 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
               },
               iconUrl: { type: Type.STRING },
             },
-            required: ['name', 'tagline', 'description', 'category'],
+            required: ['name', 'description', 'category'],
           },
         },
       });
@@ -255,15 +249,11 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
       const parsed = JSON.parse(response.text?.trim() || '{}');
 
       const finalName = parsed.name?.trim() || cleanProjectName(scrapedTitle, domain);
-      const finalTagline =
-        parsed.tagline?.trim() ||
-        scrapedDesc?.slice(0, 75).trim() ||
-        `${finalName} — Modern developer platform`;
       const finalDesc =
         parsed.description?.trim() ||
         scrapedDesc ||
         `${finalName} is an innovative tool built to streamline development workflows.`;
-      const guessed = guessCategory(`${finalName} ${finalTagline} ${domain}`);
+      const guessed = guessCategory(`${finalName} ${finalDesc} ${domain}`);
       const finalCategory = availableCategories.includes(parsed.category)
         ? parsed.category
         : (availableCategories.includes(guessed)
@@ -278,7 +268,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
           url: cleanUrl,
           domain,
           name: finalName,
-          tagline: finalTagline,
           description: finalDesc,
           category: finalCategory,
           iconUrl: finalIcon,
@@ -287,9 +276,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
     } catch (aiErr) {
       console.warn('Gemini generation notice, falling back to heuristics:', aiErr);
       const fallbackName = cleanProjectName(scrapedTitle, domain);
-      const fallbackTagline = scrapedDesc
-        ? scrapedDesc.slice(0, 75).trim()
-        : `${fallbackName} — High performance software for modern developers`;
       const fallbackDesc = scrapedDesc || `${fallbackName} provides modern software solutions for developers.`;
       const fallbackCat = guessCategory(`${scrapedTitle} ${scrapedDesc} ${domain}`);
 
@@ -300,7 +286,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
           url: cleanUrl,
           domain,
           name: fallbackName,
-          tagline: fallbackTagline,
           description: fallbackDesc,
           category: fallbackCat,
           iconUrl: chosenIcon,

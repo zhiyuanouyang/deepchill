@@ -64,7 +64,7 @@ const RankHatIcon: React.FC<{ rank: number; className?: string }> = ({
  * - Stacked Rank Hat/Crown badge (#1 Gold, #2 Silver, #3 Bronze, #4+ Grey Hat) above icon
  * - Bigger 56px squircle logo, verified DoFollow SEO badge, SaaS category mini-chip
  * - Multi-proof metrics: Paid Bid, Clicks, Stars
- * - Tagline & rich description snippet
+ * - Rich description snippet
  * - Interactive tech stack / tags (clickable) & maker attribution
  * ────────────────────────────────────────────────────────────────────────── */
 
@@ -271,12 +271,9 @@ export const PrimaryProductListItem: React.FC<PrimaryProductListItemProps> = ({
               </div>
             </div>
 
-            {/* Row 2: Tagline & Rich Description */}
-            <div className="mt-1.5 space-y-0.5">
-              <p className="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-1 leading-snug">
-                {product.tagline}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+            {/* Row 2: Description */}
+            <div className="mt-1.5">
+              <p className="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug">
                 {product.description}
               </p>
             </div>
@@ -473,10 +470,10 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
 
         {/* Row 2: Description Text (Single line with ellipsis, expands on hover) */}
         <p
-          title={product.tagline || product.description}
+          title={product.description}
           className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 hover:line-clamp-none group-hover:line-clamp-none transition-all duration-200 leading-relaxed mt-1.5"
         >
-          {product.tagline || product.description}
+          {product.description}
         </p>
 
         {/* Row 3: Meta Footer: Timestamp (Left) & Clicks + Reduced Bid Price Badge (Right) */}

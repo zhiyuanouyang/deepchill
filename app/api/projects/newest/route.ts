@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      query = query.or(`name.ilike.${term},tagline.ilike.${term},description.ilike.${term},url.ilike.${term}`);
+      query = query.or(`name.ilike.${term},description.ilike.${term},url.ilike.${term}`);
     }
 
     query = query.range(offset, offset + limit - 1);

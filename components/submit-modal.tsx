@@ -37,7 +37,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
 }) => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [name, setName] = useState('');
-  const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string>(
     defaultCategory && defaultCategory !== 'All' ? defaultCategory : 'Other'
@@ -187,14 +186,12 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
               // Override metadata with the newly verified domain's suggested data
               if (data.suggested) {
                 setName(data.suggested.name || '');
-                setTagline(data.suggested.tagline || '');
                 setDescription(data.suggested.description || '');
                 setIconUrl(data.suggested.iconUrl || '');
                 setIconError(false);
 
                 const hasAnyPopulated = Boolean(
                   data.suggested.name ||
-                    data.suggested.tagline ||
                     data.suggested.description
                 );
                 if (hasAnyPopulated) {
@@ -316,7 +313,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       const { metadata } = data;
 
       if (metadata.name) setName(metadata.name);
-      if (metadata.tagline) setTagline(metadata.tagline);
       if (metadata.category) {
         setCategory(metadata.category);
         setCategoryOptions((prev) =>
@@ -341,7 +337,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
           cleanDomain.split('.')[0].charAt(0).toUpperCase() +
           cleanDomain.split('.')[0].slice(1);
         setName(guessedName);
-        setTagline(`${guessedName} — Built for modern developers`);
         setDescription(`${guessedName} provides tools for developers and creators.`);
         setIconUrl(`https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`);
         setIconError(false);
@@ -370,7 +365,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     }
 
     if (!name.trim()) newErrors.name = 'Name is required';
-    if (!tagline.trim()) newErrors.tagline = 'Tagline is required';
     if (!description.trim()) newErrors.description = 'Description is required';
 
     setErrors(newErrors);
@@ -429,7 +423,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
             return;
           } else if (checkData.suggested) {
             setName(checkData.suggested.name || '');
-            setTagline(checkData.suggested.tagline || '');
             setDescription(checkData.suggested.description || '');
             setIconUrl(checkData.suggested.iconUrl || '');
             setIconError(false);
@@ -441,7 +434,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     }
 
     // If details are folded and user hasn't filled name yet, trigger AI auto-fill first
-    if (!name.trim() || !tagline.trim() || !description.trim()) {
+    if (!name.trim() || !description.trim()) {
       if (!isExpanded) {
         setIsExpanded(true);
       }
@@ -468,7 +461,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         .replace(/(^-|-$)/g, '') || 'project',
       domain: cleanDomain || urlValidation.domain,
       name: name.trim(),
-      tagline: tagline.trim(),
       description: description.trim(),
       websiteUrl: websiteUrl.trim(),
       category: category as ProductCategory,
@@ -502,7 +494,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
         body: JSON.stringify({
           name: name.trim(),
           websiteUrl: websiteUrl.trim(),
-          tagline: tagline.trim(),
           description: description.trim(),
           category,
           icon_url: finalIcon,
@@ -558,7 +549,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
     // Reset & close
     setWebsiteUrl('');
     setName('');
-    setTagline('');
     setDescription('');
     setIconUrl('');
     setBiddingAmount(0);
@@ -741,27 +731,6 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   </div>
                 </div>
 
-                {/* Tagline */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Tagline <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    id="input-tagline"
-                    type="text"
-                    value={tagline}
-                    maxLength={100}
-                    onChange={(e) => setTagline(e.target.value)}
-                    placeholder="Short 1-sentence value proposition"
-                    className={`w-full liquid-glass-input rounded-xl px-3 py-2 text-xs sm:text-sm outline-none font-medium ${
-                      errors.tagline ? 'border-rose-400 dark:border-rose-500' : ''
-                    }`}
-                  />
-                  {errors.tagline && (
-                    <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">{errors.tagline}</p>
-                  )}
-                </div>
-
                 {/* Description */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -769,7 +738,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                   </label>
                   <textarea
                     id="textarea-description"
-                    rows={2}
+                    rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Brief description of what your product does..."

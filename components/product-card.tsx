@@ -128,13 +128,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </button>
         </div>
 
-        {/* Tagline */}
-        <p className="text-sm text-slate-700 font-medium line-clamp-2 leading-snug mb-3">
-          {product.tagline}
-        </p>
-
-        {/* Short description preview */}
-        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+        {/* Description */}
+        <p className="text-sm text-slate-600 font-medium line-clamp-2 leading-snug mb-4">
           {product.description}
         </p>
 
