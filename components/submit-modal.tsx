@@ -60,6 +60,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   } | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [iconError, setIconError] = useState(false);
+  const [aiAutoFilling, setAiAutoFilling] = useState(false);
 
   const { profile, displayName } = useAuth();
 
@@ -113,6 +114,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       setAiSuccessMessage(null);
       setDomainCheckResult(null);
       setIsCheckingDomain(false);
+      setAiAutoFilling(false);
       setIconError(false);
       if (defaultCategory && defaultCategory !== 'All') {
         setCategory(defaultCategory);
@@ -183,23 +185,54 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 return next;
               });
 
-              // Override metadata with the newly verified domain's suggested data
-              if (data.suggested) {
-                setName(data.suggested.name || '');
-                setDescription(data.suggested.description || '');
-                setIconUrl(data.suggested.iconUrl || '');
-                setIconError(false);
-
-                const hasAnyPopulated = Boolean(
-                  data.suggested.name ||
-                    data.suggested.description
-                );
-                if (hasAnyPopulated) {
-                  setIsExpanded(true);
-                  setAiSuccessMessage(`✨ Metadata detected for ${domainToCheck}`);
-                } else {
-                  setAiSuccessMessage(null);
+              // Domain is free — fire AI metadata extraction automatically
+              setAiAutoFilling(true);
+              setAiSuccessMessage(null);
+              try {
+                const aiRes = await fetch('/api/ai/extract-metadata', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ url: trimmed }),
+                });
+                if (aiRes.ok && isCurrent) {
+                  const aiData = await aiRes.json();
+                  if (aiData.success && aiData.metadata) {
+                    const { metadata } = aiData;
+                    if (metadata.name) setName(metadata.name);
+                    if (metadata.description) setDescription(metadata.description);
+                    if (metadata.category) {
+                      setCategory(metadata.category);
+                      setCategoryOptions((prev) =>
+                        prev.includes(metadata.category) ? prev : [metadata.category, ...prev]
+                      );
+                    }
+                    if (metadata.iconUrl) {
+                      setIconUrl(metadata.iconUrl);
+                      setIconError(false);
+                    }
+                    const hasData = Boolean(metadata.name || metadata.description);
+                    if (hasData) {
+                      setIsExpanded(true);
+                      setAiSuccessMessage(`✨ AI filled metadata for ${domainToCheck}`);
+                    }
+                  }
                 }
+              } catch (aiErr) {
+                console.warn('Auto AI fill notice:', aiErr);
+                // Silently fall back — user can still use the manual AI button
+                if (data.suggested && isCurrent) {
+                  setName(data.suggested.name || '');
+                  setDescription(data.suggested.description || '');
+                  setIconUrl(data.suggested.iconUrl || '');
+                  setIconError(false);
+                  const hasAnyPopulated = Boolean(data.suggested.name || data.suggested.description);
+                  if (hasAnyPopulated) {
+                    setIsExpanded(true);
+                    setAiSuccessMessage(`✨ Metadata detected for ${domainToCheck}`);
+                  }
+                }
+              } finally {
+                if (isCurrent) setAiAutoFilling(false);
               }
             }
           }
@@ -660,6 +693,11 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">
                   <Loader2 className="w-3 h-3 animate-spin shrink-0 text-indigo-500" />
                   <span>Checking domain availability...</span>
+                </p>
+              ) : aiAutoFilling ? (
+                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">
+                  <Loader2 className="w-3 h-3 animate-spin shrink-0 text-indigo-500" />
+                  <span>AI is filling your project details...</span>
                 </p>
               ) : domainCheckResult && !domainCheckResult.exists && cleanDomain ? (
                 <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5 flex items-center gap-1 animate-in fade-in duration-150">

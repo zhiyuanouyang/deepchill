@@ -16,6 +16,42 @@ function cleanHtmlText(html: string): string {
     .trim();
 }
 
+/**
+ * Extract only high-signal text: headings (h1-h3) and the first few paragraphs.
+ * Much cheaper to send to LLM than raw body text.
+ */
+function extractSignalText(html: string, maxChars = 1200): string {
+  // Remove script/style blocks first
+  const stripped = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+  const parts: string[] = [];
+
+  // Extract h1-h3 text
+  const headingRegex = /<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi;
+  let hMatch;
+  while ((hMatch = headingRegex.exec(stripped)) !== null) {
+    const text = hMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (text && text.length < 200) parts.push(text);
+    if (parts.length >= 5) break;
+  }
+
+  // Extract first few <p> tags
+  const paraRegex = /<p\b[^>]*>([\s\S]*?)<\/p>/gi;
+  let pMatch;
+  let paraCount = 0;
+  while ((pMatch = paraRegex.exec(stripped)) !== null && paraCount < 6) {
+    const text = pMatch[1].replace(/<[^>]+>/g, ' ').replace(/&[a-z0-9#]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+    if (text && text.length > 20 && text.length < 500) {
+      parts.push(text);
+      paraCount++;
+    }
+  }
+
+  return parts.join(' | ').slice(0, maxChars);
+}
+
 function extractMetaTag(html: string, nameOrProp: string): string | null {
   const regex = new RegExp(
     `<meta\\s+[^>]*(?:name|property)=["']${nameOrProp}["'][^>]*content=["']([^"']*)["']`,
@@ -162,7 +198,8 @@ export async function POST(req: NextRequest) {
       console.warn(`Scraping warning for ${cleanUrl}:`, scrapeErr);
     }
 
-    const bodySnippet = cleanHtmlText(scrapedHtml).slice(0, 2500);
+    // Extract high-signal text only (headings + first paragraphs) — much more LLM-efficient
+    const bodySnippet = extractSignalText(scrapedHtml, 1200);
     const chosenIcon = scrapedIcon || unavatarIconUrl;
 
     // AI Generation with Gemini
@@ -208,24 +245,30 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const prompt = `You are an expert product directory editor. Analyze this web application / developer project and extract high-quality metadata for our directory.
+    // Compact structured snippet sent to LLM — only essential fields
+    const structuredSnippet = [
+      `url: ${cleanUrl}`,
+      `domain: ${domain}`,
+      scrapedTitle ? `title: ${scrapedTitle}` : null,
+      scrapedDesc ? `description: ${scrapedDesc}` : null,
+      bodySnippet ? `page_content: ${bodySnippet}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
 
-Project URL: ${cleanUrl}
-Domain: ${domain}
-Page Title: ${scrapedTitle || '(none)'}
-Meta Description: ${scrapedDesc || '(none)'}
-Page Content Extract: ${bodySnippet || '(none)'}
+    const categoryList = availableCategories.map((c) => `"${c}"`).join(', ');
 
-Your task:
-1. "name": The clean, official brand or project name (e.g. "Supabase", "Linear", "Tailwind CSS", "Resend"). Keep it concise.
-2. "description": A clear, informative 2-3 sentence overview describing what it does, key developer features, and who it is for.
-3. "category": You MUST choose exactly ONE from this list of directory categories:
-${availableCategories.map((c) => `   - "${c}"`).join('\n')}
-4. "iconUrl": Suggested icon/logo image URL. If you know a stable logo URL for this project or see a valid one, provide it; otherwise return "${chosenIcon}".`;
+    const prompt = `You are a product directory editor. Given the structured snippet of a website below, return a JSON object with these fields:
+- name: clean brand/project name (e.g. "Supabase", "Linear")
+- description: 2-3 sentences — what it does, key features, who it's for
+- category: MUST be exactly one of: [${categoryList}]
+
+Website data:
+${structuredSnippet}`;
 
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
         config: {
           temperature: 0.3,
@@ -239,7 +282,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
                 type: Type.STRING,
                 enum: availableCategories,
               },
-              iconUrl: { type: Type.STRING },
             },
             required: ['name', 'description', 'category'],
           },
@@ -259,7 +301,6 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
         : (availableCategories.includes(guessed)
           ? guessed
           : (availableCategories.includes('Other') ? 'Other' : availableCategories[0] || 'Other'));
-      const finalIcon = parsed.iconUrl && parsed.iconUrl.startsWith('http') ? parsed.iconUrl : chosenIcon;
 
       return NextResponse.json({
         success: true,
@@ -270,7 +311,7 @@ ${availableCategories.map((c) => `   - "${c}"`).join('\n')}
           name: finalName,
           description: finalDesc,
           category: finalCategory,
-          iconUrl: finalIcon,
+          iconUrl: chosenIcon,
         },
       });
     } catch (aiErr) {
