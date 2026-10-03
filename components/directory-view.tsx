@@ -47,7 +47,7 @@ const CATEGORIES: ('All' | ProductCategory)[] = [
 ];
 
 const PRIMARY_PAGE_SIZE = 10;
-const SIDE_PAGE_SIZE = 15;
+const SIDE_PAGE_SIZE = 10;
 
 export interface DirectoryViewProps {
   initialTrendingProducts?: TrendingProduct[];

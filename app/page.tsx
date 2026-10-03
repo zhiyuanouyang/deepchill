@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const [initialTrending, initialNewest, initialProducts, initialCategories] = await Promise.all([
     getTrendingProjects(undefined, 10, 0),
-    getNewestProjects(undefined, 15, 0),
+    getNewestProjects(undefined, 10, 0),
     getAllProjects(),
     getCategories(),
   ]);

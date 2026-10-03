@@ -422,9 +422,9 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
       id={`side-product-item-${product.id}`}
       onClick={handleCardClick}
       title={`Open ${product.name} — ${product.domain || product.websiteUrl}`}
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer hover:z-10"
     >
-      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-xs hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">
+      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xs hover:shadow-md hover:border-indigo-300/80 dark:hover:border-indigo-500/30 transition-all duration-200">
         {/* Row 1: Smaller Rank & Icon + Product Name (Left) & SEO Button (Right) */}
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -471,7 +471,7 @@ export const SideProductListItem: React.FC<SideProductListItemProps> = ({
         {/* Row 2: Description Text (Single line with ellipsis, expands on hover) */}
         <p
           title={product.description}
-          className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 hover:line-clamp-none group-hover:line-clamp-none transition-all duration-200 leading-relaxed mt-1.5"
+          className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-1.5"
         >
           {product.description}
         </p>
