@@ -6,13 +6,14 @@ import {
   Search,
   Flame,
   Clock,
-  Star,
   Plus,
   Bot,
   ShieldCheck,
   Tag,
   X,
   Layers,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react';
 import {
   Product,
@@ -550,9 +551,22 @@ export function DirectoryView({
   const totalNewestCount = isClientFiltering ? newestProducts.length : newestTotal;
   const totalNewestPages = Math.max(1, Math.ceil(totalNewestCount / SIDE_PAGE_SIZE));
 
-  const openSourceCount = useMemo(() => {
-    return products.filter((p) => p.pricing === 'Open Source').length;
-  }, [products]);
+  // Authoritative total curated count from categories table (matches categories-view)
+  const totalCuratedCount = useMemo(() => {
+    if (dbCategories.length > 0) {
+      const sum = dbCategories.reduce((acc, c) => acc + (c.count || 0), 0);
+      if (sum > 0) return sum;
+    }
+    return products.length;
+  }, [dbCategories, products]);
+
+  // Number of active categories (with at least 1 project)
+  const activeCategoryCount = useMemo(() => {
+    if (dbCategories.length > 0) {
+      return dbCategories.filter((c) => (c.count || 0) > 0).length;
+    }
+    return CATEGORIES.filter((c) => c !== 'All').length;
+  }, [dbCategories]);
 
   // Category counts fetched from Supabase categories table with fallback
   const categoryCounts = useMemo(() => {
@@ -627,7 +641,7 @@ export function DirectoryView({
       {/* Navigation */}
       <Navbar
         onOpenSubmit={() => setIsSubmitOpen(true)}
-        totalProducts={products.length}
+        totalProducts={totalCuratedCount}
         onOpenSeoInfo={() => setIsSeoGuideOpen(true)}
       />
 
@@ -656,21 +670,27 @@ export function DirectoryView({
           {/* Metric Stats Pills */}
           <div className="flex items-center justify-center gap-1.5 sm:gap-4 flex-wrap text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 px-1">
             <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 shrink-0" />
               <span>
-                <strong className="text-slate-900 dark:text-white">{products.length}</strong> Curated Projects
+                <strong className="text-slate-900 dark:text-white">{activeCategoryCount}</strong> Active Categories
               </span>
             </div>
             <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <span>
-                <strong className="text-slate-900 dark:text-white">{openSourceCount}</strong> Open Source Repos
+                <strong className="text-slate-900 dark:text-white">{totalCuratedCount}</strong> Curated Projects
               </span>
             </div>
             <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>
                 <strong className="text-slate-900 dark:text-white">100%</strong> Direct DoFollow SEO Links
+              </span>
+            </div>
+            <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span>
+                <strong className="text-slate-900 dark:text-white">Live</strong> Bid Rankings
               </span>
             </div>
           </div>
@@ -725,7 +745,7 @@ export function DirectoryView({
             <div className="flex items-center gap-2.5 flex-wrap">
               <span>
                 Showing <strong className="text-slate-900 dark:text-slate-200 font-bold">{baseFilteredProducts.length}</strong> of{' '}
-                <span className="text-slate-600 dark:text-slate-400 font-semibold">{products.length}</span> curated projects
+                <span className="text-slate-600 dark:text-slate-400 font-semibold">{totalCuratedCount}</span> curated projects
                 {activeMode === 'ai' && aiFilterQuery && (
                   <span className="text-indigo-600 dark:text-indigo-400 font-semibold ml-1.5 inline-flex items-center gap-1">
                     (AI matches for &quot;{aiFilterQuery}&quot;)

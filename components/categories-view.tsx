@@ -304,7 +304,7 @@ const CategoriesHero: React.FC<{ totalProducts: number; categoryCount: number }>
       <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
         <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
         <span>
-          <strong className="text-slate-900 dark:text-white">{categoryCount}</strong> Categories
+          <strong className="text-slate-900 dark:text-white">{categoryCount}</strong> Active Categories
         </span>
       </div>
       <div className="liquid-glass-pill px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl flex items-center gap-1.5">
