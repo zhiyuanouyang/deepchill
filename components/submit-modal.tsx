@@ -313,6 +313,7 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
       const { metadata } = data;
 
       if (metadata.name) setName(metadata.name);
+      if (metadata.description) setDescription(metadata.description);
       if (metadata.category) {
         setCategory(metadata.category);
         setCategoryOptions((prev) =>
