@@ -552,6 +552,7 @@ const SecondaryCategoryRow: React.FC<{
           <h5 className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
             {product.name}
           </h5>
+          <VerifiedBadge project={product} size="xs" showLabel={false} />
         </div>
 
         {/* Right: Timestamp & Small Bid Price / Clicks */}

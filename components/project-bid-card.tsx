@@ -16,10 +16,33 @@ export const ProjectBidCard: React.FC<ProjectBidCardProps> = ({
   onChangeAmount,
   className = '',
 }) => {
+  const [isCustomFocused, setIsCustomFocused] = React.useState(false);
+
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
     onChangeAmount(isNaN(val) ? 0 : Math.max(0, val));
   };
+
+  const handlePresetClick = (val: number) => {
+    setIsCustomFocused(false);
+    onChangeAmount(val);
+  };
+
+  const handleCustomFocus = () => {
+    setIsCustomFocused(true);
+  };
+
+  const handleCustomBlur = () => {
+    setIsCustomFocused(false);
+  };
+
+  // When the custom input is focused, don't highlight any preset chip
+  const isPresetSelected = (val: number) => !isCustomFocused && amount === val;
+
+  // Show the typed value in the custom input while focused, even if it matches a preset
+  const customInputValue = isCustomFocused
+    ? (amount === 0 ? '' : amount)
+    : (PRESET_AMOUNTS.includes(amount) ? '' : (amount === 0 ? '' : amount));
 
   return (
     <div
@@ -38,14 +61,14 @@ export const ProjectBidCard: React.FC<ProjectBidCardProps> = ({
 
       <div className="flex items-center gap-1.5 flex-wrap">
         {PRESET_AMOUNTS.map((val) => {
-          const isSelected = amount === val;
+          const selected = isPresetSelected(val);
           return (
             <button
               key={val}
               type="button"
-              onClick={() => onChangeAmount(val)}
+              onClick={() => handlePresetClick(val)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                isSelected
+                selected
                   ? 'bg-amber-500 text-white shadow-xs'
                   : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-300'
               }`}
@@ -63,8 +86,10 @@ export const ProjectBidCard: React.FC<ProjectBidCardProps> = ({
             type="text"
             inputMode="numeric"
             placeholder="Custom"
-            value={PRESET_AMOUNTS.includes(amount) ? '' : (amount === 0 ? '' : amount)}
+            value={customInputValue}
             onChange={handleCustomChange}
+            onFocus={handleCustomFocus}
+            onBlur={handleCustomBlur}
             className="w-full liquid-glass-input rounded-xl pl-6 pr-2 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-100 outline-none"
           />
         </div>
